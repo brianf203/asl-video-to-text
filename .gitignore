@@ -6,3 +6,9 @@ __pycache__/
 *.gguf
 models/
 data/
+ASL-citizen-code/
+ASL-citizen-code/
+*.zip
+*.deb
+*.npy
+models/
