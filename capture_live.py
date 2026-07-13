@@ -1,24 +1,14 @@
 import cv2
 import mediapipe as mp
 import numpy as np
-import time
 
 mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
 
-# Adjust if your ConferenceCam isn't device 0
 CAMERA_INDEX = 0
 OUTPUT_PATH = "live_sample.npy"
 
 def extract_frame_landmarks(results):
-    """
-    Replicates the exact layout used in ASL-citizen-code/ST-GCN/pose.py:
-    - indices 0-32:   pose landmarks (33 points)
-    - indices 33-53:  RIGHT hand landmarks (21 points)
-    - indices 54-74:  LEFT hand landmarks (21 points)
-    - indices 75-542: face landmarks (468 points)
-    Each point stores (x, y) only - matches original 2-channel format.
-    """
     frame_landmarks = np.zeros((543, 2))
 
     if results.pose_landmarks:
@@ -50,6 +40,9 @@ def extract_frame_landmarks(results):
 
 def main():
     cap = cv2.VideoCapture(CAMERA_INDEX)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
     if not cap.isOpened():
         print(f"ERROR: could not open camera at index {CAMERA_INDEX}")
         return
@@ -63,6 +56,7 @@ def main():
 
     with mp_holistic.Holistic(
         static_image_mode=False,
+        model_complexity=0,
         min_detection_confidence=0.5,
         min_tracking_confidence=0.5
     ) as holistic:
@@ -113,3 +107,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+EOF
