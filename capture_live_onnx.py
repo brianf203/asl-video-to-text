@@ -132,8 +132,8 @@ def main():
 
     cap = cv2.VideoCapture(CAMERA_INDEX)
     cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 424)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
 
     if not cap.isOpened():
         print(f"ERROR: could not open camera at index {CAMERA_INDEX}")
