@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import onnxruntime as ort
 import time
+from collections import deque
 import sys
 sys.path.append('onnx_models')
 from mp_palmdet import MPPalmDet
@@ -130,6 +131,7 @@ def main():
     pose_detector = MPPoseORT("onnx_models/pose_estimation_mediapipe_2023mar.onnx")
 
     cap = cv2.VideoCapture(CAMERA_INDEX)
+    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
@@ -147,14 +149,18 @@ def main():
     print("Controls:")
     print("  [r] - start/stop recording a sign")
     print("  [q] - quit")
+    fps_times = deque(maxlen=30)
 
     while cap.isOpened():
         ret, frame = cap.read()
+        frame_start = time.time()
         if not ret:
             print("Failed to read frame from camera.")
             break
 
         landmarks = extract_frame_landmarks(frame, palm_detector, hand_detector, person_detector, pose_detector)
+        fps_times.append(time.time() - frame_start)
+        current_fps = 1.0 / (sum(fps_times) / len(fps_times)) if fps_times else 0
 
         display_frame = frame.copy()
         if is_recording:
@@ -165,6 +171,8 @@ def main():
             cv2.putText(display_frame, "Press 'r' to start recording",
                         (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
 
+        cv2.putText(display_frame, f"FPS: {current_fps:.1f}",
+                    (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 0), 2)
         cv2.imshow('ASL Capture - ONNX/TensorRT', display_frame)
 
         key = cv2.waitKey(1) & 0xFF
