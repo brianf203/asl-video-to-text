@@ -8,7 +8,7 @@ from architecture.st_gcn import STGCN
 from architecture.fc import FC
 from architecture.network import Network
 
-torch.set_default_dtype(torch.float32)
+torch.set_default_dtype(torch.float64)
 
 # Load gloss dictionary
 with open('gloss_dict.json', 'r') as f:
@@ -49,7 +49,7 @@ def preprocess(npy_path, max_frames=128):
     data = data[:, keypoints, :]
     data = np.transpose(data, (2, 0, 1))  # (channels, frames, nodes)
 
-    return torch.from_numpy(data).float().unsqueeze(0)  # add batch dimension
+    return torch.from_numpy(data).double().unsqueeze(0)  # add batch dimension
 
 
 # Load model
@@ -66,7 +66,6 @@ model = Network(encoder=stgcn, decoder=fc)
 model.load_state_dict(torch.load('models/ASL_citizen_stgcn_weights.pt', map_location='cuda'))
 model.cuda()
 model.eval()
-model = model.float()
 
 # Run prediction
 inputs = preprocess('live_sample.npy').cuda()
