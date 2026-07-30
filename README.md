@@ -1,4 +1,4 @@
-# ASL Video-to-Text Pipeline (SHuBERT)
+# ASL Video-to-Text Pipeline
 
 This pipeline uses **SHuBERT**, a pretrained ASL foundation model (TTIC, ACL 2025),
 to translate ASL video directly into English text.
@@ -37,8 +37,7 @@ pip install -r requirements.txt
 ```
 
 This installs torch, transformers, mediapipe, fairseq, gradio, and related
-packages. This will take a while, and `fairseq` will build from source (a few
-minutes, this is normal).
+packages. This will take a while, and `fairseq` will build from source.
 
 ## 4. Install the Jetson-specific PyTorch build (for GPU acceleration)
 
@@ -55,13 +54,13 @@ This should print `CUDA: True`.
 
 ## 5. Download the SHuBERT model
 
-You'll need a free Hugging Face account and access token (Read access is enough):
+You'll need a free Hugging Face account and access token (Read access):
 ```bash
 hf auth login
 ```
 Paste your token (from https://huggingface.co/settings/tokens) when prompted.
 
-Then download the model files (~11.7GB):
+Then download the model files:
 ```bash
 python3 -c "
 import huggingface_hub
@@ -69,7 +68,7 @@ path = huggingface_hub.snapshot_download(repo_id='ShesterG/SHuBERT', allow_patte
 print(path)
 "
 ```
-Note the printed path - you'll need it in the next step.
+Note the printed path, it's needed in the next step.
 
 ## 6. Configure and run
 
@@ -103,7 +102,7 @@ python3 run_shubert.py my_sign.mp4
 ```
 
 **Tips for good results:**
-- The signer should be the main part of the frame (roughly 90% of the area) -
+- The signer should be the main part of the frame (roughly 90% of the area),
   get reasonably close to the camera.
 - Keep clips under 20 seconds.
 - Full sentences work well, not just isolated signs.
