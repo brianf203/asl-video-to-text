@@ -12,5 +12,7 @@ ASL-citizen-code/
 *.deb
 *.npy
 models/
-shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/
 shubert/SHuBERT/
+shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/
+shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/temp/
+shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/__pycache__/
