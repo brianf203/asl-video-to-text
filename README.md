@@ -1,101 +1,108 @@
-# ASL Video-to-Text Setup Instructions
+# ASL Video-to-Text Pipeline
 
-This guide walks through setting up and running the isolated sign recognition
-pipeline (live camera -> MediaPipe Holistic -> ST-GCN model -> predicted gloss)
-on a Jetson Orin Nano running JetPack 6.2.
+This pipeline uses **SHuBERT**, a pretrained ASL foundation model (TTIC, ACL 2025),
+to translate ASL video directly into English text.
+
+Reference: http://shubert.pals.ttic.edu
+
+## Overview of the pipeline
+
+```
+Video file (.mp4)
+    -> MediaPipe extracts hand/face/pose landmarks
+    -> Hand and face regions are cropped from each frame
+    -> DINOv2 extracts visual features from hand/face crops (GPU)
+    -> Pose landmarks are processed into pose features
+    -> SHuBERT encoder + ByT5 decoder translate all features into English text (CPU)
+```
 
 ## 1. Clone this repository
+
 ```bash
 git clone https://github.com/brianf203/asl-video-to-text.git
-cd asl-video-to-text
+cd asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText
 ```
 
-## 2. Clone the ASL Citizen baseline code
+## 2. Set up a dedicated virtual environment
+
 ```bash
-git clone https://github.com/microsoft/ASL-citizen-code.git
+python3 -m venv shubert_venv
+source shubert_venv/bin/activate
 ```
 
-## 3. Set up a Python virtual environment
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
+## 3. Install dependencies
 
-## 4. Install PyTorch (Jetson-specific build)
-```bash
-pip install numpy==1.26.1
-pip install torch --index-url https://pypi.jetson-ai-lab.io/jp6/cu126
-```
-
-## 5. Install remaining Python dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-## 6. Fix CUDA library paths (Jetson-specific issue)
-The pip PyTorch build needs a few CUDA libraries pointed to manually. Add
-these lines to the end of `venv/bin/activate`:
-```bash
-echo 'export LD_LIBRARY_PATH=/usr/local/cuda-12.6/targets/aarch64-linux/lib:/home/YOUR_USERNAME/asl-video-to-text/venv/lib/python3.10/site-packages/nvidia/cudnn/lib:$LD_LIBRARY_PATH' >> venv/bin/activate
-```
-(Replace `YOUR_USERNAME` with your actual username, and adjust the Python
-version folder if it's not 3.10.)
+This installs torch, transformers, mediapipe, fairseq, gradio, and related
+packages. This will take a while, and `fairseq` will build from source.
 
-Then reactivate:
+## 4. Install the Jetson-specific PyTorch build (for GPU acceleration)
+
 ```bash
-deactivate
-source venv/bin/activate
+pip uninstall torch torchvision torchaudio -y
+pip install torch torchvision torchaudio --index-url https://pypi.jetson-ai-lab.io/jp6/cu126
 ```
 
-## 7. Download the pretrained model weights
+Verify GPU is available:
 ```bash
-mkdir -p models
-cd models
-wget https://github.com/microsoft/ASL-citizen-code/releases/download/checkpoints_v1/ASL_citizen_stgcn_weights.zip
-unzip ASL_citizen_stgcn_weights.zip
-cd ..
+python3 -c "import torch; print(torch.__version__); print('CUDA:', torch.cuda.is_available())"
 ```
+This should print `CUDA: True`.
 
-## 8. Get the gloss vocabulary CSVs
+## 5. Download the SHuBERT model
+
+You'll need a free Hugging Face account and access token (Read access):
 ```bash
-pip install kagglehub
+hf auth login
+```
+Paste your token (from https://huggingface.co/settings/tokens) when prompted.
+
+Then download the model files:
+```bash
 python3 -c "
-import kagglehub
-kagglehub.dataset_download('abd0kamel/asl-citizen', path='ASL_Citizen/splits/train.csv')
+import huggingface_hub
+path = huggingface_hub.snapshot_download(repo_id='ShesterG/SHuBERT', allow_patterns='models/*')
+print(path)
 "
-mkdir -p data_csv
-cp ~/.cache/kagglehub/datasets/abd0kamel/asl-citizen/versions/1/ASL_Citizen/splits/train.csv data_csv/
+```
+Note the printed path, it's needed in the next step.
+
+## 6. Configure and run
+
+Edit `run_shubert.py` and set `MODELS_BASE` to the path printed in Step 5, e.g.:
+```python
+MODELS_BASE = "/home/YOUR_USERNAME/.cache/huggingface/hub/models--ShesterG--SHuBERT/snapshots/<hash>/models"
 ```
 
-## 9. Build the gloss dictionary
+Run on a bundled example video:
 ```bash
-python3 build_gloss_dict.py
-```
-This should print "Total unique glosses: 2731" when done.
-
-## 10. Set your Jetson to max performance mode
-```bash
-sudo nvpmodel -m 0
-sudo jetson_clocks
+python3 run_shubert.py
 ```
 
-## 11. Run the live pipeline
+Run on a specific video file:
 ```bash
-python3 capture_live.py
+python3 run_shubert.py path/to/your_video.mp4
 ```
-- Press `r` to start/stop recording a sign
+
+## 7. Recording and testing your own videos
+
+Use `record_clip.py` to record a clip from your camera:
+```bash
+python3 record_clip.py my_sign.mp4
+```
+- Press `r` to start/stop recording
 - Press `q` to quit
-- After recording, run `python3 predict.py` to see the top-5 predicted glosses
 
-## Known limitation
-On base Jetson Orin Nano hardware (non-Super), MediaPipe Holistic runs at
-roughly 8fps on CPU. Signing slowly and holding each sign for 1-2+ seconds
-gives more reliable results than signing at normal speed.
-
-## Troubleshooting
-If you hit `ImportError: libcudss.so.0` or similar CUDA library errors,
-find the missing library and add its folder to `LD_LIBRARY_PATH`:
+Then run it through SHuBERT:
 ```bash
-find venv -iname "libNAME.so*" 2>/dev/null
-export LD_LIBRARY_PATH=/path/to/folder:$LD_LIBRARY_PATH
+python3 run_shubert.py my_sign.mp4
 ```
+
+**Tips for good results:**
+- The signer should be the main part of the frame (roughly 90% of the area),
+  get reasonably close to the camera.
+- Keep clips under 20 seconds.
+- Full sentences work well, not just isolated signs.
