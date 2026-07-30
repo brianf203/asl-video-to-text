@@ -235,12 +235,7 @@ def extract_embeddings_from_frames(frames: List[np.ndarray], dino_model_path: st
         Numpy array of embeddings
     """
     embedder = DINOEmbedder(dino_model_path, batch_size)
-    result = embedder.extract_embeddings_from_frames(frames)
-    del embedder
-    import torch
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
-    return result
+    return embedder.extract_embeddings_from_frames(frames)
 
 
 def extract_embeddings_from_video(video_path: str, dino_model_path: str, 

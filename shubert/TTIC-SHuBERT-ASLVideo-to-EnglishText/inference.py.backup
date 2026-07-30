@@ -684,7 +684,7 @@ def generate_text_from_features(
     tokenizer = ByT5Tokenizer.from_pretrained(tokenizer_checkpoint)
     
     # Move model to appropriate device
-    device = torch.device("cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
     model.eval()
     
