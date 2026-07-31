@@ -105,7 +105,5 @@ python3 run_shubert.py my_sign.mp4
 ```
 
 **Tips for good results:**
-- The signer should be the main part of the frame (roughly 90% of the area),
-  get reasonably close to the camera.
-- Keep clips under 20 seconds.
-- Full sentences work well, not just isolated signs.
+- The signer should be the main part of the frame (around 90% of the area)
+- Keep clips under 20 seconds
