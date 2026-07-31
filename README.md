@@ -56,6 +56,9 @@ This should print `CUDA: True`.
 
 You'll need a free Hugging Face account and access token (Read access):
 ```bash
+pip install -U huggingface_hub
+```
+```bash
 hf auth login
 ```
 Paste your token (from https://huggingface.co/settings/tokens) when prompted.
