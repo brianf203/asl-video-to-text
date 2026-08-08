@@ -44,6 +44,14 @@ MOTION_STOP_THRESHOLD = 1.5
 STILL_DURATION_SECONDS = 1.5
 MIN_CLIP_DURATION_SECONDS = 1.0
 
+# The STILL_DURATION_SECONDS of stillness that *triggers* the cut also gets recorded,
+# so every clip used to carry ~45 dead frames at 30fps. Latency is ~0.41s/frame end to
+# end (measured across 105/87/149/181-frame clips), so that tail cost ~18s per clip and
+# gave ByT5 nothing to translate — a tail-only clip once produced a fluent hallucination.
+# Trim back to the last motion, keeping a short pad so a final handshape hold (which
+# carries meaning in ASL) isn't clipped off.
+TAIL_PAD_SECONDS = 0.25
+
 CAMERA_INDEX = 0
 
 clip_queue = queue.Queue()
@@ -119,6 +127,7 @@ def main():
 
     state = "IDLE"
     recorded_frames = []
+    frame_times = []
     record_start_time = None
     last_motion_time = None
     prev_gray = None
@@ -159,12 +168,14 @@ def main():
             if motion_score > MOTION_START_THRESHOLD:
                 state = "RECORDING"
                 recorded_frames = [frame]
+                frame_times = [now]
                 record_start_time = now
                 last_motion_time = now
                 print(">>> RECORDING STARTED <<<")
 
         elif state == "RECORDING":
             recorded_frames.append(frame)
+            frame_times.append(now)
             if motion_score > MOTION_STOP_THRESHOLD:
                 last_motion_time = now
 
@@ -177,17 +188,28 @@ def main():
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
             if still_duration >= STILL_DURATION_SECONDS:
-                if elapsed >= MIN_CLIP_DURATION_SECONDS:
+                # Drop the trailing stillness; keep everything up to the last motion
+                # plus TAIL_PAD_SECONDS. Gate on signing time rather than wall-clock
+                # elapsed, so a clip that is nothing but the still tail scores ~0s and
+                # is rejected instead of being handed to ByT5 to hallucinate over.
+                cutoff = last_motion_time + TAIL_PAD_SECONDS
+                keep = sum(1 for t in frame_times if t <= cutoff)
+                signing_duration = last_motion_time - record_start_time
+
+                if signing_duration >= MIN_CLIP_DURATION_SECONDS:
                     clip_counter[0] += 1
                     clip_path = os.path.join(config['temp_dir'], f"clip_{clip_counter[0]}.mp4")
-                    write_clip(recorded_frames, clip_path)
+                    write_clip(recorded_frames[:keep], clip_path)
                     clip_queue.put(clip_path)
-                    print(f"Queued {clip_path} ({len(recorded_frames)} frames, {elapsed:.1f}s)")
+                    print(f"Queued {clip_path} ({keep} frames, {signing_duration:.1f}s signing; "
+                          f"trimmed {len(recorded_frames) - keep} still frames)")
                 else:
-                    print("Too short, ignored.")
+                    print(f"Too short, ignored ({signing_duration:.1f}s signing, "
+                          f"{len(recorded_frames)} frames).")
 
                 state = "IDLE"
                 recorded_frames = []
+                frame_times = []
 
         cv2.putText(display_frame, f"motion: {motion_score:.1f}", (10, 470),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1)

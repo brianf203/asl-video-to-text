@@ -716,6 +716,13 @@ def generate_text_from_features(
     output_dir: str,
     generation_max_length: int = 2048,
     generation_num_beams: int = 1,
+    # Greedy decoding with no repetition constraint produced looping tails on live
+    # clips ("the pleasure of the pleasure", "down the side and then down the side").
+    # ByT5 is byte-level, so its n-grams are characters, not word pieces: the usual
+    # no_repeat_ngram_size=3 would ban reusing "the" or "ing" and wreck normal English.
+    # 12 bytes ~= 12 characters, long enough to block phrase-level loops while leaving
+    # ordinary letter patterns alone.
+    generation_no_repeat_ngram_size: int = 12,
 ):
     """
     Direct inference function that generates text from sign language features.
@@ -746,6 +753,7 @@ def generate_text_from_features(
             pose_features=pose_tensor,
             max_length=generation_max_length,
             num_beams=generation_num_beams,
+            no_repeat_ngram_size=generation_no_repeat_ngram_size,
             early_stopping=True,
             pad_token_id=tokenizer.pad_token_id,
             eos_token_id=tokenizer.eos_token_id,
