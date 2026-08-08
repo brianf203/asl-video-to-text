@@ -4,6 +4,8 @@ data/
 *.gguf
 models/
 online_cslr/
+PROJECT_CONTEXT.md
+QLORA_SCOPING.md
 *.mp4
 *.npy
 *.pyc
