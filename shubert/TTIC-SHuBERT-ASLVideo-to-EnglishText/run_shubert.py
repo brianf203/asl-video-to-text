@@ -1,3 +1,4 @@
+import time
 import os
 from features import SHuBERTProcessor
 
@@ -22,5 +23,8 @@ import sys
 input_clip = sys.argv[1] if len(sys.argv) > 1 else "dailymoth_examples/L5hUxT5YbnY_crop_1.mp4"
 
 processor = SHuBERTProcessor(config)
+start_time = time.time()
 output_text = processor.process_video(input_clip)
+elapsed = time.time() - start_time
 print(f"\nThe English translation is: {output_text}")
+print(f"Total time: {elapsed:.1f} seconds")

@@ -4,6 +4,8 @@ from mediapipe.tasks.python import vision
 import cv2
 import numpy as np
 import json
+import time
+import concurrent.futures
 from pathlib import Path
 try:
     import decord
@@ -17,10 +19,10 @@ class HolisticDetector:
     A class for detecting face, hand, and pose landmarks in videos using MediaPipe.
     """
     
-    def __init__(self, face_model_path: str, hand_model_path: str, 
+    def __init__(self, face_model_path: str, hand_model_path: str,
                  min_detection_confidence: float = 0.1,
                  min_hand_detection_confidence: float = 0.05,
-                 max_faces: int = 6, max_hands: int = 6):
+                 max_faces: int = 6, max_hands: int = 2):
         """
         Initialize the HolisticDetector with model paths and configuration.
         
@@ -30,7 +32,11 @@ class HolisticDetector:
             min_detection_confidence: Minimum confidence for pose detection
             min_hand_detection_confidence: Minimum confidence for hand detection
             max_faces: Maximum number of faces to detect
-            max_hands: Maximum number of hands to detect
+            max_hands: Maximum number of hands to detect. Defaults to 2 (one
+                signer's two hands) rather than MediaPipe's default of larger
+                values meant for multi-person scenes; the hand detector's
+                search cost scales with this, so lowering it materially cuts
+                per-frame latency.
         """
         self.face_model_path = face_model_path
         self.hand_model_path = hand_model_path
@@ -38,8 +44,53 @@ class HolisticDetector:
         self.min_hand_detection_confidence = min_hand_detection_confidence
         self.max_faces = max_faces
         self.max_hands = max_hands
-        
+
+        # Run pose/face/hand detection concurrently per frame instead of
+        # sequentially. MediaPipe's underlying C++ inference releases the GIL,
+        # so this gives real parallelism rather than just interleaving.
+        self._executor = None
         self._initialize_detectors()
+        self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
+        # Per-frame (pose, face, hand) timings, for profiling the critical path
+        # inside the concurrent detect_frame_landmarks() call.
+        self._frame_timings = []
+
+    def close(self):
+        """Release the thread pool and MediaPipe native resources.
+
+        Safe to call multiple times. Closing the MediaPipe objects matters:
+        a fresh detector is built per clip, and the underlying graphs hold
+        native memory that is not reclaimed by Python GC alone — leaking it
+        exhausts the Jetson's shared CPU/GPU pool after a few clips.
+        """
+        if self._executor is not None:
+            self._executor.shutdown(wait=True)
+            self._executor = None
+
+        for attr in ('mp_holistic', 'face_detector', 'hand_detector'):
+            obj = getattr(self, attr, None)
+            if obj is not None:
+                try:
+                    obj.close()
+                except Exception:
+                    pass
+                setattr(self, attr, None)
+
+    def __del__(self):
+        self.close()
+
+    def print_timing_summary(self):
+        """Print a per-detector timing breakdown collected across processed frames."""
+        n = len(self._frame_timings)
+        if n == 0:
+            return
+        totals = {k: sum(t[k] for t in self._frame_timings) for k in ('pose', 'face', 'hand', 'wall')}
+        print(f"\n--- MediaPipe per-frame timing ({n} frames) ---")
+        for key in ('pose', 'face', 'hand'):
+            total = totals[key]
+            print(f"  {key:6s}: {total:6.1f}s total, {1000 * total / n:6.1f}ms/frame avg")
+        print(f"  {'wall':6s}: {totals['wall']:6.1f}s total, {1000 * totals['wall'] / n:6.1f}ms/frame avg"
+              f" (critical path: max(pose,face,hand) + thread overhead)")
     
     def _initialize_detectors(self):
         """Initialize the MediaPipe detectors."""
@@ -77,11 +128,26 @@ class HolisticDetector:
         Returns:
             Tuple of (bounding_boxes_count, landmarks_data)
         """
-        results = self.mp_holistic.process(image)
-        
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image)
-        face_prediction = self.face_detector.detect(mp_image)
-        hand_prediction = self.hand_detector.detect(mp_image)
+
+        def _timed(fn, *args):
+            t0 = time.time()
+            result = fn(*args)
+            return result, time.time() - t0
+
+        frame_start = time.time()
+        pose_future = self._executor.submit(_timed, self.mp_holistic.process, image)
+        face_future = self._executor.submit(_timed, self.face_detector.detect, mp_image)
+        hand_future = self._executor.submit(_timed, self.hand_detector.detect, mp_image)
+
+        results, pose_dt = pose_future.result()
+        face_prediction, face_dt = face_future.result()
+        hand_prediction, hand_dt = hand_future.result()
+
+        self._frame_timings.append({
+            'pose': pose_dt, 'face': face_dt, 'hand': hand_dt,
+            'wall': time.time() - frame_start,
+        })
 
         bounding_boxes = {}
         landmarks_data = {}
@@ -169,7 +235,8 @@ class HolisticDetector:
         
         result_dict = {}
         stats = {}
-        
+        self._frame_timings = []
+
         # Process each frame
         for i in range(len(video)):
             try:
@@ -188,9 +255,10 @@ class HolisticDetector:
         # Save results if requested
         if save_results:
             self._save_results(file_name, result_dict, stats, output_dir)
-        
+
+        self.print_timing_summary()
         return result_dict
-    
+
     def process_video_frames(self, frames: list, save_results: bool = False,
                            output_dir: Optional[str] = None, video_name: str = "video") -> Dict[int, Any]:
         """
@@ -210,7 +278,8 @@ class HolisticDetector:
         
         result_dict = {}
         stats = {}
-        
+        self._frame_timings = []
+
         # Process each frame
         for i, frame in enumerate(frames):
             try:
@@ -225,7 +294,8 @@ class HolisticDetector:
         # Save results if requested
         if save_results:
             self._save_results(video_name, result_dict, stats, output_dir)
-        
+
+        self.print_timing_summary()
         return result_dict
 
     def _save_results(self, video_name: str, landmarks_data: Dict, stats_data: Dict, output_dir: str):
@@ -275,6 +345,13 @@ class HolisticDetector:
         return stats
 
 
+# NOTE: deliberately NOT cached across clips. `mp.solutions.holistic.Holistic`
+# tracks landmarks temporally across successive process() calls, which is what we
+# want *within* a clip but not *between* clips — reusing one detector leaks the
+# previous clip's tracking state into the next and produced different translations
+# for identical input. Constructing a detector is cheap relative to per-frame
+# inference (measured: no difference in the MediaPipe stage), so there is nothing
+# to gain by caching it here.
 # Convenience function for backward compatibility and simple usage
 def video_holistic(video_input, face_model_path: str, hand_model_path: str,
                   save_results: bool = False, output_dir: Optional[str] = None,
@@ -294,7 +371,10 @@ def video_holistic(video_input, face_model_path: str, hand_model_path: str,
         Dictionary containing landmarks for each frame
     """
     detector = HolisticDetector(face_model_path, hand_model_path)
-    return detector.process_video(video_input, save_results, output_dir, video_name)
+    try:
+        return detector.process_video(video_input, save_results, output_dir, video_name)
+    finally:
+        detector.close()
 
 
 # Utility functions for batch processing
@@ -366,45 +446,48 @@ def main():
 
     # Process videos in batches
     video_batches = [fixed_list[i:i + args.batch_size] for i in range(0, len(fixed_list), args.batch_size)]
-    
-    for video_file in video_batches[args.index]:
-        current_time = time.time()
-        if current_time - start_time > args.time_limit:
-            print("Time limit reached. Stopping execution.")
-            break
 
-        # Check if output files already exist
-        video_name = Path(video_file).stem
-        landmark_json_path = Path(args.pose_path) / f"{video_name}_pose.json"
-        stats_json_path = Path(args.stats_path) / f"{video_name}_stats.json"
+    try:
+        for video_file in video_batches[args.index]:
+            current_time = time.time()
+            if current_time - start_time > args.time_limit:
+                print("Time limit reached. Stopping execution.")
+                break
 
-        if landmark_json_path.exists() and stats_json_path.exists():
-            print(f"Skipping {video_file} - output files already exist")
-            continue
-        elif is_string_in_file(args.problem_file_path, video_file):
-            print(f"Skipping {video_file} - found in problem file")
-            continue
-        else:
-            try:
-                print(f"Processing {video_file}")
-                result_dict = detector.process_video(
-                    video_file_path=video_file,
-                    save_results=True,
-                    output_dir=args.pose_path
-                )
-                
-                # Also save stats separately for compatibility
-                stats = detector.compute_video_stats(result_dict)
-                with open(stats_json_path, 'w') as f:
-                    json.dump(stats, f)
-                    
-                print(f"Successfully processed {video_file}")
-                
-            except Exception as e:
-                print(f"Error processing {video_file}: {e}")
-                # Add to problem file
-                with open(args.problem_file_path, "a") as p:
-                    p.write(video_file + "\n")
+            # Check if output files already exist
+            video_name = Path(video_file).stem
+            landmark_json_path = Path(args.pose_path) / f"{video_name}_pose.json"
+            stats_json_path = Path(args.stats_path) / f"{video_name}_stats.json"
+
+            if landmark_json_path.exists() and stats_json_path.exists():
+                print(f"Skipping {video_file} - output files already exist")
+                continue
+            elif is_string_in_file(args.problem_file_path, video_file):
+                print(f"Skipping {video_file} - found in problem file")
+                continue
+            else:
+                try:
+                    print(f"Processing {video_file}")
+                    result_dict = detector.process_video(
+                        video_file_path=video_file,
+                        save_results=True,
+                        output_dir=args.pose_path
+                    )
+
+                    # Also save stats separately for compatibility
+                    stats = detector.compute_video_stats(result_dict)
+                    with open(stats_json_path, 'w') as f:
+                        json.dump(stats, f)
+
+                    print(f"Successfully processed {video_file}")
+
+                except Exception as e:
+                    print(f"Error processing {video_file}: {e}")
+                    # Add to problem file
+                    with open(args.problem_file_path, "a") as p:
+                        p.write(video_file + "\n")
+    finally:
+        detector.close()
 
 
 if __name__ == "__main__":

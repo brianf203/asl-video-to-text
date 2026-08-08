@@ -3,6 +3,7 @@ data/
 *.deb
 *.gguf
 models/
+online_cslr/
 *.mp4
 *.npy
 *.pyc

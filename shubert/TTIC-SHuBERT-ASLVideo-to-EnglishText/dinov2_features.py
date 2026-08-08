@@ -220,43 +220,67 @@ class DINOEmbedder:
         return embedding
 
 
+# DINOv2 peak GPU memory is dominated by per-batch activations, not weights (the
+# ViT-S/14 backbone is only ~22M params). On the Jetson's 8GB *shared* CPU/GPU
+# pool a batch of 128 frames is enough to OOM once anything else is resident
+# (e.g. the cached ByT5 model in host RAM), so the live pipeline uses a much
+# smaller batch. Throughput impact is minimal — this GPU does not saturate at 128.
+# Override with DINOV2_BATCH_SIZE=<n> when tuning against memory pressure.
+DEFAULT_BATCH_SIZE = int(os.environ.get("DINOV2_BATCH_SIZE", "32"))
+
+# Process-wide cache so repeated calls with the same model path/batch_size/device
+# reuse the already-loaded model instead of reloading weights from disk each time.
+_embedder_cache = {}
+
+
+def _get_cached_embedder(dino_model_path: str, batch_size: int = DEFAULT_BATCH_SIZE,
+                          device: Optional[str] = None) -> "DINOEmbedder":
+    key = (dino_model_path, batch_size, str(device) if device else None)
+    embedder = _embedder_cache.get(key)
+    if embedder is None:
+        embedder = DINOEmbedder(dino_model_path, batch_size, device)
+        _embedder_cache[key] = embedder
+    return embedder
+
+
+def preload_embedder(dino_model_path: str, batch_size: int = DEFAULT_BATCH_SIZE) -> None:
+    """Load and cache an embedder ahead of first use, so the first clip does not
+    pay the model-load cost. Useful for long-running processes (live capture)."""
+    _get_cached_embedder(dino_model_path, batch_size)
+
+
 # Convenience functions for backward compatibility
-def extract_embeddings_from_frames(frames: List[np.ndarray], dino_model_path: str, 
-                                  batch_size: int = 128) -> np.ndarray:
+def extract_embeddings_from_frames(frames: List[np.ndarray], dino_model_path: str,
+                                  batch_size: int = DEFAULT_BATCH_SIZE) -> np.ndarray:
     """
     Convenience function to extract embeddings from frames.
-    
+
     Args:
         frames: List of frames as numpy arrays
         dino_model_path: Path to the fine-tuned DINOv2 model
         batch_size: Batch size for processing
-        
+
     Returns:
         Numpy array of embeddings
     """
-    embedder = DINOEmbedder(dino_model_path, batch_size)
-    result = embedder.extract_embeddings_from_frames(frames)
-    del embedder
-    import torch
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
-    return result
+    embedder = _get_cached_embedder(dino_model_path, batch_size)
+    return embedder.extract_embeddings_from_frames(frames)
 
 
-def extract_embeddings_from_video(video_path: str, dino_model_path: str, 
-                                 batch_size: int = 128) -> np.ndarray:
+def extract_embeddings_from_video(video_path: str, dino_model_path: str,
+                                 batch_size: int = DEFAULT_BATCH_SIZE) -> np.ndarray:
     """
     Convenience function to extract embeddings from video.
-    
+
     Args:
         video_path: Path to the video file
         dino_model_path: Path to the fine-tuned DINOv2 model
         batch_size: Batch size for processing
-        
+
     Returns:
         Numpy array of embeddings
     """
-    embedder = DINOEmbedder(dino_model_path, batch_size)
+    embedder = _get_cached_embedder(dino_model_path, batch_size)
     return embedder.extract_embeddings_from_video(video_path)
 
 
@@ -265,7 +289,7 @@ def video_to_embeddings(video_path: str, output_folder: str, dino_path: str, bat
     Original function for backward compatibility with command-line usage.
     """
     try:
-        embedder = DINOEmbedder(dino_path, batch_size)
+        embedder = _get_cached_embedder(dino_path, batch_size)
         embedder.extract_embeddings_from_video_and_save(video_path, output_folder)
     except Exception as e:
         print(f'Error processing {video_path}: {e}')

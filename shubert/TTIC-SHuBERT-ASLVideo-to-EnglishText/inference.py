@@ -62,7 +62,9 @@ class LinearAdapter(nn.Module):
         self.extraction_layer = extraction_layer
 
     def forward(self, face_features, left_hand_features, right_hand_features, body_posture_features):
-        dtype = torch.float32
+        # Follow the module's own dtype so the model can be loaded in bf16
+        # (halves resident memory) without a dtype mismatch here.
+        dtype = self.final_layer.weight.dtype
         face_features = face_features.to(dtype=dtype)
         left_hand_features = left_hand_features.to(dtype=dtype)
         right_hand_features = right_hand_features.to(dtype=dtype)
@@ -659,6 +661,50 @@ class TranslationFeatures(torch.utils.data.Dataset):
             "pose_features": torch.tensor(self.body_posture_embeddings),
         }
 
+# Process-wide cache for the ByT5 translation model. Loading the checkpoint is
+# ~13s (a 2.68GB pytorch_model.bin) versus ~7s for the actual generate() call, so
+# in any long-running process (the live auto-segment worker, app.py) this reload
+# dominated per-clip latency. Keyed on the checkpoint paths; holds a single
+# already-on-device, already-eval() model.
+_model_cache = {}
+
+
+def _get_cached_model(model_checkpoint: str, tokenizer_checkpoint: str, output_dir: str):
+    """Load (or reuse) the ByT5 model + tokenizer. Returns (model, tokenizer, device)."""
+    key = (model_checkpoint, tokenizer_checkpoint)
+    cached = _model_cache.get(key)
+    if cached is not None:
+        return cached
+
+    # bfloat16 halves the resident footprint (~2.7GB -> ~1.4GB), which matters a
+    # lot on the Jetson's shared 8GB pool: an fp32-resident ByT5 pushes the box
+    # into swap and CUDA then fails to map memory for DINOv2. bf16 (not fp16) —
+    # T5 overflows in fp16. Override with BYT5_DTYPE=float32 to compare.
+    _dtype_name = os.environ.get("BYT5_DTYPE", "bfloat16")
+    _dtype = getattr(torch, _dtype_name)
+    model = SignLanguageByT5ForConditionalGeneration.from_pretrained(
+        model_checkpoint,
+        cache_dir=os.path.join(output_dir, "cache"),
+        torch_dtype=_dtype,
+    )
+    tokenizer = ByT5Tokenizer.from_pretrained(tokenizer_checkpoint)
+
+    # ByT5 stays on CPU: running it on GPU alongside DINOv2 OOMs the Jetson's
+    # 8GB shared memory.
+    device = torch.device("cpu")
+    model.to(device)
+    model.eval()
+
+    _model_cache[key] = (model, tokenizer, device)
+    return _model_cache[key]
+
+
+def preload_model(model_checkpoint: str, tokenizer_checkpoint: str, output_dir: str) -> None:
+    """Load and cache the ByT5 model ahead of first use, so the first clip does not
+    pay the ~13s checkpoint load. Useful for long-running processes (live capture)."""
+    _get_cached_model(model_checkpoint, tokenizer_checkpoint, output_dir)
+
+
 def generate_text_from_features(
     face_embeddings: np.ndarray,
     left_hand_embeddings: np.ndarray,
@@ -669,32 +715,29 @@ def generate_text_from_features(
     tokenizer_checkpoint: str,
     output_dir: str,
     generation_max_length: int = 2048,
-    generation_num_beams: int = 5,
+    generation_num_beams: int = 1,
 ):
     """
     Direct inference function that generates text from sign language features.
     """
-    # Load model and tokenizer
-    config = SignLanguageByT5Config.from_pretrained(model_config)
-    model = SignLanguageByT5ForConditionalGeneration.from_pretrained(
-        model_checkpoint,
-        # config=config,
-        cache_dir=os.path.join(output_dir, "cache"),
+    # Load model and tokenizer (cached across calls — see _get_cached_model)
+    import time as _time
+    _t0 = _time.time()
+    model, tokenizer, device = _get_cached_model(
+        model_checkpoint, tokenizer_checkpoint, output_dir
     )
-    tokenizer = ByT5Tokenizer.from_pretrained(tokenizer_checkpoint)
-    
-    # Move model to appropriate device
-    device = torch.device("cpu")
-    model.to(device)
-    model.eval()
-    
-    # Convert inputs to tensors and move to device
-    face_tensor = torch.tensor(face_embeddings, dtype=torch.float32).unsqueeze(0).to(device)
-    left_hand_tensor = torch.tensor(left_hand_embeddings, dtype=torch.float32).unsqueeze(0).to(device)
-    right_hand_tensor = torch.tensor(right_hand_embeddings, dtype=torch.float32).unsqueeze(0).to(device)
-    pose_tensor = torch.tensor(body_posture_embeddings, dtype=torch.float32).unsqueeze(0).to(device)
+    _load_dt = _time.time() - _t0
+    _to_device_dt = 0.0
+
+    # Convert inputs to tensors and move to device, matching the model's dtype
+    _dtype = next(model.parameters()).dtype
+    face_tensor = torch.tensor(face_embeddings, dtype=_dtype).unsqueeze(0).to(device)
+    left_hand_tensor = torch.tensor(left_hand_embeddings, dtype=_dtype).unsqueeze(0).to(device)
+    right_hand_tensor = torch.tensor(right_hand_embeddings, dtype=_dtype).unsqueeze(0).to(device)
+    pose_tensor = torch.tensor(body_posture_embeddings, dtype=_dtype).unsqueeze(0).to(device)
     
     # Generate text
+    _t0 = _time.time()
     with torch.no_grad():
         generated_ids = model.generate(
             face_features=face_tensor,
@@ -707,7 +750,13 @@ def generate_text_from_features(
             pad_token_id=tokenizer.pad_token_id,
             eos_token_id=tokenizer.eos_token_id,
         )
-    
+    _generate_dt = _time.time() - _t0
+
+    print("\n--- ByT5 stage breakdown ---")
+    print(f"  {'checkpoint_load':16s}: {_load_dt:6.1f}s")
+    print(f"  {'to_device+eval':16s}: {_to_device_dt:6.1f}s")
+    print(f"  {'generate':16s}: {_generate_dt:6.1f}s")
+
     # Decode generated text
     generated_text = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
     return generated_text
