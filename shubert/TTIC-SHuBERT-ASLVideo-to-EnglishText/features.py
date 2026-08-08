@@ -13,7 +13,6 @@ from dinov2_features import extract_embeddings_from_frames, preload_embedder
 from body_features import process_pose_landmarks
 # from shubert import SignHubertModel, SignHubertConfig
 from inference import test, preload_model
-import subprocess
 
 
 
@@ -40,44 +39,40 @@ class SHuBERTProcessor:
 
 
     def process_video(self, video_path):
-        
-        # output_file = f"{output_path}/{os.path.basename(video_file)}"
-    
-        
-        # # Target FPS is 12.5
-        # cmd = [
-        #     'ffmpeg',
-        #     '-i', video_path,
-        #     '-filter:v', 'fps=15',
-        #     '-c:v', 'libx264',
-        #     '-preset', 'medium',  # Balance between speed and quality
-        #     '-crf', '23',  # Quality level (lower is better)
-        #     '-y',  # Overwrite output file if it exists
-        #     video_path
-        # ]
-        
 
-        # try:
-        #     subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        #     print(f"Saved to {video_path} at 15 fps")
-        # except subprocess.CalledProcessError as e:
-        #     print(f"Error reading video {video_path}: {e}")
-        
-        
-        
         timings = {}
         stage_start = time.time()
 
-        # Step 1: Change the fps to 15
+        # Step 1: Drop to ~15fps by keeping every FRAME_STRIDE'th frame.
+        #
+        # SHuBERT expects roughly 15fps. Upstream tried to do this with an ffmpeg
+        # `-filter:v fps=15` pass that was commented out and could never have worked
+        # anyway (it read video_path and wrote back to video_path), leaving the read
+        # loop taking every frame while its "Step 1: Change the fps to 15" comment
+        # claimed otherwise. A 30fps camera therefore fed the model twice the frames
+        # it wants, paying for it twice over: perception is per-frame, and the extra
+        # frames also lengthen the ByT5 encoder input.
+        #
+        # A/B'd over my_please.mp4 plus 5 dailymoth_examples clips (189-364 frames,
+        # both signers), 3 strides each: stride 2 runs at 53% of full-rate latency
+        # with no quality cost (2 clips better, 3 draws, 1 marginally worse — on the
+        # one clip with checkable ground truth it dropped a hallucinated place name
+        # the full-rate run invented). Stride 3 is 36% but degrades: misspelled proper
+        # nouns ("Liberia" -> "Libera"), dropped clauses, "collapsed" -> "torn down".
+        stride = max(1, int(os.environ.get("FRAME_STRIDE", "2")))
         cap = cv2.VideoCapture(video_path)
         frames = []
+        read_count = 0
         while True:
             ret, frame = cap.read()
             if not ret:
                 break
-            frames.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            if read_count % stride == 0:
+                frames.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            read_count += 1
         cap.release()
         signer_video = np.array(frames)
+        print(f"[features] stride {stride}: {len(frames)}/{read_count} frames kept")
         timings['video_read'] = time.time() - stage_start
         stage_start = time.time()
 
