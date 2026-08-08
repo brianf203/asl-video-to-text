@@ -716,13 +716,18 @@ def generate_text_from_features(
     output_dir: str,
     generation_max_length: int = 2048,
     generation_num_beams: int = 1,
-    # Greedy decoding with no repetition constraint produced looping tails on live
-    # clips ("the pleasure of the pleasure", "down the side and then down the side").
-    # ByT5 is byte-level, so its n-grams are characters, not word pieces: the usual
-    # no_repeat_ngram_size=3 would ban reusing "the" or "ing" and wreck normal English.
-    # 12 bytes ~= 12 characters, long enough to block phrase-level loops while leaving
-    # ordinary letter patterns alone.
-    generation_no_repeat_ngram_size: int = 12,
+    # Off by design. Greedy decoding here produces occasional looping tails ("the
+    # pleasure of the pleasure"), and no_repeat_ngram_size looks like the fix, but
+    # ByT5 is byte-level so its n-grams are CHARACTERS, not word pieces — and at
+    # character scale the parameter cannot tell degenerate repetition from ordinary
+    # English. Measured at 12: it corrupted a legitimate repeat ("I'm studying this
+    # and I'm studyin' tears" — "I'm studying" is exactly 12 bytes, so the decoder was
+    # forced off the final "g") while missing a real loop in the same run ("men and
+    # men and", an 8-byte unit, slipped under the threshold). Lowering it to catch
+    # 8-byte loops mangles more words; raising it stops catching loops at all. If
+    # repetition needs fixing later, num_beams > 1 is the mechanism — at a real
+    # latency cost in a stage that can be ~44% of a short clip.
+    generation_no_repeat_ngram_size: int = 0,
 ):
     """
     Direct inference function that generates text from sign language features.
