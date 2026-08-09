@@ -59,12 +59,24 @@ def proper_nouns(sentence):
 # testing. It also makes the eval unfaithful, because the live path feeds process_video
 # clips that auto_segment_v5 has already trimmed. So trim here with the same
 # frame-differencing logic and thresholds the live segmenter uses.
-MOTION_THRESHOLD = 1.5      # matches auto_segment_v5.MOTION_STOP_THRESHOLD
+MOTION_FLOOR = 0.5          # absolute noise floor for mean frame difference
 TRIM_PAD_SECONDS = 0.25     # matches auto_segment_v5.TAIL_PAD_SECONDS
+MIN_KEEP_FRACTION = 0.40    # below this, distrust the trim and keep the whole clip
 
 
 def trim_to_motion(src, dst, fps=30.0):
-    """Write src to dst keeping only the moving span. Returns (kept, total)."""
+    """Write src to dst keeping only the moving span. Returns (kept, total).
+
+    The threshold is derived per clip rather than fixed. A fixed value (1.5, borrowed
+    from the live segmenter) cut clip 005 from 387 frames to 18 -- 0.6s, far too short to
+    contain the sign -- because that clip's signing motion simply sat below it. Lighting
+    and signing energy vary enough between clips that an absolute cutoff is unsafe.
+
+    Two guards, because silently discarding most of a sign is much worse than leaving
+    some dead air in: the threshold sits a quarter of the way up the clip's own motion
+    range, and if the result keeps less than MIN_KEEP_FRACTION the trim is abandoned
+    entirely rather than trusted.
+    """
     cap = cv2.VideoCapture(src)
     frames = []
     while True:
@@ -77,20 +89,25 @@ def trim_to_motion(src, dst, fps=30.0):
         return 0, 0
 
     prev = None
-    moving = []
+    scores = []
     for frame in frames:
         gray = cv2.GaussianBlur(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (21, 21), 0)
-        moving.append(prev is not None and
-                      float(np.mean(cv2.absdiff(prev, gray))) > MOTION_THRESHOLD)
+        scores.append(0.0 if prev is None
+                      else float(np.mean(cv2.absdiff(prev, gray))))
         prev = gray
 
-    idxs = [i for i, m in enumerate(moving) if m]
+    quiet, loud = np.percentile(scores, 20), np.percentile(scores, 90)
+    threshold = max(MOTION_FLOOR, quiet + 0.25 * (loud - quiet))
+
+    idxs = [i for i, s in enumerate(scores) if s > threshold]
     if not idxs:
         return len(frames), len(frames)  # no motion detected: keep everything
 
     pad = int(TRIM_PAD_SECONDS * fps)
     lo = max(0, idxs[0] - pad)
     hi = min(len(frames), idxs[-1] + pad + 1)
+    if (hi - lo) < MIN_KEEP_FRACTION * len(frames):
+        return len(frames), len(frames)  # implausible span: don't trust it
     kept = frames[lo:hi]
 
     h, w = kept[0].shape[:2]
