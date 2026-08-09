@@ -15,6 +15,7 @@ shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/__pycache__/
 shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/
 shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/temp/
 shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/trt_cache/
+shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/eval_set/
 venv/
 *.wav
 *.zip
