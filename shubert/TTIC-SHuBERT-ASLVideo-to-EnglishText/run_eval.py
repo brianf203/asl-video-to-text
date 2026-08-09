@@ -19,6 +19,8 @@ import os
 import re
 import time
 
+import cv2
+import numpy as np
 import sacrebleu
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -49,6 +51,54 @@ def proper_nouns(sentence):
     tokens = re.findall(r"[A-Za-z']+", sentence)
     return {t.lower() for i, t in enumerate(tokens)
             if i > 0 and t[0].isupper() and not _STOP_INITIAL.match(t) is None}
+
+
+# Recorded clips are bracketed by however long it took to reach for the spacebar --
+# often 5-7s of stillness around a 4s sign. That matters twice over: latency is ~0.22s
+# per captured frame, and dead air is what made the model hallucinate during live
+# testing. It also makes the eval unfaithful, because the live path feeds process_video
+# clips that auto_segment_v5 has already trimmed. So trim here with the same
+# frame-differencing logic and thresholds the live segmenter uses.
+MOTION_THRESHOLD = 1.5      # matches auto_segment_v5.MOTION_STOP_THRESHOLD
+TRIM_PAD_SECONDS = 0.25     # matches auto_segment_v5.TAIL_PAD_SECONDS
+
+
+def trim_to_motion(src, dst, fps=30.0):
+    """Write src to dst keeping only the moving span. Returns (kept, total)."""
+    cap = cv2.VideoCapture(src)
+    frames = []
+    while True:
+        ok, frame = cap.read()
+        if not ok:
+            break
+        frames.append(frame)
+    cap.release()
+    if not frames:
+        return 0, 0
+
+    prev = None
+    moving = []
+    for frame in frames:
+        gray = cv2.GaussianBlur(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (21, 21), 0)
+        moving.append(prev is not None and
+                      float(np.mean(cv2.absdiff(prev, gray))) > MOTION_THRESHOLD)
+        prev = gray
+
+    idxs = [i for i, m in enumerate(moving) if m]
+    if not idxs:
+        return len(frames), len(frames)  # no motion detected: keep everything
+
+    pad = int(TRIM_PAD_SECONDS * fps)
+    lo = max(0, idxs[0] - pad)
+    hi = min(len(frames), idxs[-1] + pad + 1)
+    kept = frames[lo:hi]
+
+    h, w = kept[0].shape[:2]
+    writer = cv2.VideoWriter(dst, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
+    for f in kept:
+        writer.write(f)
+    writer.release()
+    return len(kept), len(frames)
 
 
 def load_manifest():
@@ -130,6 +180,8 @@ def main():
     ap.add_argument("--tag", default="", help="label for the results file")
     ap.add_argument("--compare", nargs=2, metavar=("A", "B"),
                     help="compare two existing results files, no inference")
+    ap.add_argument("--no-trim", action="store_true",
+                    help="score the raw clips instead of trimming to the moving span")
     args = ap.parse_args()
 
     if args.compare:
@@ -162,6 +214,16 @@ def main():
     hyps, times = [], []
     for it in items:
         path = os.path.join(EVAL_DIR, it["file"])
+        trimmed = None
+        if not args.no_trim:
+            trimmed = os.path.join(config['temp_dir'], f"eval_{it['id']}.mp4")
+            kept, total = trim_to_motion(path, trimmed)
+            if kept and kept < total:
+                print(f"[{it['id']}] trimmed {total} -> {kept} frames")
+                path = trimmed
+            else:
+                trimmed = None
+
         t0 = time.time()
         try:
             hyp = processor.process_video(path)
@@ -169,6 +231,11 @@ def main():
             hyp = ""
             print(f"[{it['id']}] FAILED {type(e).__name__}: {e}")
         dt = time.time() - t0
+        if trimmed:
+            try:
+                os.remove(trimmed)
+            except OSError:
+                pass
         hyps.append(hyp)
         times.append(dt)
         print(f"[{it['id']}] {it['category']:12s} {dt:5.1f}s")
