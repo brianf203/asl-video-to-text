@@ -53,6 +53,80 @@ def proper_nouns(sentence):
             if i > 0 and t[0].isupper() and not _STOP_INITIAL.match(t) is None}
 
 
+# --- number normalisation ---------------------------------------------------------
+# The model writes numerals ("15", "10th", "$5") where the references spell them out
+# ("fifteen", "tenth", "five dollars"). Raw BLEU counts those as errors even when the
+# number is right, which is why the numbers category first scored 5.05 -- an artefact,
+# not a measurement. Canonicalise both sides to digits before scoring.
+_UNITS = {
+    "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+    "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12,
+    "thirteen": 13, "fourteen": 14, "fifteen": 15, "sixteen": 16, "seventeen": 17,
+    "eighteen": 18, "nineteen": 19,
+}
+_TENS = {"twenty": 20, "thirty": 30, "forty": 40, "fifty": 50,
+         "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90}
+_ORDINALS = {
+    "first": 1, "second": 2, "third": 3, "fourth": 4, "fifth": 5, "sixth": 6,
+    "seventh": 7, "eighth": 8, "ninth": 9, "tenth": 10, "eleventh": 11,
+    "twelfth": 12, "thirteenth": 13, "fourteenth": 14, "fifteenth": 15,
+    "twentieth": 20, "thirtieth": 30,
+}
+
+
+def normalize_numbers(text):
+    text = re.sub(r"\$\s*(\d+)", r"\1 dollars", text)
+    tokens = re.findall(r"[A-Za-z']+|\d+|[^\sA-Za-z\d']", text.lower())
+
+    out = []
+    for tok in tokens:
+        if tok in _UNITS:
+            out.append(str(_UNITS[tok]))
+        elif tok in _TENS:
+            out.append(str(_TENS[tok]))
+        elif tok in _ORDINALS:
+            out.append(str(_ORDINALS[tok]))
+        elif re.fullmatch(r"\d+(st|nd|rd|th)", tok):
+            out.append(re.sub(r"(st|nd|rd|th)$", "", tok))
+        else:
+            out.append(tok)
+
+    # "forty five" -> 45, after both halves became digits; and drop the orphaned
+    # ordinal suffix left behind when the tokenizer splits "10th" into "10" + "th".
+    merged = []
+    i = 0
+    while i < len(out):
+        if (i + 1 < len(out) and out[i].isdigit() and out[i + 1].isdigit()
+                and int(out[i]) in _TENS.values() and 1 <= int(out[i + 1]) <= 9):
+            merged.append(str(int(out[i]) + int(out[i + 1])))
+            i += 2
+        elif (out[i] in ("st", "nd", "rd", "th")
+              and merged and merged[-1].isdigit()):
+            i += 1
+        else:
+            merged.append(out[i])
+            i += 1
+    return " ".join(merged)
+
+
+def char_similarity(a, b):
+    """1.0 - normalised Levenshtein distance. 'blian' vs 'brian' -> 0.8."""
+    if a == b:
+        return 1.0
+    if not a or not b:
+        return 0.0
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        cur = [i]
+        for j, cb in enumerate(b, 1):
+            cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != cb)))
+        prev = cur
+    return 1.0 - prev[-1] / max(len(a), len(b))
+
+
+NEAR_HIT = 0.6  # 'blian'/'brian' = 0.80, 'columbs'/'columbus' = 0.88, 'osd'/'osu' = 0.67
+
+
 # Recorded clips are bracketed by however long it took to reach for the spacebar --
 # often 5-7s of stillness around a 4s sign. That matters twice over: latency is ~0.22s
 # per captured frame, and dead air is what made the model hallucinate during live
@@ -134,41 +208,59 @@ def load_manifest():
 
 def score(items, hyps):
     refs = [it["reference"] for it in items]
+    n_refs = [normalize_numbers(r) for r in refs]
+    n_hyps = [normalize_numbers(h) for h in hyps]
     out = {
         "n": len(items),
-        "bleu": sacrebleu.corpus_bleu(hyps, [refs]).score,
-        "chrf": sacrebleu.corpus_chrf(hyps, [refs]).score,
+        "bleu_raw": sacrebleu.corpus_bleu(hyps, [refs]).score,
+        "bleu": sacrebleu.corpus_bleu(n_hyps, [n_refs]).score,
+        "chrf": sacrebleu.corpus_chrf(n_hyps, [n_refs]).score,
         "by_category": {},
     }
     cats = sorted({it["category"] for it in items})
     for cat in cats:
         idxs = [i for i, it in enumerate(items) if it["category"] == cat]
-        c_refs = [refs[i] for i in idxs]
-        c_hyps = [hyps[i] for i in idxs]
         out["by_category"][cat] = {
             "n": len(idxs),
-            "bleu": sacrebleu.corpus_bleu(c_hyps, [c_refs]).score,
-            "chrf": sacrebleu.corpus_chrf(c_hyps, [c_refs]).score,
+            "bleu_raw": sacrebleu.corpus_bleu([hyps[i] for i in idxs],
+                                              [[refs[i] for i in idxs]]).score,
+            "bleu": sacrebleu.corpus_bleu([n_hyps[i] for i in idxs],
+                                          [[n_refs[i] for i in idxs]]).score,
+            "chrf": sacrebleu.corpus_chrf([n_hyps[i] for i in idxs],
+                                          [[n_refs[i] for i in idxs]]).score,
         }
 
-    # Proper-noun recall: of the fingerspelled names in the references, how many appear
-    # anywhere in the corresponding hypothesis?
-    hit = total = 0
-    misses = []
+    # Proper nouns are scored by character similarity, not exact match. Fingerspelling
+    # fails by degrees -- "Blian" for "Brian" is one character out, which exact matching
+    # scores identically to a total miss and so hides the signal that matters most.
+    exact = near = total = 0
+    sims = []
+    detail = []
     for it, hyp in zip(items, hyps):
         want = proper_nouns(it["reference"])
         if not want:
             continue
-        got = {w for w in re.findall(r"[A-Za-z']+", hyp.lower())}
+        got = re.findall(r"[A-Za-z']+", hyp.lower())
         for w in want:
             total += 1
-            if w in got:
-                hit += 1
+            best, best_tok = 0.0, ""
+            for g in got:
+                s = char_similarity(w, g)
+                if s > best:
+                    best, best_tok = s, g
+            sims.append(best)
+            if best == 1.0:
+                exact += 1
+            elif best >= NEAR_HIT:
+                near += 1
+                detail.append((it["id"], w, best_tok, round(best, 2), hyp))
             else:
-                misses.append((it["id"], w, hyp))
-    out["proper_noun_recall"] = (hit / total * 100) if total else None
+                detail.append((it["id"], w, best_tok or "-", round(best, 2), hyp))
     out["proper_noun_total"] = total
-    out["proper_noun_misses"] = misses
+    out["proper_noun_recall"] = (exact / total * 100) if total else None
+    out["proper_noun_near_recall"] = ((exact + near) / total * 100) if total else None
+    out["proper_noun_mean_similarity"] = (sum(sims) / len(sims) * 100) if sims else None
+    out["proper_noun_detail"] = detail
     return out
 
 
@@ -177,18 +269,25 @@ def report(res, tag=""):
     print(f"EVAL RESULTS {tag}".rstrip())
     print("=" * 72)
     print(f"  clips: {res['n']}")
-    print(f"  BLEU : {res['bleu']:.2f}")
+    print(f"  BLEU : {res['bleu']:.2f}   (raw, before number normalisation: "
+          f"{res.get('bleu_raw', float('nan')):.2f})")
     print(f"  chrF : {res['chrf']:.2f}")
     print("\n  by category:")
     for cat, c in sorted(res["by_category"].items()):
-        print(f"    {cat:12s} n={c['n']:3d}  BLEU {c['bleu']:6.2f}  chrF {c['chrf']:6.2f}")
-    if res["proper_noun_recall"] is not None:
-        print(f"\n  proper-noun recall: {res['proper_noun_recall']:.1f}% "
-              f"({res['proper_noun_total']} names)")
-        if res["proper_noun_misses"]:
-            print("  missed names:")
-            for cid, word, hyp in res["proper_noun_misses"][:12]:
-                print(f"    [{cid}] '{word}' -> {hyp}")
+        raw = c.get("bleu_raw")
+        raw_s = f" (raw {raw:5.2f})" if raw is not None else ""
+        print(f"    {cat:12s} n={c['n']:3d}  BLEU {c['bleu']:6.2f}{raw_s}  "
+              f"chrF {c['chrf']:6.2f}")
+    if res.get("proper_noun_recall") is not None:
+        print(f"\n  proper nouns ({res['proper_noun_total']} names):")
+        print(f"    exact          : {res['proper_noun_recall']:.1f}%")
+        print(f"    near (>={NEAR_HIT:.1f} sim): {res['proper_noun_near_recall']:.1f}%")
+        print(f"    mean similarity: {res['proper_noun_mean_similarity']:.1f}%")
+        if res.get("proper_noun_detail"):
+            print("    non-exact:")
+            for cid, want, got, sim, _hyp in res["proper_noun_detail"][:14]:
+                mark = "~" if sim >= NEAR_HIT else " "
+                print(f"      {mark} [{cid}] {want:12s} -> {got:14s} sim {sim:.2f}")
     print("=" * 72)
 
 
@@ -199,7 +298,21 @@ def main():
                     help="compare two existing results files, no inference")
     ap.add_argument("--no-trim", action="store_true",
                     help="score the raw clips instead of trimming to the moving span")
+    ap.add_argument("--rescore", metavar="FILE",
+                    help="recompute metrics from a saved results file (no inference)")
     args = ap.parse_args()
+
+    if args.rescore:
+        data = json.load(open(args.rescore))
+        items = [{"id": o["id"], "category": o["category"],
+                  "reference": o["reference"]} for o in data["outputs"]]
+        hyps = [o["hypothesis"] for o in data["outputs"]]
+        res = score(items, hyps)
+        report(res, f"{data.get('tag', '')} (rescored)")
+        data["results"] = res
+        json.dump(data, open(args.rescore, "w"), indent=2)
+        print(f"updated {args.rescore}")
+        return
 
     if args.compare:
         a = json.load(open(args.compare[0]))
