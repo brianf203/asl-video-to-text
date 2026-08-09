@@ -1,5 +1,27 @@
 """ONNX/TensorRT hand and pose detection, drop-in for MediaPipe's in HolisticDetector.
 
+STATUS: opt-in, OFF by default. Set USE_ONNX_PERCEPTION=1 to enable.
+
+It is genuinely faster -- ~1.5x on the perception stage -- but that is only ~13% end to
+end (perception is a minority of clip time; ByT5 dominates), and a 5-clip A/B against
+MediaPipe showed a real accuracy cost. On dailymoth_examples/rDUefZVPfmU_crop_1, the only
+clip in the set with verifiable ground truth (the real Wilmington LA tunnel collapse,
+31 workers), this backend lost the count ("31 workers" -> "Wild workers"), inverted the
+event ("collapsed" -> "taken down") and relocated Wilmington to "Louisiana, California".
+MediaPipe got all three right. The other four clips were: one identical, one draw, and
+two minor splits.
+
+The cause is landmark ACCURACY, not detection rate -- worth knowing before anyone retries
+the obvious fix. Hand detection on that clip was already 98% single-hand / 27% two-hand
+(matching MediaPipe) at the original conf_threshold of 0.8, and lowering it to 0.3
+reproduced all three errors unchanged. The ONNX 21-point positions are simply less
+precise than MediaPipe's, which propagates into the DINOv2 hand crops.
+
+Worth revisiting if perception ever becomes the dominant cost, or for high-resolution
+input, where the advantage grows: the ONNX models resize to fixed inputs (192/224/256)
+so their cost is resolution-independent, while MediaPipe's scales with frame size
+(1.42-1.61x on the larger dailymoth clips vs 1.41x on 640x480 camera footage).
+
 MediaPipe's hand (139.9 ms/frame) and pose (126.5 ms/frame) detectors set the perception
 critical path. The legacy ASL-Citizen pipeline already carries ONNX exports of the same
 MediaPipe graphs, which run ~10x faster here under TensorRT. Benchmarked on this Jetson
@@ -59,6 +81,13 @@ PROVIDERS = [
 # a garbage crop, so do not go lower without checking that.
 PALM_SCORE_THRESHOLD = float(os.environ.get("ONNX_PALM_SCORE_THRESHOLD", "0.30"))
 
+# Second filter, applied by the handpose model after the palm detector accepts a box --
+# why end-to-end hand detection is lower than palm detection alone. Swept on my_please:
+# 0.8 -> 71%, 0.5 -> 75%, 0.3 -> 78%, 0.1 -> 84% single-hand, at flat cost. 0.3 matches
+# MediaPipe's 78%, so it is the default. Note this did NOT fix the accuracy regression
+# described above -- that clip was already at 98% detection; see the module docstring.
+HANDPOSE_CONF_THRESHOLD = float(os.environ.get("ONNX_HANDPOSE_CONF_THRESHOLD", "0.30"))
+
 sys.path.insert(0, MODELS_DIR)
 from mp_palmdet import MPPalmDet      # noqa: E402
 from mp_handpose import MPHandPose    # noqa: E402
@@ -85,9 +114,9 @@ class _PalmDet(MPPalmDet):
 
 
 class _HandPose(MPHandPose):
-    def __init__(self, model_path):
+    def __init__(self, model_path, conf_threshold=HANDPOSE_CONF_THRESHOLD):
         self.model_path = model_path
-        self.conf_threshold = 0.8
+        self.conf_threshold = conf_threshold
         self.input_size = np.array([224, 224])
         self.PALM_LANDMARK_IDS = [0, 5, 9, 13, 17, 1, 2]
         self.PALM_LANDMARKS_INDEX_OF_PALM_BASE = 0

@@ -45,7 +45,11 @@ class HolisticDetector:
         self.min_hand_detection_confidence = min_hand_detection_confidence
         self.max_faces = max_faces
         self.max_hands = max_hands
-        self.use_onnx = os.environ.get("USE_ONNX_PERCEPTION", "1") not in ("0", "false", "False")
+        # Opt-in, not default. The ONNX backend is ~1.5x faster on the perception stage
+        # (~13% end to end) but degraded translation on the one A/B clip with verifiable
+        # ground truth -- see onnx_perception.py. Not worth a factual-accuracy risk by
+        # default for that margin.
+        self.use_onnx = os.environ.get("USE_ONNX_PERCEPTION", "0") not in ("0", "false", "False")
         self._onnx = None
 
         # Run pose/face/hand detection concurrently per frame instead of
