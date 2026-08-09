@@ -19,3 +19,4 @@ shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/eval_set/
 venv/
 *.wav
 *.zip
+shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/eval_set_openasl/

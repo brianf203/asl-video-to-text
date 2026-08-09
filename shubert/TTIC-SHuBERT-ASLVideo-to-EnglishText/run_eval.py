@@ -24,7 +24,9 @@ import numpy as np
 import sacrebleu
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-EVAL_DIR = os.path.join(HERE, "eval_set")
+# EVAL_DIR lets the same harness score a second set -- e.g. an OpenASL benchmark subset
+# of native signing with published references, alongside our own-footage set.
+EVAL_DIR = os.environ.get("EVAL_DIR", os.path.join(HERE, "eval_set"))
 MANIFEST = os.path.join(EVAL_DIR, "manifest.jsonl")
 
 MODELS_BASE = "/home/sllu/.cache/huggingface/hub/models--ShesterG--SHuBERT/snapshots/578a0233e770c8ce4dc75d859b91fdea7c34f5aa/models"
