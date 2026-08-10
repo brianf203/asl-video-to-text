@@ -689,12 +689,25 @@ def _get_cached_model(model_checkpoint: str, tokenizer_checkpoint: str, output_d
     )
     tokenizer = ByT5Tokenizer.from_pretrained(tokenizer_checkpoint)
 
-    # ByT5 defaults to CPU because running it on GPU alongside DINOv2 once OOM'd the
-    # Jetson's 8GB shared pool. NOTE that finding dates from a different configuration:
-    # ByT5 was fp32 (2.68GB, not bf16's ~1.4GB) and DINOv2 ran at batch 128, since
-    # dropped to 32 and to fp16. Both cut resident memory, so the constraint may no
-    # longer bind. Set BYT5_DEVICE=cuda to re-test; keep the default until measured.
-    device = torch.device(os.environ.get("BYT5_DEVICE", "cpu"))
+    # ByT5 used to default to CPU because running it on GPU alongside DINOv2 once OOM'd
+    # the Jetson's 8GB shared pool. That finding dated from a different configuration —
+    # ByT5 was fp32 (2.68GB, not bf16's ~1.4GB) and DINOv2 ran at batch 128, since dropped
+    # to 32 and to fp16 — and it no longer holds. Measured on the LIVE worker path (camera
+    # open, display window up, 4 clips back to back), cuda vs cpu from matched start states:
+    #   peak system RAM 6711MB vs 6947MB, peak swap 259MB vs 385MB,
+    #   min available 908MB vs 672MB, 43.9 s/clip vs 64.0 (1.46x), camera 29.7 vs 29.8fps,
+    #   0 failures, and decoded text bit-identical on 4/4 clips.
+    # So GPU is not merely safe here, it is *cheaper* in host memory — consistent with ARM
+    # having no native bf16 CPU kernels, so CPU generate() upcasts to fp32 and allocates
+    # large fp32 intermediates in host RAM.
+    #
+    # The win is entirely in this stage, NOT a cross-stage effect. Per-clip stage
+    # breakdowns (cpu -> cuda): byt5_inference 25.6->5.3, 21.4->1.7, 24.9->5.3, 11.0->2.5,
+    # while mediapipe_landmarks is flat at 31.0->30.7, 28.2->28.3, 28.7->29.1, 12.5->12.8.
+    # ByT5 alone accounts for ~96% of the total delta. This REFUTES the earlier guess that
+    # ByT5-on-CPU was stealing cores from CPU-bound MediaPipe — perception does not speed up
+    # at all. Set BYT5_DEVICE=cpu to revert.
+    device = torch.device(os.environ.get("BYT5_DEVICE", "cuda"))
     model.to(device)
     model.eval()
     print(f"[byt5] device: {device} dtype: {_dtype_name}")

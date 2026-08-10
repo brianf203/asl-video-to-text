@@ -414,7 +414,7 @@ def main():
         "dinov2_hands_dtype": str(dinov2_features.HANDS_DTYPE),
         "dinov2_face_dtype": str(dinov2_features.FACE_DTYPE),
         "byt5_dtype": os.environ.get("BYT5_DTYPE", "bfloat16"),
-        "byt5_device": os.environ.get("BYT5_DEVICE", "cpu"),
+        "byt5_device": os.environ.get("BYT5_DEVICE", "cuda"),
         "no_trim": args.no_trim,
     }
 
