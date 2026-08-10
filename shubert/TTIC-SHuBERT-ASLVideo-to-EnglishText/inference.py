@@ -689,11 +689,15 @@ def _get_cached_model(model_checkpoint: str, tokenizer_checkpoint: str, output_d
     )
     tokenizer = ByT5Tokenizer.from_pretrained(tokenizer_checkpoint)
 
-    # ByT5 stays on CPU: running it on GPU alongside DINOv2 OOMs the Jetson's
-    # 8GB shared memory.
-    device = torch.device("cpu")
+    # ByT5 defaults to CPU because running it on GPU alongside DINOv2 once OOM'd the
+    # Jetson's 8GB shared pool. NOTE that finding dates from a different configuration:
+    # ByT5 was fp32 (2.68GB, not bf16's ~1.4GB) and DINOv2 ran at batch 128, since
+    # dropped to 32 and to fp16. Both cut resident memory, so the constraint may no
+    # longer bind. Set BYT5_DEVICE=cuda to re-test; keep the default until measured.
+    device = torch.device(os.environ.get("BYT5_DEVICE", "cpu"))
     model.to(device)
     model.eval()
+    print(f"[byt5] device: {device} dtype: {_dtype_name}")
 
     _model_cache[key] = (model, tokenizer, device)
     return _model_cache[key]

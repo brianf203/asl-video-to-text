@@ -336,6 +336,8 @@ def main():
     items = load_manifest()
     print(f"{len(items)} clips in eval set")
 
+    # Imported here, not at module scope, so --compare/--rescore stay torch-free.
+    import dinov2_features
     from features import SHuBERTProcessor
     os.makedirs(config['temp_dir'], exist_ok=True)
     processor = SHuBERTProcessor(config)
@@ -386,6 +388,10 @@ def main():
             "timestamp": stamp,
             "frame_stride": os.environ.get("FRAME_STRIDE", "2"),
             "use_onnx_perception": os.environ.get("USE_ONNX_PERCEPTION", "0"),
+            "dinov2_hands_dtype": str(dinov2_features.HANDS_DTYPE),
+            "dinov2_face_dtype": str(dinov2_features.FACE_DTYPE),
+            "byt5_dtype": os.environ.get("BYT5_DTYPE", "bfloat16"),
+            "byt5_device": os.environ.get("BYT5_DEVICE", "cpu"),
             "mean_seconds_per_clip": sum(times) / len(times) if times else 0,
             "results": res,
             "outputs": [

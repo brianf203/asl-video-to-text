@@ -9,7 +9,8 @@ import cv2
 from kpe_mediapipe import video_holistic
 from crop_hands import HandExtractor
 from crop_face import FaceExtractor
-from dinov2_features import extract_embeddings_from_frames, preload_embedder
+from dinov2_features import (extract_embeddings_from_frames, preload_embedder,
+                             HANDS_DTYPE, FACE_DTYPE)
 from body_features import process_pose_landmarks
 # from shubert import SignHubertModel, SignHubertConfig
 from inference import test, preload_model
@@ -29,8 +30,8 @@ class SHuBERTProcessor:
         Gradio app — calling this at startup moves that cost off the first
         translation. Safe to call more than once; subsequent calls are no-ops.
         """
-        preload_embedder(self.config['dino_hands_model_path'])
-        preload_embedder(self.config['dino_face_model_path'])
+        preload_embedder(self.config['dino_hands_model_path'], dtype=HANDS_DTYPE)
+        preload_embedder(self.config['dino_face_model_path'], dtype=FACE_DTYPE)
         preload_model(
             self.config['slt_model_checkpoint'],
             self.config['slt_tokenizer_checkpoint'],
@@ -91,8 +92,8 @@ class SHuBERTProcessor:
         timings['hand_crop'] = time.time() - stage_start
         stage_start = time.time()
 
-        left_hand_embeddings = extract_embeddings_from_frames(left_hand_frames, self.config['dino_hands_model_path'])
-        right_hand_embeddings = extract_embeddings_from_frames(right_hand_frames, self.config['dino_hands_model_path'])
+        left_hand_embeddings = extract_embeddings_from_frames(left_hand_frames, self.config['dino_hands_model_path'], dtype=HANDS_DTYPE)
+        right_hand_embeddings = extract_embeddings_from_frames(right_hand_frames, self.config['dino_hands_model_path'], dtype=HANDS_DTYPE)
         del left_hand_frames, right_hand_frames
         timings['dinov2_hands'] = time.time() - stage_start
         stage_start = time.time()
@@ -102,7 +103,7 @@ class SHuBERTProcessor:
         timings['face_crop'] = time.time() - stage_start
         stage_start = time.time()
 
-        face_embeddings = extract_embeddings_from_frames(face_frames, self.config['dino_face_model_path'])
+        face_embeddings = extract_embeddings_from_frames(face_frames, self.config['dino_face_model_path'], dtype=FACE_DTYPE)
         del face_frames, signer_video
         timings['dinov2_face'] = time.time() - stage_start
         stage_start = time.time()

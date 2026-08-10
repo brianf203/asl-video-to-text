@@ -25,19 +25,30 @@ class DINOEmbedder:
     A class for extracting DINOv2 embeddings from video frames or images.
     """
     
-    def __init__(self, dino_model_path: str, batch_size: int = 128, device: Optional[str] = None):
+    def __init__(self, dino_model_path: str, batch_size: int = 128, device: Optional[str] = None,
+                 dtype: Optional[torch.dtype] = None):
         """
         Initialize the DINOEmbedder.
-        
+
         Args:
             dino_model_path: Path to the fine-tuned DINOv2 model
             batch_size: Batch size for processing frames
             device: Device to use ('cuda' or 'cpu'). Auto-detected if None
+            dtype: Compute dtype. Defaults to DEFAULT_DTYPE (fp16 on CUDA). Forced to
+                fp32 on CPU, where half precision has no fast kernels.
         """
         self.dino_model_path = dino_model_path
         self.batch_size = batch_size
         self.device = device if device else torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        
+
+        # fp16 is a CUDA-only win here: the Orin has half-precision tensor cores, while
+        # on CPU half falls back to slow emulated kernels. Unlike ByT5 (which overflows
+        # in fp16 and needs bf16), a ViT encoder is numerically well behaved in fp16.
+        dtype = DEFAULT_DTYPE if dtype is None else dtype
+        if "cuda" not in str(self.device):
+            dtype = torch.float32
+        self.dtype = dtype
+
         # Initialize model
         self.model = self._load_dino_model()
         self.model.eval()
@@ -49,7 +60,7 @@ class DINOEmbedder:
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
         
-        print(f"DINOEmbedder initialized on device: {self.device}")
+        print(f"DINOEmbedder initialized on device: {self.device} dtype: {self.dtype}")
     
     def _load_dino_model(self) -> nn.Module:
         """Load the fine-tuned DINOv2 model."""
@@ -76,7 +87,7 @@ class DINOEmbedder:
         model.load_state_dict(new_state_dict, strict=True)
         
         # Move model to device
-        model.to(self.device)
+        model.to(device=self.device, dtype=self.dtype)
         return model
     
     def _preprocess_frame(self, frame: np.ndarray) -> torch.Tensor:
@@ -93,7 +104,7 @@ class DINOEmbedder:
     def _preprocess_frames_batch(self, frames: List[np.ndarray]) -> torch.Tensor:
         """Preprocess a batch of frames."""
         batch_tensors = torch.stack([self._preprocess_frame(frame) for frame in frames])
-        return batch_tensors.to(self.device)
+        return batch_tensors.to(device=self.device, dtype=self.dtype)
     
     def extract_embeddings_from_frames(self, frames: List[np.ndarray]) -> np.ndarray:
         """
@@ -116,7 +127,9 @@ class DINOEmbedder:
             
             # Extract embeddings
             with torch.no_grad():
-                batch_embeddings = self.model(batch_tensors).cpu().numpy()
+                # Cast back to fp32 so callers keep receiving float32 arrays regardless
+                # of the compute dtype -- downstream (SHuBERT/ByT5) sets its own dtype.
+                batch_embeddings = self.model(batch_tensors).float().cpu().numpy()
             
             all_embeddings.append(batch_embeddings)
         
@@ -165,7 +178,9 @@ class DINOEmbedder:
             
             # Extract embeddings
             with torch.no_grad():
-                batch_embeddings = self.model(batch_tensors).cpu().numpy()
+                # Cast back to fp32 so callers keep receiving float32 arrays regardless
+                # of the compute dtype -- downstream (SHuBERT/ByT5) sets its own dtype.
+                batch_embeddings = self.model(batch_tensors).float().cpu().numpy()
             
             all_embeddings.append(batch_embeddings)
         
@@ -211,12 +226,12 @@ class DINOEmbedder:
         if isinstance(image, np.ndarray):
             image = Image.fromarray(image)
         
-        tensor = self.transform(image).unsqueeze(0).to(self.device)
-        
+        tensor = self.transform(image).unsqueeze(0).to(device=self.device, dtype=self.dtype)
+
         # Extract embedding
         with torch.no_grad():
-            embedding = self.model(tensor).cpu().numpy()
-        
+            embedding = self.model(tensor).float().cpu().numpy()
+
         return embedding
 
 
@@ -228,30 +243,54 @@ class DINOEmbedder:
 # Override with DINOV2_BATCH_SIZE=<n> when tuning against memory pressure.
 DEFAULT_BATCH_SIZE = int(os.environ.get("DINOV2_BATCH_SIZE", "32"))
 
+# DINOv2 was the single largest stage in the pipeline (~41% of clip time) and was
+# running in fp32 on a GPU with half-precision tensor cores. Override with
+# DINOV2_DTYPE=float32 to A/B. Ignored on CPU (see DINOEmbedder.__init__).
+DEFAULT_DTYPE = getattr(torch, os.environ.get("DINOV2_DTYPE", "float16"))
+
+# The hand and face streams are separate embedders, so their precision can differ.
+# Measured on 50 OpenASL clips: fp16 everywhere is 1.28x but costs ~1 BLEU, and the
+# damage showed up as a dropped fingerspelled name -- i.e. hand detail. These let us
+# keep hands at full precision while the face stream (coarser: expression and mouth
+# shape, not fingertip position) runs fp16. Both fall back to DINOV2_DTYPE.
+HANDS_DTYPE = getattr(torch, os.environ.get("DINOV2_HANDS_DTYPE",
+                                            os.environ.get("DINOV2_DTYPE", "float16")))
+FACE_DTYPE = getattr(torch, os.environ.get("DINOV2_FACE_DTYPE",
+                                           os.environ.get("DINOV2_DTYPE", "float16")))
+
 # Process-wide cache so repeated calls with the same model path/batch_size/device
 # reuse the already-loaded model instead of reloading weights from disk each time.
 _embedder_cache = {}
 
 
 def _get_cached_embedder(dino_model_path: str, batch_size: int = DEFAULT_BATCH_SIZE,
-                          device: Optional[str] = None) -> "DINOEmbedder":
-    key = (dino_model_path, batch_size, str(device) if device else None)
+                          device: Optional[str] = None,
+                          dtype: Optional[torch.dtype] = None) -> "DINOEmbedder":
+    # dtype is part of the key so an A/B within one process gets two distinct models
+    # rather than silently reusing the first one's precision.
+    key = (dino_model_path, batch_size, str(device) if device else None,
+           str(dtype) if dtype else None)
     embedder = _embedder_cache.get(key)
     if embedder is None:
-        embedder = DINOEmbedder(dino_model_path, batch_size, device)
+        embedder = DINOEmbedder(dino_model_path, batch_size, device, dtype)
         _embedder_cache[key] = embedder
     return embedder
 
 
-def preload_embedder(dino_model_path: str, batch_size: int = DEFAULT_BATCH_SIZE) -> None:
+def preload_embedder(dino_model_path: str, batch_size: int = DEFAULT_BATCH_SIZE,
+                     dtype: Optional[torch.dtype] = None) -> None:
     """Load and cache an embedder ahead of first use, so the first clip does not
-    pay the model-load cost. Useful for long-running processes (live capture)."""
-    _get_cached_embedder(dino_model_path, batch_size)
+    pay the model-load cost. Useful for long-running processes (live capture).
+
+    Pass the same dtype the caller will use at inference time, or warmup populates a
+    cache entry under a different key and the first clip pays the load anyway."""
+    _get_cached_embedder(dino_model_path, batch_size, dtype=dtype)
 
 
 # Convenience functions for backward compatibility
 def extract_embeddings_from_frames(frames: List[np.ndarray], dino_model_path: str,
-                                  batch_size: int = DEFAULT_BATCH_SIZE) -> np.ndarray:
+                                  batch_size: int = DEFAULT_BATCH_SIZE,
+                                  dtype: Optional[torch.dtype] = None) -> np.ndarray:
     """
     Convenience function to extract embeddings from frames.
 
@@ -259,11 +298,13 @@ def extract_embeddings_from_frames(frames: List[np.ndarray], dino_model_path: st
         frames: List of frames as numpy arrays
         dino_model_path: Path to the fine-tuned DINOv2 model
         batch_size: Batch size for processing
+        dtype: Compute dtype; defaults to DEFAULT_DTYPE. Callers pass HANDS_DTYPE /
+            FACE_DTYPE to set the two streams independently.
 
     Returns:
         Numpy array of embeddings
     """
-    embedder = _get_cached_embedder(dino_model_path, batch_size)
+    embedder = _get_cached_embedder(dino_model_path, batch_size, dtype=dtype)
     return embedder.extract_embeddings_from_frames(frames)
 
 
