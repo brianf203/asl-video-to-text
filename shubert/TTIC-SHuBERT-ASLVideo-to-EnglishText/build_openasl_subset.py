@@ -32,9 +32,17 @@ TSV_URL = ("https://raw.githubusercontent.com/chevalierNoir/OpenASL/main/"
            "data/openasl-v1.0.tsv")
 
 YTDLP = os.path.join(HERE, "shubert_venv", "bin", "yt-dlp")
-# 480p matches the bundled dailymoth_examples (574x480) and our own camera clips, so
-# resolution is not a confounder when comparing the two eval sets.
+# Cap at 480p so resolution is not a confounder against the other eval sets. In practice
+# YouTube serves these as format 18 (640x360) and every clip built so far is 640x360, so
+# treat 360p as the actual, consistent resolution of this set.
 FORMAT = "bv*[height<=480]+ba/b[height<=480]/worst"
+
+# YouTube 403s the media fetch for the default player client (android_vr returns URLs that
+# are then refused; web/tv report a spurious "DRM protected"; ios/mweb offer no matching
+# format). android still serves format 18 fine. Checked 2026-08-10 on the current yt-dlp
+# release (2026.07.04) — this is a YouTube-side change, not a stale yt-dlp. If downloads
+# start 403ing again, re-test the clients before assuming an upgrade is the fix.
+EXTRACTOR_ARGS = "youtube:player_client=android"
 
 
 def hhmmss_to_seconds(t):
@@ -85,6 +93,7 @@ def main():
             print(f"downloading {yid} ({len(items)} clips) ...", flush=True)
             rc = subprocess.run(
                 [YTDLP, "-f", FORMAT, "--merge-output-format", "mp4",
+                 "--extractor-args", EXTRACTOR_ARGS,
                  "-o", src, "--no-playlist", "--quiet", "--no-warnings",
                  f"https://www.youtube.com/watch?v={yid}"],
             ).returncode
