@@ -7,11 +7,16 @@ specifically, or general translation quality?
 
     python3 run_eval.py                     # score current pipeline
     python3 run_eval.py --tag baseline      # label the results file
+    python3 run_eval.py --fresh             # discard a partial run, start over
     python3 run_eval.py --compare a.json b.json
 
 Reports corpus BLEU and chrF overall and per category, plus a proper-noun recall check
 that is the actual metric of interest for the fingerspelling items -- BLEU barely moves
 when one name in a sentence is wrong, but that one name is the whole failure.
+
+A full 50-clip run takes over half an hour, so each clip's hypothesis is appended to a
+partial file the moment it is produced and re-running resumes from there. Losing the
+machine at clip 49 used to cost the entire run.
 """
 import argparse
 import json
@@ -208,6 +213,66 @@ def load_manifest():
     return items
 
 
+# --- crash-resumable partial results ----------------------------------------------
+# Clips are appended here as they finish so an interrupted run can pick up where it
+# stopped. The file is deleted once the final results JSON is written, so its presence
+# means "a run died partway".
+
+
+def partial_path(tag):
+    # Keyed by tag so two configurations run under different tags cannot resume into
+    # each other. Dotfile to keep it out of the results listing.
+    return os.path.join(EVAL_DIR, f".partial_{tag or 'default'}.jsonl")
+
+
+def append_partial(fh, record):
+    """Append one JSONL record and force it to disk.
+
+    fsync, not just flush: the failure being guarded against is the machine losing
+    power mid-run, and a flushed-but-unsynced line is exactly what a power cut eats.
+    """
+    fh.write(json.dumps(record) + "\n")
+    fh.flush()
+    os.fsync(fh.fileno())
+
+
+def load_partial(path, run_cfg):
+    """Read completed clips from an interrupted run. Returns {clip_id: record}.
+
+    Refuses to resume across a settings change. Silently mixing, say, fp16 and fp32
+    clips into one BLEU score would produce a number that describes no configuration
+    at all -- worse than losing the run, because it looks valid.
+    """
+    done = {}
+    if not os.path.exists(path):
+        return done
+    with open(path) as f:
+        for lineno, line in enumerate(f, 1):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except json.JSONDecodeError:
+                # A power cut can truncate the line being written. By construction it
+                # is the last one, so drop it and recompute that clip.
+                print(f"  {os.path.basename(path)}:{lineno} truncated, ignoring")
+                continue
+            if "_config" in rec:
+                differs = {k: (v, run_cfg.get(k)) for k, v in rec["_config"].items()
+                           if run_cfg.get(k) != v}
+                if differs:
+                    raise SystemExit(
+                        f"{path}\nis from a run with different settings, so resuming "
+                        f"it would mix configurations in one score:\n"
+                        + "".join(f"  {k}: saved {s!r}, now {n!r}\n"
+                                  for k, (s, n) in differs.items())
+                        + "pass --fresh to discard it, or use a different --tag.")
+                continue
+            done[rec["id"]] = rec
+    return done
+
+
 def score(items, hyps):
     refs = [it["reference"] for it in items]
     n_refs = [normalize_numbers(r) for r in refs]
@@ -302,6 +367,8 @@ def main():
                     help="score the raw clips instead of trimming to the moving span")
     ap.add_argument("--rescore", metavar="FILE",
                     help="recompute metrics from a saved results file (no inference)")
+    ap.add_argument("--fresh", action="store_true",
+                    help="discard any partial run for this tag and start from clip 1")
     args = ap.parse_args()
 
     if args.rescore:
@@ -339,42 +406,79 @@ def main():
     # Imported here, not at module scope, so --compare/--rescore stay torch-free.
     import dinov2_features
     from features import SHuBERTProcessor
+
+    # Everything that changes the output and therefore must not vary across a resume.
+    run_cfg = {
+        "frame_stride": os.environ.get("FRAME_STRIDE", "2"),
+        "use_onnx_perception": os.environ.get("USE_ONNX_PERCEPTION", "0"),
+        "dinov2_hands_dtype": str(dinov2_features.HANDS_DTYPE),
+        "dinov2_face_dtype": str(dinov2_features.FACE_DTYPE),
+        "byt5_dtype": os.environ.get("BYT5_DTYPE", "bfloat16"),
+        "byt5_device": os.environ.get("BYT5_DEVICE", "cpu"),
+        "no_trim": args.no_trim,
+    }
+
+    part_path = partial_path(args.tag)
+    if args.fresh and os.path.exists(part_path):
+        os.remove(part_path)
+        print(f"--fresh: discarded {os.path.basename(part_path)}")
+    is_new = not os.path.exists(part_path)
+    done = load_partial(part_path, run_cfg)
+
     os.makedirs(config['temp_dir'], exist_ok=True)
-    processor = SHuBERTProcessor(config)
-    t0 = time.time()
-    processor.warmup()
-    print(f"warmup {time.time() - t0:.1f}s")
+    remaining = [it for it in items if it["id"] not in done]
+    if done:
+        print(f"resuming from {os.path.basename(part_path)}: "
+              f"{len(done)} clips done, {len(remaining)} to go")
 
-    hyps, times = [], []
-    for it in items:
-        path = os.path.join(EVAL_DIR, it["file"])
-        trimmed = None
-        if not args.no_trim:
-            trimmed = os.path.join(config['temp_dir'], f"eval_{it['id']}.mp4")
-            kept, total = trim_to_motion(path, trimmed)
-            if kept and kept < total:
-                print(f"[{it['id']}] trimmed {total} -> {kept} frames")
-                path = trimmed
-            else:
-                trimmed = None
-
+    # Skipping warmup when there is nothing left means a resume that only needs the
+    # scoring pass never loads the models at all.
+    if remaining:
+        processor = SHuBERTProcessor(config)
         t0 = time.time()
-        try:
-            hyp = processor.process_video(path)
-        except Exception as e:
-            hyp = ""
-            print(f"[{it['id']}] FAILED {type(e).__name__}: {e}")
-        dt = time.time() - t0
-        if trimmed:
+        processor.warmup()
+        print(f"warmup {time.time() - t0:.1f}s")
+
+    with open(part_path, "a") as pf:
+        if is_new:
+            append_partial(pf, {"_config": run_cfg})
+        for it in remaining:
+            path = os.path.join(EVAL_DIR, it["file"])
+            trimmed = None
+            if not args.no_trim:
+                trimmed = os.path.join(config['temp_dir'], f"eval_{it['id']}.mp4")
+                kept, total = trim_to_motion(path, trimmed)
+                if kept and kept < total:
+                    print(f"[{it['id']}] trimmed {total} -> {kept} frames")
+                    path = trimmed
+                else:
+                    trimmed = None
+
+            t0 = time.time()
             try:
-                os.remove(trimmed)
-            except OSError:
-                pass
-        hyps.append(hyp)
-        times.append(dt)
-        print(f"[{it['id']}] {it['category']:12s} {dt:5.1f}s")
-        print(f"      ref: {it['reference']}")
-        print(f"      hyp: {hyp}")
+                hyp = processor.process_video(path)
+            except Exception as e:
+                hyp = ""
+                print(f"[{it['id']}] FAILED {type(e).__name__}: {e}")
+            dt = time.time() - t0
+            if trimmed:
+                try:
+                    os.remove(trimmed)
+                except OSError:
+                    pass
+            rec = {"id": it["id"], "category": it["category"],
+                   "reference": it["reference"], "hypothesis": hyp,
+                   "seconds": round(dt, 1)}
+            append_partial(pf, rec)
+            done[it["id"]] = rec
+            print(f"[{it['id']}] {it['category']:12s} {dt:5.1f}s")
+            print(f"      ref: {it['reference']}")
+            print(f"      hyp: {hyp}")
+
+    # Rebuilt in manifest order, not completion order, so a resumed run scores
+    # identically to one that ran straight through.
+    hyps = [done[it["id"]]["hypothesis"] for it in items]
+    times = [done[it["id"]]["seconds"] for it in items]
 
     res = score(items, hyps)
     report(res, args.tag)
@@ -386,12 +490,7 @@ def main():
         json.dump({
             "tag": args.tag,
             "timestamp": stamp,
-            "frame_stride": os.environ.get("FRAME_STRIDE", "2"),
-            "use_onnx_perception": os.environ.get("USE_ONNX_PERCEPTION", "0"),
-            "dinov2_hands_dtype": str(dinov2_features.HANDS_DTYPE),
-            "dinov2_face_dtype": str(dinov2_features.FACE_DTYPE),
-            "byt5_dtype": os.environ.get("BYT5_DTYPE", "bfloat16"),
-            "byt5_device": os.environ.get("BYT5_DEVICE", "cpu"),
+            **run_cfg,
             "mean_seconds_per_clip": sum(times) / len(times) if times else 0,
             "results": res,
             "outputs": [
@@ -401,6 +500,12 @@ def main():
             ],
         }, f, indent=2)
     print(f"\nwrote {out_path}")
+
+    # Only now, with the real results safely written.
+    try:
+        os.remove(part_path)
+    except OSError:
+        pass
 
 
 if __name__ == "__main__":
