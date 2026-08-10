@@ -74,16 +74,39 @@ class SHuBERTProcessor:
         cap.release()
         signer_video = np.array(frames)
         print(f"[features] stride {stride}: {len(frames)}/{read_count} frames kept")
-        timings['video_read'] = time.time() - stage_start
+        video_read_seconds = time.time() - stage_start
+
+        return self.process_frames(signer_video, landmarks=None,
+                                   video_read_seconds=video_read_seconds)
+
+    def process_frames(self, signer_video, landmarks=None, video_read_seconds=0.0,
+                       mediapipe_seconds=None):
+        """Everything after the frames exist: landmarks, crops, DINOv2, pose, ByT5.
+
+        Split out of process_video() so the live worker can hand over frames whose
+        landmarks were already computed *during* capture (see streaming_perception.py).
+        Pass `landmarks` to skip the MediaPipe stage entirely; `mediapipe_seconds` is
+        then only used to report what that overlapped work cost.
+        """
+        timings = {'video_read': video_read_seconds}
+        if not isinstance(signer_video, np.ndarray):
+            signer_video = np.array(signer_video)
         stage_start = time.time()
 
-        # Step 2: Extract pose using kpe_mediapipe
-        landmarks = video_holistic(
-            video_input=signer_video,
-            face_model_path=self.config['mediapipe_face_model_path'],
-            hand_model_path=self.config['mediapipe_hands_model_path'],
-        )
-        timings['mediapipe_landmarks'] = time.time() - stage_start
+        # Step 2: Extract pose using kpe_mediapipe (unless the caller already did it).
+        if landmarks is None:
+            landmarks = video_holistic(
+                video_input=signer_video,
+                face_model_path=self.config['mediapipe_face_model_path'],
+                hand_model_path=self.config['mediapipe_hands_model_path'],
+            )
+            timings['mediapipe_landmarks'] = time.time() - stage_start
+        else:
+            # Already done, overlapped with capture. Report it as ~0 on the critical
+            # path and show the absorbed cost separately, so the breakdown stays honest.
+            timings['mediapipe_landmarks'] = time.time() - stage_start
+            if mediapipe_seconds is not None:
+                timings['mediapipe_overlapped'] = mediapipe_seconds
         stage_start = time.time()
 
         # Step 3: Extract stream features
@@ -125,8 +148,13 @@ class SHuBERTProcessor:
 
         print("\n--- Stage timing breakdown ---")
         for stage_name, elapsed in timings.items():
-            print(f"  {stage_name:20s}: {elapsed:6.1f}s")
-        print(f"  {'total':20s}: {sum(timings.values()):6.1f}s")
+            note = "  (overlapped with capture, not on the critical path)" \
+                if stage_name == 'mediapipe_overlapped' else ""
+            print(f"  {stage_name:20s}: {elapsed:6.1f}s{note}")
+        # mediapipe_overlapped is reported but excluded: it was already paid during
+        # recording, so counting it here would misstate the post-cut latency.
+        critical = sum(v for k, v in timings.items() if k != 'mediapipe_overlapped')
+        print(f"  {'total':20s}: {critical:6.1f}s")
 
         return output_text
         

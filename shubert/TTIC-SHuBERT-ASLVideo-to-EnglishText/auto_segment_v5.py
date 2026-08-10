@@ -21,6 +21,14 @@ import threading
 import queue
 import time
 from features import SHuBERTProcessor
+from streaming_perception import StreamingPerception, stride_from_env
+
+# Run MediaPipe on each frame as it is captured rather than after the cut. Perception is
+# ~4.5x slower than realtime so it never finishes early, but it absorbs the whole recording
+# duration -- ~14s off a ~55s clip. Landmarks are identical, not approximated: a fresh
+# detector sees the same frames in the same order either way. Set STREAM_PERCEPTION=0 to
+# fall back to writing an mp4 and processing it after the cut.
+STREAM_PERCEPTION = os.environ.get("STREAM_PERCEPTION", "1") not in ("0", "false", "False")
 
 MODELS_BASE = "/home/sllu/.cache/huggingface/hub/models--ShesterG--SHuBERT/snapshots/578a0233e770c8ce4dc75d859b91fdea7c34f5aa/models"
 
@@ -78,28 +86,54 @@ def translation_worker(processor):
         models_ready.set()
 
     while True:
-        clip_path = clip_queue.get()
-        if clip_path is None:
+        item = clip_queue.get()
+        if item is None:
             break
+        # Streamed clips arrive as a live StreamingPerception whose backlog still has to
+        # be drained; legacy clips arrive as a path to an mp4 needing full processing.
+        streamed = isinstance(item, tuple)
+        label = item[0] if streamed else item
+        stream = None
         try:
-            print(f"[worker] Translating {clip_path} ...")
+            print(f"[worker] Translating {label} ...")
             t0 = time.time()
-            result = processor.process_video(clip_path)
+            if streamed:
+                _, stream, keep = item
+                # Drain here rather than on the camera thread: perception runs ~4.5x
+                # slower than realtime, so at the cut there is still a backlog worth
+                # seconds, and blocking the capture loop on it would freeze the preview
+                # and drop frames of whatever the signer does next.
+                drain_start = time.time()
+                frames, landmarks = stream.finish(keep)
+                drain = time.time() - drain_start
+                print(f"[worker] drained perception backlog in {drain:.1f}s "
+                      f"({stream.processed_frames} frames processed, "
+                      f"{stream.busy_seconds:.1f}s inside MediaPipe)")
+                result = processor.process_frames(
+                    frames, landmarks=landmarks,
+                    mediapipe_seconds=stream.busy_seconds)
+            else:
+                result = processor.process_video(item)
             elapsed = time.time() - t0
             with state_lock:
                 latest_translation[0] = result
             print(f"[worker] ({elapsed:.1f}s) {result}")
         except Exception as e:
             # Report rather than swallow — v2 discarded stderr and made failures invisible.
-            print(f"[worker] Error translating {clip_path}: {type(e).__name__}: {e}")
+            print(f"[worker] Error translating {label}: {type(e).__name__}: {e}")
             with state_lock:
                 latest_translation[0] = f"[translation failed: {type(e).__name__}]"
         finally:
+            # MediaPipe native objects must be released per clip or they exhaust the
+            # Jetson's shared pool after a few clips.
+            if stream is not None:
+                stream.close()
             clip_queue.task_done()
-            try:
-                os.remove(clip_path)
-            except OSError:
-                pass
+            if not streamed:
+                try:
+                    os.remove(item)
+                except OSError:
+                    pass
 
 
 def write_clip(frames, path, fps=30.0):
@@ -131,6 +165,12 @@ def main():
     record_start_time = None
     last_motion_time = None
     prev_gray = None
+    stream = None          # StreamingPerception for the clip being recorded
+    raw_frame_index = 0    # raw frames since RECORDING began, for applying the stride
+    stride = stride_from_env()
+    if STREAM_PERCEPTION:
+        print(f"Streaming perception ON (stride {stride}) — landmarks are extracted "
+              f"during recording, not after the cut.")
 
     print("Auto-segmentation active. Sign naturally, pause briefly between sentences.")
     print("Press 'q' to quit.")
@@ -167,22 +207,49 @@ def main():
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
             if motion_score > MOTION_START_THRESHOLD:
                 state = "RECORDING"
-                recorded_frames = [frame]
-                frame_times = [now]
                 record_start_time = now
                 last_motion_time = now
+                raw_frame_index = 0
+                recorded_frames = []
+                frame_times = []
+                if STREAM_PERCEPTION:
+                    # One detector per clip — never reused, see streaming_perception.py.
+                    stream = StreamingPerception(
+                        config['mediapipe_face_model_path'],
+                        config['mediapipe_hands_model_path'],
+                    )
+                    stream.add_frame(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+                    frame_times.append(now)
+                    raw_frame_index = 1
+                else:
+                    recorded_frames = [frame]
+                    frame_times = [now]
                 print(">>> RECORDING STARTED <<<")
 
         elif state == "RECORDING":
-            recorded_frames.append(frame)
-            frame_times.append(now)
+            if STREAM_PERCEPTION:
+                # Apply the stride here: features.py only strides at video read, which
+                # streamed frames never go through. Without this the model would get
+                # 30fps instead of the ~15fps SHuBERT expects.
+                if raw_frame_index % stride == 0:
+                    stream.add_frame(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+                    frame_times.append(now)
+                raw_frame_index += 1
+            else:
+                recorded_frames.append(frame)
+                frame_times.append(now)
             if motion_score > MOTION_STOP_THRESHOLD:
                 last_motion_time = now
 
             still_duration = now - last_motion_time
             elapsed = now - record_start_time
 
-            cv2.putText(display_frame, f"RECORDING - {len(recorded_frames)} frames, {elapsed:.1f}s",
+            if STREAM_PERCEPTION:
+                rec_label = (f"RECORDING - {len(frame_times)} frames, {elapsed:.1f}s "
+                             f"(perception {stream.processed_frames}/{stream.queued_frames})")
+            else:
+                rec_label = f"RECORDING - {len(recorded_frames)} frames, {elapsed:.1f}s"
+            cv2.putText(display_frame, rec_label,
                         (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
             cv2.putText(display_frame, status_line, (10, 60),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
@@ -198,14 +265,27 @@ def main():
 
                 if signing_duration >= MIN_CLIP_DURATION_SECONDS:
                     clip_counter[0] += 1
-                    clip_path = os.path.join(config['temp_dir'], f"clip_{clip_counter[0]}.mp4")
-                    write_clip(recorded_frames[:keep], clip_path)
-                    clip_queue.put(clip_path)
-                    print(f"Queued {clip_path} ({keep} frames, {signing_duration:.1f}s signing; "
-                          f"trimmed {len(recorded_frames) - keep} still frames)")
+                    if STREAM_PERCEPTION:
+                        label = f"clip_{clip_counter[0]} (streamed)"
+                        # Hand the whole stream over; the worker drains and closes it.
+                        clip_queue.put((label, stream, keep))
+                        print(f"Queued {label} ({keep} frames, {signing_duration:.1f}s "
+                              f"signing; trimmed {len(frame_times) - keep} still frames; "
+                              f"{stream.processed_frames} already through MediaPipe)")
+                        stream = None
+                    else:
+                        clip_path = os.path.join(config['temp_dir'],
+                                                 f"clip_{clip_counter[0]}.mp4")
+                        write_clip(recorded_frames[:keep], clip_path)
+                        clip_queue.put(clip_path)
+                        print(f"Queued {clip_path} ({keep} frames, {signing_duration:.1f}s "
+                              f"signing; trimmed {len(recorded_frames) - keep} still frames)")
                 else:
                     print(f"Too short, ignored ({signing_duration:.1f}s signing, "
-                          f"{len(recorded_frames)} frames).")
+                          f"{len(frame_times)} frames).")
+                    if stream is not None:
+                        stream.close()
+                        stream = None
 
                 state = "IDLE"
                 recorded_frames = []
@@ -219,6 +299,10 @@ def main():
 
     cap.release()
     cv2.destroyAllWindows()
+
+    # Quitting mid-recording leaves a detector holding MediaPipe native resources.
+    if stream is not None:
+        stream.close()
 
     clip_queue.put(None)
     worker.join(timeout=5)
