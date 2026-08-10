@@ -732,7 +732,9 @@ def generate_text_from_features(
     tokenizer_checkpoint: str,
     output_dir: str,
     generation_max_length: int = 2048,
-    generation_num_beams: int = 1,
+    # None -> read BYT5_NUM_BEAMS at call time (a literal default would be evaluated once at
+    # import, so setting the env var later would silently do nothing). Greedy unless asked.
+    generation_num_beams: int = None,
     # Off by design. Greedy decoding here produces occasional looping tails ("the
     # pleasure of the pleasure"), and no_repeat_ngram_size looks like the fix, but
     # ByT5 is byte-level so its n-grams are CHARACTERS, not word pieces — and at
@@ -749,6 +751,13 @@ def generate_text_from_features(
     """
     Direct inference function that generates text from sign language features.
     """
+    # Beam search is the real mechanism for the occasional degenerate looping output (see
+    # the no_repeat_ngram_size note above for why the byte-level alternative fails). It was
+    # previously rejected on cost — ByT5 ran 20-25s on CPU, ~44% of a short clip — but that
+    # changed when it moved to the GPU and dropped to ~2-5s, so a beam is now affordable.
+    if generation_num_beams is None:
+        generation_num_beams = max(1, int(os.environ.get("BYT5_NUM_BEAMS", "1")))
+
     # Load model and tokenizer (cached across calls — see _get_cached_model)
     import time as _time
     _t0 = _time.time()
