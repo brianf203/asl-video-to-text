@@ -35,7 +35,8 @@ class StreamingPerception:
     changes the translation). Build one per clip and call close().
     """
 
-    def __init__(self, face_model_path: str, hand_model_path: str):
+    def __init__(self, face_model_path: str, hand_model_path: str, embed_config: dict = None,
+                 chunk_size: int = None):
         self._detector = HolisticDetector(face_model_path, hand_model_path)
         self._queue: "queue.Queue" = queue.Queue()
         self._frames = []          # RGB, stride-applied, in capture order
@@ -45,8 +46,26 @@ class StreamingPerception:
         self._error = None
         self._processed = 0
         self._busy_seconds = 0.0
+
+        # Optional second stage: crop + DINOv2 as landmarks land, pipelined behind
+        # perception. DINOv2 is GPU work and MediaPipe is CPU-bound, so this stage runs
+        # essentially for free in the shadow of the perception backlog. Disabled unless
+        # embed_config is supplied.
+        self._embed_config = embed_config
+        self._chunk_size = chunk_size or int(os.environ.get("DINOV2_BATCH_SIZE", "32"))
+        self._embed_queue: "queue.Queue" = queue.Queue()
+        self._embed_busy_seconds = 0.0
+        self._embedded = 0
+        self._embed_error = None
+        self._left_chunks, self._right_chunks, self._face_chunks = [], [], []
+        self._embed_worker = None
+
         self._worker = threading.Thread(target=self._run, name="perception", daemon=True)
         self._worker.start()
+        if self._embed_config is not None:
+            self._embed_worker = threading.Thread(target=self._embed_run, name="embed",
+                                                  daemon=True)
+            self._embed_worker.start()
 
     # -- producer side (camera thread) ---------------------------------------
 
@@ -87,6 +106,57 @@ class StreamingPerception:
                 self._landmarks[index] = None
             finally:
                 self._processed += 1
+                if self._embed_config is not None:
+                    # Hand off in perception order; the crop extractors carry fallback
+                    # state across frames, so order here is not optional.
+                    self._embed_queue.put((frame, self._landmarks[index]))
+        if self._embed_config is not None:
+            self._embed_queue.put(None)
+
+    def _embed_run(self):
+        """Crop and embed frames in chunks as their landmarks become available."""
+        from crop_hands import HandExtractor
+        from crop_face import FaceExtractor
+        from dinov2_features import extract_embeddings_from_frames, HANDS_DTYPE, FACE_DTYPE
+
+        hand_extractor = HandExtractor()
+        face_extractor = FaceExtractor()
+        pending_frames, pending_landmarks = [], []
+        done = False
+
+        def flush():
+            if not pending_frames:
+                return
+            t0 = time.time()
+            left, right = hand_extractor.extract_hand_frames_chunk(
+                pending_frames, pending_landmarks)
+            face = face_extractor.extract_face_frames_chunk(
+                pending_frames, pending_landmarks)
+            self._left_chunks.append(extract_embeddings_from_frames(
+                left, self._embed_config['dino_hands_model_path'], dtype=HANDS_DTYPE))
+            self._right_chunks.append(extract_embeddings_from_frames(
+                right, self._embed_config['dino_hands_model_path'], dtype=HANDS_DTYPE))
+            self._face_chunks.append(extract_embeddings_from_frames(
+                face, self._embed_config['dino_face_model_path'], dtype=FACE_DTYPE))
+            self._embedded += len(pending_frames)
+            self._embed_busy_seconds += time.time() - t0
+            pending_frames.clear()
+            pending_landmarks.clear()
+
+        try:
+            while not done:
+                item = self._embed_queue.get()
+                if item is None:
+                    done = True
+                else:
+                    pending_frames.append(item[0])
+                    pending_landmarks.append(item[1])
+                if done or len(pending_frames) >= self._chunk_size:
+                    flush()
+        except Exception as e:
+            # Record and stop; finish() reports it rather than returning partial features.
+            print(f"[stream] embedding stage failed: {type(e).__name__}: {e}")
+            self._embed_error = e
 
     # -- finishing -----------------------------------------------------------
 
@@ -99,12 +169,28 @@ class StreamingPerception:
         """
         self._queue.put(None)
         self._worker.join()
+        if self._embed_worker is not None:
+            self._embed_worker.join()
+            if self._embed_error is not None:
+                raise self._embed_error
 
         with self._lock:
             frames = self._frames if keep is None else self._frames[:keep]
         count = len(frames)
         landmarks = {i: self._landmarks.get(i) for i in range(count)}
-        return frames, landmarks
+
+        embeddings = None
+        if self._embed_config is not None:
+            # Chunks are appended in perception order, so concatenating then truncating to
+            # `keep` matches embedding exactly the kept frames: DINOv2 is a per-image
+            # encoder with no cross-frame state, and the trimmed frames are the last ones,
+            # so nothing retained depended on them.
+            embeddings = (
+                np.concatenate(self._left_chunks)[:count],
+                np.concatenate(self._right_chunks)[:count],
+                np.concatenate(self._face_chunks)[:count],
+            )
+        return frames, landmarks, embeddings
 
     def close(self):
         """Release MediaPipe native resources. Safe to call more than once."""
@@ -120,6 +206,15 @@ class StreamingPerception:
     def busy_seconds(self) -> float:
         """Wall time the perception thread actually spent inside MediaPipe."""
         return self._busy_seconds
+
+    @property
+    def embed_busy_seconds(self) -> float:
+        """Wall time the embedding thread spent cropping and running DINOv2."""
+        return self._embed_busy_seconds
+
+    @property
+    def embedded_frames(self) -> int:
+        return self._embedded
 
     def __enter__(self):
         return self

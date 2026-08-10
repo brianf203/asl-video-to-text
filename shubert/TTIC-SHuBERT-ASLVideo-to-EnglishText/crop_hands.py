@@ -34,7 +34,83 @@ class HandExtractor:
         self.output_size = output_size
         self.scale_factor = scale_factor
         self.distance_threshold = distance_threshold
-    
+        self._reset_state()
+
+    def _reset_state(self):
+        """Clear the cross-frame fallback state.
+
+        Cropping is sequential: a frame with no detected hand reuses the previous frame's
+        crop. Holding that on the instance (rather than in locals) lets the streaming path
+        extract crops in chunks as landmarks arrive and still get identical output, since
+        state carries across calls. extract_hand_frames() resets first, so the one-shot
+        path behaves exactly as before.
+        """
+        self._prev_left_frame = None
+        self._prev_right_frame = None
+        self._prev_landmarks = None
+
+    def _blank(self) -> np.ndarray:
+        return np.zeros((*self.output_size, 3), dtype=np.uint8)
+
+    def _process_one(self, frame, frame_landmarks):
+        """Crop one frame's hands, updating fallback state. Returns (left, right)."""
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        if frame_landmarks is None:
+            if self._prev_landmarks is not None:
+                frame_landmarks = self._prev_landmarks
+            else:
+                return self._blank(), self._blank()
+        else:
+            self._prev_landmarks = frame_landmarks
+
+        if frame_landmarks.get('pose_landmarks') is None:
+            left = self._prev_left_frame if self._prev_left_frame is not None else self._blank()
+            right = self._prev_right_frame if self._prev_right_frame is not None else self._blank()
+            return left, right
+
+        left_hand_landmarks, right_hand_landmarks = self.select_hands(
+            frame_landmarks['pose_landmarks'][0],
+            frame_landmarks.get('hand_landmarks'),
+            frame_rgb.shape
+        )
+
+        if left_hand_landmarks is not None:
+            left_box = self.get_bounding_box(left_hand_landmarks, frame_rgb.shape, self.scale_factor)
+            left_box = self.adjust_bounding_box(left_box, frame_rgb.shape)
+            left_frame = self.resize_frame(self.crop_frame(frame_rgb, left_box), self.output_size)
+            self._prev_left_frame = left_frame
+        elif self._prev_left_frame is not None:
+            left_frame = self._prev_left_frame
+        else:
+            left_frame = self._blank()
+
+        if right_hand_landmarks is not None:
+            right_box = self.get_bounding_box(right_hand_landmarks, frame_rgb.shape, self.scale_factor)
+            right_box = self.adjust_bounding_box(right_box, frame_rgb.shape)
+            right_frame = self.resize_frame(self.crop_frame(frame_rgb, right_box), self.output_size)
+            self._prev_right_frame = right_frame
+        elif self._prev_right_frame is not None:
+            right_frame = self._prev_right_frame
+        else:
+            right_frame = self._blank()
+
+        return left_frame, right_frame
+
+    def extract_hand_frames_chunk(self, frames, landmarks_list):
+        """Crop a chunk of consecutive frames, CONTINUING state from the previous call.
+
+        For the streaming path only. Feed chunks in capture order on one instance and the
+        result is identical to one extract_hand_frames() call over the whole clip.
+        """
+        left_hand_frames, right_hand_frames = [], []
+        for frame, frame_landmarks in zip(frames, landmarks_list):
+            left_frame, right_frame = self._process_one(frame, frame_landmarks)
+            left_hand_frames.append(left_frame)
+            right_hand_frames.append(right_frame)
+        return left_hand_frames, right_hand_frames
+
+
     def resize_frame(self, frame: np.ndarray, frame_size: Tuple[int, int]) -> Optional[np.ndarray]:
         """Resize frame to specified size."""
         if frame is not None and frame.size > 0:
@@ -169,80 +245,19 @@ class HandExtractor:
         
         left_hand_frames = []
         right_hand_frames = []
-        
-        prev_left_frame = None
-        prev_right_frame = None
-        prev_landmarks = None
-        
+
+        # One-shot over a whole clip: start from clean state so behaviour is unchanged.
+        self._reset_state()
+
         for i in range(len(video)):
             # frame = video[i].asnumpy()
             frame = video[i]
             if hasattr(video, 'seek'):
                 video.seek(0)
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            
-            # Get landmarks for this frame
-            frame_landmarks = landmarks_data.get(i, None)
-            
-            # Handle missing landmarks
-            if frame_landmarks is None:
-                if prev_landmarks is not None:
-                    frame_landmarks = prev_landmarks
-                else:
-                    # Use blank frames if no landmarks available
-                    left_hand_frames.append(np.zeros((*self.output_size, 3), dtype=np.uint8))
-                    right_hand_frames.append(np.zeros((*self.output_size, 3), dtype=np.uint8))
-                    continue
-            else:
-                prev_landmarks = frame_landmarks
-            
-            # Check if pose landmarks exist
-            if frame_landmarks.get('pose_landmarks') is None:
-                # Use previous frames or blank frames
-                if prev_left_frame is not None:
-                    left_hand_frames.append(prev_left_frame)
-                else:
-                    left_hand_frames.append(np.zeros((*self.output_size, 3), dtype=np.uint8))
-                
-                if prev_right_frame is not None:
-                    right_hand_frames.append(prev_right_frame)
-                else:
-                    right_hand_frames.append(np.zeros((*self.output_size, 3), dtype=np.uint8))
-                continue
-            
-            # Select hands based on pose landmarks
-            left_hand_landmarks, right_hand_landmarks = self.select_hands(
-                frame_landmarks['pose_landmarks'][0], 
-                frame_landmarks.get('hand_landmarks'),
-                frame_rgb.shape
-            )
-            
-            # Process left hand
-            if left_hand_landmarks is not None:
-                left_box = self.get_bounding_box(left_hand_landmarks, frame_rgb.shape, self.scale_factor)
-                left_box = self.adjust_bounding_box(left_box, frame_rgb.shape)
-                left_frame = self.crop_frame(frame_rgb, left_box)
-                left_frame = self.resize_frame(left_frame, self.output_size)
-                left_hand_frames.append(left_frame)
-                prev_left_frame = left_frame
-            elif prev_left_frame is not None:
-                left_hand_frames.append(prev_left_frame)
-            else:
-                left_hand_frames.append(np.zeros((*self.output_size, 3), dtype=np.uint8))
-            
-            # Process right hand
-            if right_hand_landmarks is not None:
-                right_box = self.get_bounding_box(right_hand_landmarks, frame_rgb.shape, self.scale_factor)
-                right_box = self.adjust_bounding_box(right_box, frame_rgb.shape)
-                right_frame = self.crop_frame(frame_rgb, right_box)
-                right_frame = self.resize_frame(right_frame, self.output_size)
-                right_hand_frames.append(right_frame)
-                prev_right_frame = right_frame
-            elif prev_right_frame is not None:
-                right_hand_frames.append(prev_right_frame)
-            else:
-                right_hand_frames.append(np.zeros((*self.output_size, 3), dtype=np.uint8))
-        
+            left_frame, right_frame = self._process_one(frame, landmarks_data.get(i, None))
+            left_hand_frames.append(left_frame)
+            right_hand_frames.append(right_frame)
+
         return left_hand_frames, right_hand_frames
 
     def extract_and_save_hand_videos(self, video_input, landmarks_data: Dict[int, Any], 

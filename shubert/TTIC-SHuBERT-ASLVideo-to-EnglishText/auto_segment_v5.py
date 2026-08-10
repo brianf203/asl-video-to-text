@@ -30,6 +30,15 @@ from streaming_perception import StreamingPerception, stride_from_env
 # fall back to writing an mp4 and processing it after the cut.
 STREAM_PERCEPTION = os.environ.get("STREAM_PERCEPTION", "1") not in ("0", "false", "False")
 
+# Second stage: also crop and run DINOv2 as landmarks land, pipelined behind perception.
+# DINOv2 is GPU work while MediaPipe is CPU-bound, so it hides almost entirely in the
+# shadow of the perception backlog -- it drops to 0.0s on the critical path. Measured over
+# 5 clips against the non-streaming path, decoded text identical on 5/5:
+#   003 23.6->11.0s (2.14x), 004 49.4->22.2s (2.22x), 005 45.0->19.8s (2.27x),
+#   006 51.1->22.8s (2.24x), 001 39.3->18.7s (2.10x).
+# Set STREAM_DINOV2=0 to disable.
+STREAM_DINOV2 = os.environ.get("STREAM_DINOV2", "1") not in ("0", "false", "False")
+
 MODELS_BASE = "/home/sllu/.cache/huggingface/hub/models--ShesterG--SHuBERT/snapshots/578a0233e770c8ce4dc75d859b91fdea7c34f5aa/models"
 
 config = {
@@ -104,14 +113,16 @@ def translation_worker(processor):
                 # seconds, and blocking the capture loop on it would freeze the preview
                 # and drop frames of whatever the signer does next.
                 drain_start = time.time()
-                frames, landmarks = stream.finish(keep)
+                frames, landmarks, embeddings = stream.finish(keep)
                 drain = time.time() - drain_start
                 print(f"[worker] drained perception backlog in {drain:.1f}s "
                       f"({stream.processed_frames} frames processed, "
                       f"{stream.busy_seconds:.1f}s inside MediaPipe)")
                 result = processor.process_frames(
                     frames, landmarks=landmarks,
-                    mediapipe_seconds=stream.busy_seconds)
+                    mediapipe_seconds=stream.busy_seconds,
+                    embeddings=embeddings,
+                    embed_seconds=stream.embed_busy_seconds)
             else:
                 result = processor.process_video(item)
             elapsed = time.time() - t0
@@ -217,6 +228,7 @@ def main():
                     stream = StreamingPerception(
                         config['mediapipe_face_model_path'],
                         config['mediapipe_hands_model_path'],
+                        embed_config=config if STREAM_DINOV2 else None,
                     )
                     stream.add_frame(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                     frame_times.append(now)

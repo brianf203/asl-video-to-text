@@ -80,7 +80,7 @@ class SHuBERTProcessor:
                                    video_read_seconds=video_read_seconds)
 
     def process_frames(self, signer_video, landmarks=None, video_read_seconds=0.0,
-                       mediapipe_seconds=None):
+                       mediapipe_seconds=None, embeddings=None, embed_seconds=None):
         """Everything after the frames exist: landmarks, crops, DINOv2, pose, ByT5.
 
         Split out of process_video() so the live worker can hand over frames whose
@@ -109,26 +109,37 @@ class SHuBERTProcessor:
                 timings['mediapipe_overlapped'] = mediapipe_seconds
         stage_start = time.time()
 
-        # Step 3: Extract stream features
-        hand_extractor = HandExtractor()
-        left_hand_frames, right_hand_frames = hand_extractor.extract_hand_frames(signer_video, landmarks)
-        timings['hand_crop'] = time.time() - stage_start
-        stage_start = time.time()
+        # Step 3: Extract stream features (unless the caller already embedded them during
+        # capture — see streaming_perception.py's second stage).
+        if embeddings is not None:
+            left_hand_embeddings, right_hand_embeddings, face_embeddings = embeddings
+            del signer_video
+            timings['hand_crop'] = 0.0
+            timings['dinov2_hands'] = 0.0
+            timings['face_crop'] = 0.0
+            timings['dinov2_face'] = 0.0
+            if embed_seconds is not None:
+                timings['dinov2_overlapped'] = embed_seconds
+        else:
+            hand_extractor = HandExtractor()
+            left_hand_frames, right_hand_frames = hand_extractor.extract_hand_frames(signer_video, landmarks)
+            timings['hand_crop'] = time.time() - stage_start
+            stage_start = time.time()
 
-        left_hand_embeddings = extract_embeddings_from_frames(left_hand_frames, self.config['dino_hands_model_path'], dtype=HANDS_DTYPE)
-        right_hand_embeddings = extract_embeddings_from_frames(right_hand_frames, self.config['dino_hands_model_path'], dtype=HANDS_DTYPE)
-        del left_hand_frames, right_hand_frames
-        timings['dinov2_hands'] = time.time() - stage_start
-        stage_start = time.time()
+            left_hand_embeddings = extract_embeddings_from_frames(left_hand_frames, self.config['dino_hands_model_path'], dtype=HANDS_DTYPE)
+            right_hand_embeddings = extract_embeddings_from_frames(right_hand_frames, self.config['dino_hands_model_path'], dtype=HANDS_DTYPE)
+            del left_hand_frames, right_hand_frames
+            timings['dinov2_hands'] = time.time() - stage_start
+            stage_start = time.time()
 
-        face_extractor = FaceExtractor()
-        face_frames = face_extractor.extract_face_frames(signer_video, landmarks)
-        timings['face_crop'] = time.time() - stage_start
-        stage_start = time.time()
+            face_extractor = FaceExtractor()
+            face_frames = face_extractor.extract_face_frames(signer_video, landmarks)
+            timings['face_crop'] = time.time() - stage_start
+            stage_start = time.time()
 
-        face_embeddings = extract_embeddings_from_frames(face_frames, self.config['dino_face_model_path'], dtype=FACE_DTYPE)
-        del face_frames, signer_video
-        timings['dinov2_face'] = time.time() - stage_start
+            face_embeddings = extract_embeddings_from_frames(face_frames, self.config['dino_face_model_path'], dtype=FACE_DTYPE)
+            del face_frames, signer_video
+            timings['dinov2_face'] = time.time() - stage_start
         stage_start = time.time()
 
         pose_embeddings = process_pose_landmarks(landmarks)
@@ -149,11 +160,11 @@ class SHuBERTProcessor:
         print("\n--- Stage timing breakdown ---")
         for stage_name, elapsed in timings.items():
             note = "  (overlapped with capture, not on the critical path)" \
-                if stage_name == 'mediapipe_overlapped' else ""
+                if stage_name.endswith('_overlapped') else ""
             print(f"  {stage_name:20s}: {elapsed:6.1f}s{note}")
         # mediapipe_overlapped is reported but excluded: it was already paid during
         # recording, so counting it here would misstate the post-cut latency.
-        critical = sum(v for k, v in timings.items() if k != 'mediapipe_overlapped')
+        critical = sum(v for k, v in timings.items() if not k.endswith('_overlapped'))
         print(f"  {'total':20s}: {critical:6.1f}s")
 
         return output_text

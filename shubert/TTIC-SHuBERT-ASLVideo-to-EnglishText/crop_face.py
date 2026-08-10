@@ -34,6 +34,7 @@ class FaceExtractor:
         self.output_size = output_size
         self.scale_factor = scale_factor
         self.grey_background_color = grey_background_color
+        self._reset_state()
         
         # Face landmark indices for eyes and mouth
         self.left_eye_indices = [69, 168, 156, 118, 54]
@@ -172,59 +173,62 @@ class FaceExtractor:
         #     raise TypeError("video_input must be either a file path (str) or a VideoReader object")
         
         face_frames = []
-        prev_face_frame = None
-        prev_landmarks = None
-        
+
+        # One-shot over a whole clip: start from clean state so behaviour is unchanged.
+        self._reset_state()
+
         for i in range(len(video)):
             # frame = video[i].asnumpy()
             frame = video[i]
             if hasattr(video, 'seek'):
                 video.seek(0)
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            
-            # Get landmarks for this frame
-            frame_landmarks = landmarks_data.get(i, None)
-            
-            # Handle missing landmarks
-            if frame_landmarks is None:
-                if prev_landmarks is not None:
-                    frame_landmarks = prev_landmarks
-                else:
-                    # Use blank frame if no landmarks available
-                    face_frames.append(np.zeros((*self.output_size, 3), dtype=np.uint8))
-                    continue
-            else:
-                prev_landmarks = frame_landmarks
-            
-            # Check if pose landmarks exist
-            if frame_landmarks.get('pose_landmarks') is None:
-                if prev_face_frame is not None:
-                    face_frames.append(prev_face_frame)
-                else:
-                    face_frames.append(np.zeros((*self.output_size, 3), dtype=np.uint8))
-                continue
-            
-            # Process face if face landmarks exist
-            if frame_landmarks.get('face_landmarks') is not None:
-                # Select the face closest to the pose
-                selected_face = self.select_face(
-                    frame_landmarks['pose_landmarks'][0],
-                    frame_landmarks['face_landmarks']
-                )
-                
-                # Create face frame with cues on grey background
-                face_frame = self.cues_on_grey_background(frame_rgb, selected_face)
-                face_frame = self.resize_frame(face_frame, self.output_size)
-                face_frames.append(face_frame)
-                prev_face_frame = face_frame
-                
-            elif prev_face_frame is not None:
-                face_frames.append(prev_face_frame)
-            else:
-                # Use blank frame if no face landmarks
-                face_frames.append(np.zeros((*self.output_size, 3), dtype=np.uint8))
-        
+            face_frames.append(self._process_one(frame, landmarks_data.get(i, None)))
+
         return face_frames
+
+    def _reset_state(self):
+        """Clear cross-frame fallback state. See HandExtractor._reset_state()."""
+        self._prev_face_frame = None
+        self._prev_landmarks = None
+
+    def _blank(self) -> np.ndarray:
+        return np.zeros((*self.output_size, 3), dtype=np.uint8)
+
+    def _process_one(self, frame, frame_landmarks):
+        """Crop one frame's face, updating fallback state. Returns the face frame."""
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        if frame_landmarks is None:
+            if self._prev_landmarks is not None:
+                frame_landmarks = self._prev_landmarks
+            else:
+                return self._blank()
+        else:
+            self._prev_landmarks = frame_landmarks
+
+        if frame_landmarks.get('pose_landmarks') is None:
+            return self._prev_face_frame if self._prev_face_frame is not None else self._blank()
+
+        if frame_landmarks.get('face_landmarks') is not None:
+            selected_face = self.select_face(
+                frame_landmarks['pose_landmarks'][0],
+                frame_landmarks['face_landmarks']
+            )
+            face_frame = self.cues_on_grey_background(frame_rgb, selected_face)
+            face_frame = self.resize_frame(face_frame, self.output_size)
+            self._prev_face_frame = face_frame
+            return face_frame
+
+        if self._prev_face_frame is not None:
+            return self._prev_face_frame
+        return self._blank()
+
+    def extract_face_frames_chunk(self, frames, landmarks_list):
+        """Crop a chunk of consecutive frames, CONTINUING state from the previous call.
+
+        For the streaming path only; see HandExtractor.extract_hand_frames_chunk().
+        """
+        return [self._process_one(frame, lm) for frame, lm in zip(frames, landmarks_list)]
 
     def extract_and_save_face_video(self, video_input, landmarks_data: Dict[int, Any], 
                                    output_dir: str, video_name: Optional[str] = None) -> str:
