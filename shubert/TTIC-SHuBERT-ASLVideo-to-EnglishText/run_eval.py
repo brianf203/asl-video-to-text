@@ -415,7 +415,7 @@ def main():
         "dinov2_face_dtype": str(dinov2_features.FACE_DTYPE),
         "byt5_dtype": os.environ.get("BYT5_DTYPE", "bfloat16"),
         "byt5_device": os.environ.get("BYT5_DEVICE", "cuda"),
-        "byt5_num_beams": os.environ.get("BYT5_NUM_BEAMS", "1"),
+        "byt5_num_beams": os.environ.get("BYT5_NUM_BEAMS", "4"),
         "no_trim": args.no_trim,
     }
 

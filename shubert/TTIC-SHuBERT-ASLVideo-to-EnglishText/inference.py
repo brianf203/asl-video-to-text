@@ -751,12 +751,21 @@ def generate_text_from_features(
     """
     Direct inference function that generates text from sign language features.
     """
-    # Beam search is the real mechanism for the occasional degenerate looping output (see
-    # the no_repeat_ngram_size note above for why the byte-level alternative fails). It was
-    # previously rejected on cost — ByT5 ran 20-25s on CPU, ~44% of a short clip — but that
-    # changed when it moved to the GPU and dropped to ~2-5s, so a beam is now affordable.
+    # Beam search was previously rejected on cost — ByT5 ran 20-25s on CPU, ~44% of a short
+    # clip — but that changed when it moved to the GPU and dropped to ~2-5s. Measured at 4
+    # beams over the 200-clip OpenASL set: raw BLEU 16.16 -> 18.85, i.e. a paired-bootstrap
+    # delta of +2.69 (95% CI [+0.17, +5.95], p=0.015), for +4% latency (23.9 -> 24.8 s/clip)
+    # and no extra memory on the live worker. Hence the default of 4.
+    #
+    # The mechanism is not what it looks like: beam search makes output SHORTER, not longer.
+    # Total hypothesis words drop 3446 -> 2960 against 2766 reference words (length ratio
+    # 1.246 -> 1.070). Both ratios exceed 1 so BLEU's brevity penalty is inactive either way
+    # — the gain is pure n-gram precision, because greedy decoding rambles past the end of
+    # the sentence and a beam stops closer to the right place. It is NOT a fix for the
+    # degenerate looping described above: clips containing a repeated 3-gram were 2 of 200
+    # both with and without beams. Looping remains a separate, rarer problem.
     if generation_num_beams is None:
-        generation_num_beams = max(1, int(os.environ.get("BYT5_NUM_BEAMS", "1")))
+        generation_num_beams = max(1, int(os.environ.get("BYT5_NUM_BEAMS", "4")))
 
     # Load model and tokenizer (cached across calls — see _get_cached_model)
     import time as _time
