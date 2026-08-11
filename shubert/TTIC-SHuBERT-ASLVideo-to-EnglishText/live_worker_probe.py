@@ -15,7 +15,15 @@ perception is credited with the overlap a real camera can supply and no more, so
 as fast as the disk allows would invent overlap that could never happen live.
 
     python3 live_worker_probe.py --beams 4 --tag beam4
-    python3 compare_probes.py probe_beam1.json probe_beam4.json
+    python3 live_worker_probe.py --overlap --beams 4 --tag beam4_overlap
+
+--overlap is the mode that matters for memory. By default the probe waits for each
+translation before feeding the next clip, so exactly one StreamingPerception is ever alive.
+A real signer does not wait: they keep signing while the worker is still busy, so several
+streams coexist, each holding a MediaPipe detector, its retained frames and its own DINOv2
+GPU work. That is what OOM'd the first live session (5 of 9 clips lost) after four
+sequential probes had all passed clean -- the sequential probes were measuring a case live
+signing never produces.
 
 Compare runs only from matched start states -- a run leaves the box several hundred MB
 dirtier than it found it, so run 1 vs run 2 is not a controlled comparison. Re-run the
@@ -24,6 +32,7 @@ control after the variant and compare that pair.
 import argparse
 import json
 import os
+import queue
 import threading
 import time
 
@@ -114,20 +123,29 @@ class CameraLoop(threading.Thread):
 
 
 def feed_clip(path, stride, embed_config, camera):
-    """Replay one clip into a fresh StreamingPerception at the clip's own frame rate.
+    """Replay one clip at its own frame rate, mirroring v5's RECORDING branch.
 
-    Mirrors v5's RECORDING branch: one detector per clip, stride applied here (features.py
-    only strides at video read, which streamed frames never reach), frames converted to RGB.
+    Takes a stream slot exactly as v5 does, so the MAX_LIVE_STREAMS cap is exercised here
+    too -- otherwise the probe would bypass the very thing it is meant to validate. Over
+    the cap it buffers stride-2 RGB frames instead, which is v5's deferred path.
+
+    Returns (stream, frames, kept, raw, capture_seconds); exactly one of stream/frames is
+    not None.
     """
     cap = cv2.VideoCapture(path)
     fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
     interval = 1.0 / fps
 
-    stream = StreamingPerception(
-        v5.config['mediapipe_face_model_path'],
-        v5.config['mediapipe_hands_model_path'],
-        embed_config=embed_config,
-    )
+    stream, frames = None, None
+    if v5._take_stream_slot():
+        stream = StreamingPerception(
+            v5.config['mediapipe_face_model_path'],
+            v5.config['mediapipe_hands_model_path'],
+            embed_config=embed_config,
+        )
+    else:
+        frames = []
+
     raw = 0
     kept = 0
     t0 = time.time()
@@ -142,12 +160,16 @@ def feed_clip(path, stride, embed_config, camera):
         if delay > 0:
             time.sleep(delay)
         if raw % stride == 0:
-            stream.add_frame(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            if stream is not None:
+                stream.add_frame(rgb)
+            else:
+                frames.append(rgb)
             kept += 1
         raw += 1
         camera.status = f"feeding {os.path.basename(path)} {raw} frames"
     cap.release()
-    return stream, kept, raw, time.time() - t0
+    return stream, frames, kept, raw, time.time() - t0
 
 
 def main():
@@ -158,6 +180,12 @@ def main():
                     help="comma-separated eval_set clip ids, replayed in order")
     ap.add_argument("--tag", default="", help="label for the output json")
     ap.add_argument("--eval-dir", default="eval_set")
+    ap.add_argument("--overlap", action="store_true",
+                    help="keep feeding clips without waiting for translations, as a real "
+                         "signer does — this is what puts several streams on the GPU at once")
+    ap.add_argument("--gap", type=float, default=1.5,
+                    help="seconds between clips in --overlap mode (default 1.5, matching "
+                         "STILL_DURATION_SECONDS)")
     args = ap.parse_args()
 
     if args.beams is not None:
@@ -191,43 +219,89 @@ def main():
     stride = stride_from_env()
     embed_config = v5.config if v5.STREAM_DINOV2 else None
     results = []
+    results_lock = threading.Lock()
+    work = queue.Queue()
+    # Clips in flight, NOT StreamingPerception count -- past MAX_LIVE_STREAMS a clip is in
+    # flight without a stream. Reported separately from the deferred count below so the two
+    # are not confused: 4 in flight with a cap of 2 means the cap did its job.
+    live_streams = [0]
+    max_live = [0]
+
+    def worker():
+        """Same shape as v5's translation_worker: drain the backlog, then run the rest."""
+        while True:
+            item = work.get()
+            if item is None:
+                work.task_done()
+                return
+            cid, stream, buffered, kept, record = item
+            camera.status = f"translating {cid}"
+            t_clip = time.time()
+            try:
+                if stream is not None:
+                    t_drain = time.time()
+                    frames, landmarks, embeddings = stream.finish(kept)
+                    drain = time.time() - t_drain
+                    text = processor.process_frames(
+                        frames, landmarks=landmarks,
+                        mediapipe_seconds=stream.busy_seconds,
+                        embeddings=embeddings,
+                        embed_seconds=stream.embed_busy_seconds)
+                    record["drain_seconds"] = round(drain, 1)
+                    record["mediapipe_seconds"] = round(stream.busy_seconds, 1)
+                    record["embed_seconds"] = round(stream.embed_busy_seconds, 1)
+                else:
+                    # Deferred clip: perception never started, so it all happens here.
+                    drain = 0.0
+                    text = processor.process_frames(buffered)
+                    record["deferred"] = True
+                record["seconds"] = round(time.time() - t_clip, 1)
+                record["text"] = text
+                record["failed"] = False
+                print(f"[probe] {cid}: {record['seconds']}s (drain {drain:.1f}s"
+                      f"{', deferred' if stream is None else ''}) -> {text}")
+            except Exception as e:
+                record["seconds"] = round(time.time() - t_clip, 1)
+                record["failed"] = True
+                record["text"] = f"{type(e).__name__}: {e}"
+                print(f"[probe] {cid} FAILED: {type(e).__name__}: {e}")
+            finally:
+                if stream is not None:
+                    stream.close()
+                    v5._release_stream_slot()
+                live_streams[0] -= 1
+                record["mem_used_after"] = meminfo()["used"]
+                with results_lock:
+                    results.append(record)
+                work.task_done()
+
+    worker_thread = threading.Thread(target=worker, daemon=True)
+    worker_thread.start()
 
     for cid, path in zip(clip_ids, paths):
         camera.status = f"feeding {cid}"
-        stream, kept, raw, capture_seconds = feed_clip(path, stride, embed_config, camera)
-        camera.status = f"translating {cid}"
-
-        # From here on this mirrors v5's translation_worker: drain the backlog, then run
-        # the remaining stages on the landmarks and embeddings already computed.
-        t_clip = time.time()
+        # The stream goes live the moment the clip starts "recording", exactly as v5 does
+        # it -- so in overlap mode its detector and DINOv2 thread coexist with whatever the
+        # worker is still chewing on.
+        live_streams[0] += 1
+        max_live[0] = max(max_live[0], live_streams[0])
+        stream, buffered, kept, raw, capture_seconds = feed_clip(
+            path, stride, embed_config, camera)
         record = {"id": cid, "kept_frames": kept, "raw_frames": raw,
-                  "capture_seconds": round(capture_seconds, 1)}
-        try:
-            t_drain = time.time()
-            frames, landmarks, embeddings = stream.finish(kept)
-            drain = time.time() - t_drain
-            text = processor.process_frames(
-                frames, landmarks=landmarks,
-                mediapipe_seconds=stream.busy_seconds,
-                embeddings=embeddings,
-                embed_seconds=stream.embed_busy_seconds)
-            record["seconds"] = round(time.time() - t_clip, 1)
-            record["drain_seconds"] = round(drain, 1)
-            record["mediapipe_seconds"] = round(stream.busy_seconds, 1)
-            record["embed_seconds"] = round(stream.embed_busy_seconds, 1)
-            record["text"] = text
-            record["failed"] = False
-            print(f"[probe] {cid}: {record['seconds']}s (drain {drain:.1f}s) -> {text}")
-        except Exception as e:
-            record["seconds"] = round(time.time() - t_clip, 1)
-            record["failed"] = True
-            record["text"] = f"{type(e).__name__}: {e}"
-            print(f"[probe] {cid} FAILED: {type(e).__name__}: {e}")
-        finally:
-            stream.close()
-        m = meminfo()
-        record["mem_used_after"] = m["used"]
-        results.append(record)
+                  "capture_seconds": round(capture_seconds, 1),
+                  "live_streams_at_queue": live_streams[0],
+                  "deferred": stream is None}
+        work.put((cid, stream, buffered, kept, record))
+        if args.overlap:
+            # A signer pauses between sentences but does not wait for the translation.
+            time.sleep(args.gap)
+        else:
+            work.join()
+
+    work.put(None)
+    work.join()
+    worker_thread.join(timeout=10)
+    results.sort(key=lambda r: clip_ids.index(r["id"]))
 
     camera.stop_event.set()
     camera.join(timeout=5)
@@ -245,6 +319,11 @@ def main():
         "frame_stride": stride,
         "stream_perception": v5.STREAM_PERCEPTION,
         "stream_dinov2": v5.STREAM_DINOV2,
+        "overlap": args.overlap,
+        "gap_seconds": args.gap if args.overlap else None,
+        "max_clips_in_flight": max_live[0],
+        "max_live_streams": v5.MAX_LIVE_STREAMS,
+        "clips_deferred": sum(1 for r in results if r.get("deferred")),
         "warmup_seconds": round(warmup, 1),
         "mem_used_at_start": start_mem["used"],
         "peak_mem_used": sampler.peak_used,
@@ -260,7 +339,9 @@ def main():
         json.dump(out, f, indent=2)
 
     print("\n" + "=" * 68)
-    print(f"PROBE {args.tag}  beams={out['byt5_num_beams']}")
+    print(f"PROBE {args.tag}  beams={out['byt5_num_beams']}  overlap={args.overlap}  "
+          f"max clips in flight={max_live[0]} (stream cap {v5.MAX_LIVE_STREAMS}, "
+          f"{out['clips_deferred']} deferred)")
     print("=" * 68)
     print(f"  warmup            : {out['warmup_seconds']}s")
     print(f"  mean s/clip       : {out['mean_seconds_per_clip']}")
