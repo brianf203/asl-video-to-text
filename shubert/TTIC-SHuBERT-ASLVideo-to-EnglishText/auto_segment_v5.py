@@ -20,6 +20,7 @@ import numpy as np
 import threading
 import queue
 import time
+from collections import deque
 from features import SHuBERTProcessor
 from streaming_perception import StreamingPerception, stride_from_env
 
@@ -80,11 +81,41 @@ config = {
 }
 os.makedirs(config['temp_dir'], exist_ok=True)
 
-# Time-based segmentation thresholds, carried over from v3.
-MOTION_START_THRESHOLD = 3.0
-MOTION_STOP_THRESHOLD = 1.5
-STILL_DURATION_SECONDS = 1.5
+# Segmentation thresholds, CALIBRATED 2026-08-10 against a labelled recording of this
+# signer and camera (calibrate_motion.py -> calib.jsonl; 85s of still/sign/fingerspell).
+#
+# The previous values (start 3.0, stop 1.5, still 1.5s) were inherited from v3 and had
+# never been measured. Replaying the state machine over that recording, they recorded
+# **11% of the time the user was actually signing**, with a false start and a mid-sentence
+# cut. Actual signing scores a median of 0.45 and fingerspelling 0.45, so a stop threshold
+# of 1.5 classified ~92% of fingerspelling frames as motionless -- which is exactly the
+# reported "it cuts off in the middle of fingerspelling", while whole-frame noise
+# (auto-exposure hunting) crossing 3.0 is the reported "it thinks I'm starting a sign".
+# These values give 95.8% coverage, 0 false starts and 0 fragments on the same recording.
+#
+# Two structural changes go with them, both necessary -- thresholds alone are not enough:
+#   * the score is SMOOTHED over MOTION_SMOOTHING_FRAMES. No instantaneous metric can
+#     separate signing from stillness (measured: every candidate overlapped, because
+#     signing contains holds and stillness contains twitches). The separation only exists
+#     over time.
+#   * a start needs START_DEBOUNCE_FRAMES sustained, and the clip is then back-dated to
+#     the real motion onset from the pre-roll ring buffer. Without the back-dating the
+#     debounce plus the smoothing lag would eat ~2s off the front of every sentence --
+#     trading a truncated tail for a truncated head.
+#
+# NOTE these are specific to this camera, room and lighting. Re-run calibrate_motion.py
+# after any of those change; an adaptive noise floor would be the principled fix.
+MOTION_START_THRESHOLD = 1.74
+MOTION_STOP_THRESHOLD = 0.29
+STILL_DURATION_SECONDS = 2.5
 MIN_CLIP_DURATION_SECONDS = 1.0
+MOTION_SMOOTHING_FRAMES = 15    # 0.5s trailing mean
+START_DEBOUNCE_FRAMES = 3       # sustained frames above start threshold before recording
+
+# Pre-roll: how far back the ring buffer can reach when back-dating a clip to motion onset.
+PRE_ROLL_MAX_SECONDS = 2.5
+# Mirror of TAIL_PAD_SECONDS at the front, so the first handshape is not clipped.
+LEAD_PAD_SECONDS = 0.25
 
 # The STILL_DURATION_SECONDS of stillness that *triggers* the cut also gets recorded,
 # so every clip used to carry ~45 dead frames at 30fps. Latency is ~0.41s/frame end to
@@ -182,6 +213,29 @@ def translation_worker(processor):
                     pass
 
 
+def find_motion_onset(ring):
+    """Walk back through the pre-roll ring to where this burst of motion began.
+
+    The trigger fires late by construction (a debounce plus a 0.5s trailing mean), so the
+    clip has to be back-dated or the front of every sentence is lost. Onset = the end of
+    the last sustained quiet stretch in the buffer; anything before that belongs to the
+    previous stillness, not to this sentence. This is the mirror image of the tail trim,
+    which ends the clip at the last motion plus a pad.
+
+    `ring` is a deque of (frame, timestamp, raw_score). Returns an index into it.
+    """
+    quiet_needed = max(1, int(0.3 * 30))    # 0.3s of quiet marks a real boundary
+    quiet = 0
+    for i in range(len(ring) - 1, -1, -1):
+        if ring[i][2] <= MOTION_STOP_THRESHOLD:
+            quiet += 1
+            if quiet >= quiet_needed:
+                return min(i + quiet_needed, len(ring) - 1)
+        else:
+            quiet = 0
+    return 0    # the whole buffer is motion; keep all of it
+
+
 def write_clip(frames, path, fps=30.0):
     h, w = frames[0].shape[:2]
     out = cv2.VideoWriter(path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
@@ -214,6 +268,9 @@ def main():
     stream = None          # StreamingPerception for the clip being recorded
     deferred = False       # recording without a stream, because the cap was reached
     raw_frame_index = 0    # raw frames since RECORDING began, for applying the stride
+    motion_history = deque(maxlen=MOTION_SMOOTHING_FRAMES)
+    pre_roll = deque(maxlen=int(PRE_ROLL_MAX_SECONDS * 30))
+    above_start = 0        # consecutive frames over the start threshold (the debounce)
     stride = stride_from_env()
     if STREAM_PERCEPTION:
         print(f"Streaming perception ON (stride {stride}) — landmarks are extracted "
@@ -231,10 +288,16 @@ def main():
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
-        motion_score = 0.0
+        raw_motion = 0.0
         if prev_gray is not None:
-            motion_score = float(np.mean(cv2.absdiff(prev_gray, gray)))
+            raw_motion = float(np.mean(cv2.absdiff(prev_gray, gray)))
         prev_gray = gray
+
+        # Decisions run on the smoothed score; the raw one is kept for locating motion
+        # onset in the pre-roll, where the smoothing lag would blur the boundary.
+        motion_history.append(raw_motion)
+        motion_score = sum(motion_history) / len(motion_history)
+        pre_roll.append((frame, now, raw_motion))
 
         display_frame = frame.copy()
         with state_lock:
@@ -252,9 +315,21 @@ def main():
         elif state == "IDLE":
             cv2.putText(display_frame, status_line, (10, 30),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-            if motion_score > MOTION_START_THRESHOLD:
+            above_start = above_start + 1 if motion_score > MOTION_START_THRESHOLD else 0
+            if above_start >= START_DEBOUNCE_FRAMES:
+                above_start = 0
                 state = "RECORDING"
-                record_start_time = now
+                # Back-date to motion onset. The trigger is late by the debounce plus the
+                # smoothing window, measured at ~2s on the calibration recording -- all of
+                # which is signing, so it must come from the ring buffer rather than being
+                # dropped.
+                onset = find_motion_onset(pre_roll)
+                # Extend back by the lead pad, the mirror of TAIL_PAD_SECONDS: cutting
+                # exactly at onset would clip the start of the first handshape.
+                onset = max(0, onset - int(LEAD_PAD_SECONDS * 30))
+                seed = list(pre_roll)[onset:]
+
+                record_start_time = seed[0][1] if seed else now
                 last_motion_time = now
                 raw_frame_index = 0
                 recorded_frames = []
@@ -269,23 +344,35 @@ def main():
                         config['mediapipe_hands_model_path'],
                         embed_config=config if STREAM_DINOV2 else None,
                     )
-                    stream.add_frame(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-                    frame_times.append(now)
-                    raw_frame_index = 1
-                    print(">>> RECORDING STARTED <<<")
                 elif STREAM_PERCEPTION:
                     # Buffer stride-2 RGB, the same frames the stream would have retained,
                     # so this fallback costs no more memory than streaming would have.
                     deferred = True
-                    recorded_frames = [cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)]
-                    frame_times = [now]
-                    raw_frame_index = 1
-                    print(f">>> RECORDING STARTED (deferred — {MAX_LIVE_STREAMS} streams "
-                          f"already live) <<<")
                 else:
-                    recorded_frames = [frame]
-                    frame_times = [now]
-                    print(">>> RECORDING STARTED <<<")
+                    deferred = False
+
+                if not STREAM_PERCEPTION:
+                    # Legacy path keeps every frame and strides later, at video read.
+                    recorded_frames = [f for f, _, _ in seed]
+                    frame_times = [t for _, t, _ in seed]
+                else:
+                    # Replay the pre-roll through the same stride the live branch uses, so
+                    # seeded and live frames form one evenly-sampled sequence.
+                    for f, t, _ in seed:
+                        if raw_frame_index % stride == 0:
+                            rgb = cv2.cvtColor(f, cv2.COLOR_BGR2RGB)
+                            if stream is not None:
+                                stream.add_frame(rgb)
+                            else:
+                                recorded_frames.append(rgb)
+                            frame_times.append(t)
+                        raw_frame_index += 1
+
+                extra = "" if stream is not None else (
+                    f" (deferred — {MAX_LIVE_STREAMS} streams already live)"
+                    if deferred else "")
+                print(f">>> RECORDING STARTED{extra} — backdated {len(seed)} frames "
+                      f"({(now - record_start_time):.2f}s) to motion onset <<<")
 
         elif state == "RECORDING":
             # The stride is applied here for both streamed and deferred clips: features.py
@@ -367,7 +454,12 @@ def main():
                 recorded_frames = []
                 frame_times = []
 
-        cv2.putText(display_frame, f"motion: {motion_score:.1f}", (10, 470),
+        # Two decimals: the thresholds are now 1.74 / 0.29, so one decimal cannot show
+        # whether the score is near either of them.
+        cv2.putText(display_frame,
+                    f"motion: {motion_score:.2f} (raw {raw_motion:.2f})  "
+                    f"start {MOTION_START_THRESHOLD} stop {MOTION_STOP_THRESHOLD}",
+                    (10, 470),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1)
         cv2.imshow('Auto ASL Translation (v5 - persistent worker)', display_frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):

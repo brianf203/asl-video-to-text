@@ -21,3 +21,4 @@ venv/
 *.zip
 shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/eval_set_openasl/
 shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/probe_*.json
+shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/calib*.jsonl
