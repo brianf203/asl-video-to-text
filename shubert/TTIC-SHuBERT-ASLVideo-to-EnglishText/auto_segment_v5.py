@@ -65,6 +65,74 @@ def _release_stream_slot():
     with _live_lock:
         _live_streams[0] -= 1
 
+
+# The stream cap above bounds how many clips do perception CONCURRENTLY. It does not bound
+# what actually grows: the translation QUEUE. Every queued clip keeps its stride-2 RGB
+# frames alive until the worker reaches it, and a deferred clip keeps all of them with
+# perception not even started. At 640x480x3 that is 0.88 MB per retained frame.
+#
+# The 2026-08-11 live session OOM'd 4 of 8 clips with the stream cap working exactly as
+# designed: clip_1 (232 frames) failed while clip_2 was streaming and clips 3 and 4 were
+# both buffering deferred -- roughly 650 retained frames, ~575MB, plus ByT5 on the GPU.
+# The FIRST clip failing is the proof that concurrency was never the binding constraint.
+#
+# So: bound total retained frames across queue + deferred + live streams, and refuse to
+# START a new clip past the budget. Refusing is deliberate. The camera thread must never
+# block (that freezes the preview and drops frames), and dropping one sentence with a
+# visible on-screen warning beats OOMing the clips already in flight.
+MAX_RETAINED_FRAMES = int(os.environ.get("MAX_RETAINED_FRAMES", "450"))
+# Second, independent guard -- an EMERGENCY BACKSTOP, deliberately set low. Retained frames
+# are only part of what fills memory (models, embeddings, MediaPipe native buffers), so also
+# check what actually binds. Unified memory means GPU allocations show up here too -- see
+# the meminfo note in live_worker_probe.py.
+#
+# Do not raise this much. Healthy probe runs with zero failures bottomed out at 217-752MB
+# available (the minimum lands during ByT5 generate), so a floor anywhere near 1GB refuses
+# clips during perfectly normal signing -- measured: at 1100MB the machine stopped starting
+# clips and never resumed. The frame budget above is the principled limit; this only
+# catches a genuine emergency the frame count did not predict.
+MIN_AVAILABLE_MB = int(os.environ.get("MIN_AVAILABLE_MB", "350"))
+_retained_lock = threading.Lock()
+_retained_frames = [0]
+
+
+def _retain_frame():
+    with _retained_lock:
+        _retained_frames[0] += 1
+
+
+def _release_frames(n):
+    with _retained_lock:
+        _retained_frames[0] = max(0, _retained_frames[0] - n)
+
+
+def _retained_count():
+    with _retained_lock:
+        return _retained_frames[0]
+
+
+def _available_mb():
+    """MemAvailable, the metric that binds on this unified-memory box."""
+    try:
+        with open("/proc/meminfo") as f:
+            for line in f:
+                if line.startswith("MemAvailable:"):
+                    return int(line.split()[1]) // 1024
+    except OSError:
+        pass
+    return None
+
+
+def _capture_budget():
+    """(ok, reason) -- whether there is room to start another clip."""
+    retained = _retained_count()
+    if retained >= MAX_RETAINED_FRAMES:
+        return False, f"backlog {retained} frames"
+    avail = _available_mb()
+    if avail is not None and avail < MIN_AVAILABLE_MB:
+        return False, f"{avail}MB free"
+    return True, ""
+
 MODELS_BASE = "/home/sllu/.cache/huggingface/hub/models--ShesterG--SHuBERT/snapshots/578a0233e770c8ce4dc75d859b91fdea7c34f5aa/models"
 
 config = {
@@ -125,7 +193,41 @@ LEAD_PAD_SECONDS = 0.25
 # carries meaning in ASL) isn't clipped off.
 TAIL_PAD_SECONDS = 0.25
 
+# A clip is normally ended by STILL_DURATION_SECONDS of stillness -- so a signer who never
+# pauses is never cut. The 2026-08-11 live session produced a 542-frame / 35.8s clip that
+# way, which cost 477MB of retained frames on its own and decoded to a degenerate loop
+# ("...IN MY LEADERSHIP" x8, 26.2s in ByT5). Long clips hurt three ways at once: memory,
+# latency (ByT5 scales with encoder length) and quality. So cap the length and force a cut.
+#
+# A forced cut is NOT the same as a stillness cut: motion is still going, so there is no
+# still tail to trim and every frame is signing. Recording restarts immediately at the cut
+# point, with no pre-roll back-dating -- the previous clip already covers everything up to
+# now, so seeding from the ring buffer would duplicate frames across the boundary.
+# The cut lands mid-sentence, which will read as a broken sentence; that is the intended
+# trade against losing the clip entirely to OOM.
+MAX_CLIP_SECONDS = float(os.environ.get("MAX_CLIP_SECONDS", "15"))
+
 CAMERA_INDEX = 0
+
+def _begin_perception():
+    """Start perception for a new clip. Returns (stream, deferred).
+
+    Shared by the IDLE->RECORDING transition and the forced mid-sentence cut, so both
+    honour the live-stream cap the same way.
+    """
+    if STREAM_PERCEPTION and _take_stream_slot():
+        # One detector per clip -- never reused, see streaming_perception.py.
+        return StreamingPerception(
+            config['mediapipe_face_model_path'],
+            config['mediapipe_hands_model_path'],
+            embed_config=config if STREAM_DINOV2 else None,
+        ), False
+    if STREAM_PERCEPTION:
+        # Over the cap: buffer stride-2 RGB, the same frames the stream would have
+        # retained, so this fallback costs no more memory than streaming would have.
+        return None, True
+    return None, False
+
 
 clip_queue = queue.Queue()
 models_ready = threading.Event()
@@ -155,19 +257,25 @@ def translation_worker(processor):
         if item is None:
             break
         # Three shapes arrive here:
-        #   ("stream", label, stream, keep)  live StreamingPerception, backlog to drain
-        #   ("frames", label, frames)        buffered frames, perception not started (the
-        #                                    over-cap fallback; no mp4 round trip)
+        #   ("stream", label, stream, keep, retained)  live StreamingPerception to drain
+        #   ("frames", label, frames, retained)        buffered frames, perception not
+        #                                    started (the over-cap fallback; no mp4 round
+        #                                    trip)
         #   "<path>.mp4"                     legacy, only when STREAM_PERCEPTION=0
+        # `retained` is this clip's contribution to the global retained-frame budget; the
+        # finally releases it, which is what lets the camera thread start a clip again.
         kind = item[0] if isinstance(item, tuple) else "path"
         label = item[1] if isinstance(item, tuple) else item
         streamed = kind == "stream"
         stream = None
+        # Frames this clip is keeping alive, released in the finally once they are no
+        # longer referenced -- that release is what lets the camera thread start again.
+        retained = item[-1] if isinstance(item, tuple) else 0
         try:
             print(f"[worker] Translating {label} ...")
             t0 = time.time()
             if streamed:
-                _, _, stream, keep = item
+                _, _, stream, keep, _ = item
                 # Drain here rather than on the camera thread: perception runs ~4.5x
                 # slower than realtime, so at the cut there is still a backlog worth
                 # seconds, and blocking the capture loop on it would freeze the preview
@@ -205,10 +313,15 @@ def translation_worker(processor):
             if stream is not None:
                 stream.close()
                 _release_stream_slot()
+            # Drop the reference to the buffered frames before accounting for them, so
+            # the budget reflects memory actually reclaimable rather than optimism.
+            # `label` still holds the mp4 path for the legacy branch below.
+            item = None
+            _release_frames(retained)
             clip_queue.task_done()
             if kind == "path":
                 try:
-                    os.remove(item)
+                    os.remove(label)
                 except OSError:
                     pass
 
@@ -268,6 +381,7 @@ def main():
     stream = None          # StreamingPerception for the clip being recorded
     deferred = False       # recording without a stream, because the cap was reached
     raw_frame_index = 0    # raw frames since RECORDING began, for applying the stride
+    retained_this_clip = 0  # frames this clip has added to the global retained budget
     motion_history = deque(maxlen=MOTION_SMOOTHING_FRAMES)
     pre_roll = deque(maxlen=int(PRE_ROLL_MAX_SECONDS * 30))
     above_start = 0        # consecutive frames over the start threshold (the debounce)
@@ -316,9 +430,22 @@ def main():
             cv2.putText(display_frame, status_line, (10, 30),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
             above_start = above_start + 1 if motion_score > MOTION_START_THRESHOLD else 0
-            if above_start >= START_DEBOUNCE_FRAMES:
+            # Checked only when a start is actually due, not every idle frame: this reads
+            # /proc/meminfo, and the capture loop runs 30x a second.
+            budget_ok, budget_reason = (
+                _capture_budget() if above_start >= START_DEBOUNCE_FRAMES else (True, ""))
+            if not budget_ok:
+                # Refuse to start rather than pile another clip's frames onto a backlog
+                # that is already at the limit. Say so on screen: a dropped sentence the
+                # signer can see and repeat beats an OOM that silently loses clips
+                # already in flight.
+                above_start = 0
+                cv2.putText(display_frame, f"BUSY - backlog full ({budget_reason})",
+                            (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 165, 255), 2)
+            elif above_start >= START_DEBOUNCE_FRAMES:
                 above_start = 0
                 state = "RECORDING"
+                retained_this_clip = 0
                 # Back-date to motion onset. The trigger is late by the debounce plus the
                 # smoothing window, measured at ~2s on the calibration recording -- all of
                 # which is signing, so it must come from the ring buffer rather than being
@@ -337,24 +464,15 @@ def main():
                 # Stream only if a slot is free. Over the cap the clip is still recorded,
                 # just buffered at stride and translated after the cut — degraded latency
                 # for that one clip instead of an OOM that loses it entirely.
-                if STREAM_PERCEPTION and _take_stream_slot():
-                    # One detector per clip — never reused, see streaming_perception.py.
-                    stream = StreamingPerception(
-                        config['mediapipe_face_model_path'],
-                        config['mediapipe_hands_model_path'],
-                        embed_config=config if STREAM_DINOV2 else None,
-                    )
-                elif STREAM_PERCEPTION:
-                    # Buffer stride-2 RGB, the same frames the stream would have retained,
-                    # so this fallback costs no more memory than streaming would have.
-                    deferred = True
-                else:
-                    deferred = False
+                stream, deferred = _begin_perception()
 
                 if not STREAM_PERCEPTION:
                     # Legacy path keeps every frame and strides later, at video read.
                     recorded_frames = [f for f, _, _ in seed]
                     frame_times = [t for _, t, _ in seed]
+                    for _ in recorded_frames:
+                        _retain_frame()
+                    retained_this_clip += len(recorded_frames)
                 else:
                     # Replay the pre-roll through the same stride the live branch uses, so
                     # seeded and live frames form one evenly-sampled sequence.
@@ -366,6 +484,8 @@ def main():
                             else:
                                 recorded_frames.append(rgb)
                             frame_times.append(t)
+                            _retain_frame()
+                            retained_this_clip += 1
                         raw_frame_index += 1
 
                 extra = "" if stream is not None else (
@@ -382,15 +502,21 @@ def main():
                 if raw_frame_index % stride == 0:
                     stream.add_frame(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                     frame_times.append(now)
+                    _retain_frame()
+                    retained_this_clip += 1
                 raw_frame_index += 1
             elif deferred:
                 if raw_frame_index % stride == 0:
                     recorded_frames.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                     frame_times.append(now)
+                    _retain_frame()
+                    retained_this_clip += 1
                 raw_frame_index += 1
             else:
                 recorded_frames.append(frame)
                 frame_times.append(now)
+                _retain_frame()
+                retained_this_clip += 1
             if motion_score > MOTION_STOP_THRESHOLD:
                 last_motion_time = now
 
@@ -408,32 +534,48 @@ def main():
             cv2.putText(display_frame, status_line, (10, 60),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
-            if still_duration >= STILL_DURATION_SECONDS:
-                # Drop the trailing stillness; keep everything up to the last motion
-                # plus TAIL_PAD_SECONDS. Gate on signing time rather than wall-clock
-                # elapsed, so a clip that is nothing but the still tail scores ~0s and
-                # is rejected instead of being handed to ByT5 to hallucinate over.
-                cutoff = last_motion_time + TAIL_PAD_SECONDS
-                keep = sum(1 for t in frame_times if t <= cutoff)
-                signing_duration = last_motion_time - record_start_time
+            force_cut = elapsed >= MAX_CLIP_SECONDS
+            if still_duration >= STILL_DURATION_SECONDS or force_cut:
+                if force_cut:
+                    # Still signing: there is no still tail to trim and every frame counts
+                    # as signing, so keep the lot and measure the duration to now.
+                    keep = len(frame_times)
+                    signing_duration = now - record_start_time
+                    print(f">>> FORCED CUT at {elapsed:.1f}s "
+                          f"(MAX_CLIP_SECONDS={MAX_CLIP_SECONDS}) <<<")
+                else:
+                    # Drop the trailing stillness; keep everything up to the last motion
+                    # plus TAIL_PAD_SECONDS. Gate on signing time rather than wall-clock
+                    # elapsed, so a clip that is nothing but the still tail scores ~0s and
+                    # is rejected instead of being handed to ByT5 to hallucinate over.
+                    cutoff = last_motion_time + TAIL_PAD_SECONDS
+                    keep = sum(1 for t in frame_times if t <= cutoff)
+                    signing_duration = last_motion_time - record_start_time
 
                 if signing_duration >= MIN_CLIP_DURATION_SECONDS:
                     clip_counter[0] += 1
                     if stream is not None:
                         label = f"clip_{clip_counter[0]} (streamed)"
-                        # Hand the whole stream over; the worker drains, closes it and
-                        # releases the slot.
-                        clip_queue.put(("stream", label, stream, keep))
+                        # Hand the whole stream over; the worker drains, closes it,
+                        # releases the slot and releases this clip's retained frames.
+                        clip_queue.put(("stream", label, stream, keep,
+                                        retained_this_clip))
                         print(f"Queued {label} ({keep} frames, {signing_duration:.1f}s "
                               f"signing; trimmed {len(frame_times) - keep} still frames; "
                               f"{stream.processed_frames} already through MediaPipe)")
                         stream = None
+                        # Ownership passes to the worker, which releases them in its
+                        # finally. Zero it here so the quit path cannot double-release.
+                        retained_this_clip = 0
                     elif deferred:
                         label = f"clip_{clip_counter[0]} (deferred)"
-                        clip_queue.put(("frames", label, recorded_frames[:keep]))
+                        clip_queue.put(("frames", label, recorded_frames[:keep],
+                                        retained_this_clip))
                         print(f"Queued {label} ({keep} frames, {signing_duration:.1f}s "
                               f"signing; trimmed {len(recorded_frames) - keep} still "
                               f"frames; perception not started)")
+                        # As above: the worker owns these frames from here.
+                        retained_this_clip = 0
                     else:
                         clip_path = os.path.join(config['temp_dir'],
                                                  f"clip_{clip_counter[0]}.mp4")
@@ -441,6 +583,10 @@ def main():
                         clip_queue.put(clip_path)
                         print(f"Queued {clip_path} ({keep} frames, {signing_duration:.1f}s "
                               f"signing; trimmed {len(recorded_frames) - keep} still frames)")
+                        # The legacy path hands over an mp4 path, not the frames, so the
+                        # buffer is dropped here rather than by the worker.
+                        _release_frames(retained_this_clip)
+                        retained_this_clip = 0
                 else:
                     print(f"Too short, ignored ({signing_duration:.1f}s signing, "
                           f"{len(frame_times)} frames).")
@@ -448,11 +594,32 @@ def main():
                         stream.close()
                         _release_stream_slot()
                         stream = None
+                    # Nothing was queued, so nothing downstream will release these.
+                    _release_frames(retained_this_clip)
+                    retained_this_clip = 0
 
-                state = "IDLE"
-                deferred = False
                 recorded_frames = []
                 frame_times = []
+                deferred = False
+                if force_cut and signing_duration >= MIN_CLIP_DURATION_SECONDS:
+                    # Still mid-sentence. Restart immediately, anchored at now: the clip
+                    # just queued covers everything up to this point, so seeding from the
+                    # pre-roll would duplicate frames across the boundary. Falls back to
+                    # IDLE if the backlog is now full, which is the same refusal the
+                    # IDLE branch makes.
+                    budget_ok, budget_reason = _capture_budget()
+                    if budget_ok:
+                        stream, deferred = _begin_perception()
+                        record_start_time = now
+                        last_motion_time = now
+                        raw_frame_index = 0
+                        retained_this_clip = 0
+                        state = "RECORDING"
+                    else:
+                        print(f"Not continuing after forced cut: {budget_reason}")
+                        state = "IDLE"
+                else:
+                    state = "IDLE"
 
         # Two decimals: the thresholds are now 1.74 / 0.29, so one decimal cannot show
         # whether the score is near either of them.
@@ -472,6 +639,7 @@ def main():
     if stream is not None:
         stream.close()
         _release_stream_slot()
+    _release_frames(retained_this_clip)
 
     clip_queue.put(None)
     worker.join(timeout=5)
