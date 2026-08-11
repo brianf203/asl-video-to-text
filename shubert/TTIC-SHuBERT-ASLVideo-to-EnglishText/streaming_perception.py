@@ -37,8 +37,18 @@ from kpe_mediapipe import HolisticDetector
 # tracks landmarks temporally: a worker that sees frames 0..9 keeps useful tracking state,
 # one that sees every other frame does not. The cost is a re-detection at each chunk
 # boundary, which is why chunks should not be tiny.
+#
+# The default is 30, not the paper's 10. Measured 2026-08-11 across a 200-clip OpenASL eval
+# at chunks 10/15/20/30 plus a 1-worker control: chunk 10 was the only setting that leaned
+# quality-negative (raw BLEU 18.66 vs 19.15/18.98/19.54, and 1-worker control 19.51), which
+# is what more re-detections at more chunk boundaries would predict. None of the deltas
+# cleared significance on 200 clips, but the change is free: a live-worker probe sweep
+# (4 clips per config, control re-run last) found chunk size latency-NEUTRAL -- the whole
+# spread was 1.3 s/clip while two runs of the SAME config differed by 0.6 s/clip. Eval
+# s/clip had suggested 1.20-1.67x differences; those were artifact, which is exactly why
+# score_streaming's docstring says latency conclusions must come from the probe.
 PERCEPTION_WORKERS = max(1, int(os.environ.get("PERCEPTION_WORKERS", "2")))
-PERCEPTION_CHUNK = max(1, int(os.environ.get("PERCEPTION_CHUNK", "10")))
+PERCEPTION_CHUNK = max(1, int(os.environ.get("PERCEPTION_CHUNK", "30")))
 
 
 class StreamingPerception:

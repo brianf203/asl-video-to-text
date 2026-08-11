@@ -461,7 +461,7 @@ def main():
         # Only affects output when --streaming: the sequential path uses one detector.
         "perception_workers": (os.environ.get("PERCEPTION_WORKERS", "2")
                                if args.streaming else "n/a"),
-        "perception_chunk": (os.environ.get("PERCEPTION_CHUNK", "10")
+        "perception_chunk": (os.environ.get("PERCEPTION_CHUNK", "30")
                              if args.streaming else "n/a"),
         "dinov2_hands_dtype": str(dinov2_features.HANDS_DTYPE),
         "dinov2_face_dtype": str(dinov2_features.FACE_DTYPE),
