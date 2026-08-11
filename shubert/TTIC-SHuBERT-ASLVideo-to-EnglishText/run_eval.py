@@ -411,6 +411,7 @@ def main():
     run_cfg = {
         "frame_stride": os.environ.get("FRAME_STRIDE", "2"),
         "use_onnx_perception": os.environ.get("USE_ONNX_PERCEPTION", "0"),
+        "mediapipe_video_mode": os.environ.get("MEDIAPIPE_VIDEO_MODE", "1"),
         "dinov2_hands_dtype": str(dinov2_features.HANDS_DTYPE),
         "dinov2_face_dtype": str(dinov2_features.FACE_DTYPE),
         "byt5_dtype": os.environ.get("BYT5_DTYPE", "bfloat16"),

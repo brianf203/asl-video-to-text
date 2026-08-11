@@ -13,6 +13,25 @@ try:
 except ImportError:
     decord = None
 from typing import Dict, Optional, Tuple, Any
+from mediapipe.tasks.python.vision import RunningMode
+
+# Run the hand and face landmarkers in VIDEO mode instead of IMAGE mode.
+#
+# They were built with no running_mode, which defaults to IMAGE -- and in IMAGE mode
+# MediaPipe re-runs the full palm/face DETECTOR on every single frame. VIDEO mode reuses
+# the previous frame's landmarks to crop and only re-detects when tracking is lost, which
+# is the detect-then-track behaviour this pipeline was assumed to already get for free.
+#
+# Hand detection is the per-frame wall (pose and face hide behind it). Measured standalone
+# on 80 frames of eval clip 004: hand 191.1 -> 135.2 ms/frame (1.41x) at an IDENTICAL
+# detection rate of 1.48 hands/frame; face 59.8 -> 50.7 ms (1.18x) at 1.00 faces/frame.
+# Downscaling the input was also tested and does nothing (190-192 ms at 640x480, 480x360
+# and 320x240 alike) because MediaPipe resizes internally -- do not retry that.
+#
+# The cost is cross-frame tracking state, which makes results depend on frame order. That
+# is already true of the pose model and is why a detector is never reused across clips.
+# Set MEDIAPIPE_VIDEO_MODE=0 to go back to per-frame detection.
+VIDEO_MODE = os.environ.get("MEDIAPIPE_VIDEO_MODE", "1") not in ("0", "false", "False")
 
 
 class HolisticDetector:
@@ -55,6 +74,11 @@ class HolisticDetector:
         # Run pose/face/hand detection concurrently per frame instead of
         # sequentially. MediaPipe's underlying C++ inference releases the GIL,
         # so this gives real parallelism rather than just interleaving.
+        # VIDEO mode requires strictly increasing timestamps per detector instance. The
+        # clips are stride-2 at 30fps, but the value only has to be monotonic, not real:
+        # MediaPipe uses it to order frames, not to measure anything.
+        self._frame_counter = 0
+
         self._executor = None
         self._initialize_detectors()
         self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
@@ -110,12 +134,17 @@ class HolisticDetector:
         # Initialize face detector -- MediaPipe in both modes. At 41.8 ms/frame it is
         # already under the ONNX path's ~51.5 ms wall, so converting it gains nothing.
         base_options_face = python.BaseOptions(model_asset_path=self.face_model_path)
-        options_face = vision.FaceLandmarkerOptions(
+        face_kwargs = dict(
             base_options=base_options_face,
-            output_face_blendshapes=True,
-            output_facial_transformation_matrixes=True,
-            num_faces=self.max_faces
+            # Both outputs were on and NOTHING in the pipeline ever read them. Measured
+            # cost is under 1ms so this is tidiness, not speed.
+            output_face_blendshapes=False,
+            output_facial_transformation_matrixes=False,
+            num_faces=1 if VIDEO_MODE else self.max_faces,
         )
+        if VIDEO_MODE:
+            face_kwargs["running_mode"] = RunningMode.VIDEO
+        options_face = vision.FaceLandmarkerOptions(**face_kwargs)
         self.face_detector = vision.FaceLandmarker.create_from_options(options_face)
 
         if self.use_onnx:
@@ -129,17 +158,43 @@ class HolisticDetector:
 
         # Initialize hand detector
         base_options_hand = python.BaseOptions(model_asset_path=self.hand_model_path)
-        options_hand = vision.HandLandmarkerOptions(
+        hand_kwargs = dict(
             base_options=base_options_hand,
             num_hands=self.max_hands,
-            min_hand_detection_confidence=self.min_hand_detection_confidence
+            min_hand_detection_confidence=self.min_hand_detection_confidence,
         )
+        if VIDEO_MODE:
+            hand_kwargs["running_mode"] = RunningMode.VIDEO
+        options_hand = vision.HandLandmarkerOptions(**hand_kwargs)
         self.hand_detector = vision.HandLandmarker.create_from_options(options_hand)
 
-        # Initialize holistic model for pose
-        self.mp_holistic = mp.solutions.holistic.Holistic(
-            min_detection_confidence=self.min_detection_confidence
+        # Pose. This used to be mp.solutions.holistic.Holistic, but ONLY pose_landmarks was
+        # ever read from it -- Holistic additionally computes face landmarks and BOTH hands
+        # internally, all discarded, while the dedicated detectors above compute them again.
+        # Measured standalone on 80 frames of eval clip 004: Holistic 149.7 ms/frame vs
+        # Pose 86.4 ms/frame, same model at model_complexity=1, so the landmarks are the
+        # same and only the wasted work is gone.
+        #
+        # model_complexity=0 is faster still (61.8 ms) but swaps in pose_landmark_lite,
+        # whose landmark POSITIONS are less precise. Those positions drive the hand and
+        # face crops, and the ONNX experiment established that crop-driving landmark
+        # accuracy -- not detection rate -- is what degrades translation. Not worth it:
+        # pose is not the per-frame wall anyway (hand is).
+        self.mp_holistic = mp.solutions.pose.Pose(
+            min_detection_confidence=self.min_detection_confidence,
+            model_complexity=1,
         )
+
+    def _detect_hand(self, mp_image, index):
+        """VIDEO mode needs a timestamp; IMAGE mode must not be given one."""
+        if VIDEO_MODE:
+            return self.hand_detector.detect_for_video(mp_image, index * 33)
+        return self.hand_detector.detect(mp_image)
+
+    def _detect_face(self, mp_image, index):
+        if VIDEO_MODE:
+            return self.face_detector.detect_for_video(mp_image, index * 33)
+        return self.face_detector.detect(mp_image)
 
     def detect_frame_landmarks(self, image: np.ndarray) -> Tuple[Dict[str, int], Dict[str, Any]]:
         """
@@ -182,8 +237,11 @@ class HolisticDetector:
             gpu_future = self._executor.submit(_pose_then_hands)
         else:
             pose_future = self._executor.submit(_timed, self.mp_holistic.process, image)
-            hand_future = self._executor.submit(_timed, self.hand_detector.detect, mp_image)
-        face_future = self._executor.submit(_timed, self.face_detector.detect, mp_image)
+            hand_future = self._executor.submit(
+                _timed, self._detect_hand, mp_image, self._frame_counter)
+        face_future = self._executor.submit(
+            _timed, self._detect_face, mp_image, self._frame_counter)
+        self._frame_counter += 1
 
         if self.use_onnx:
             (pose_raw, pose_dt), (hand_raw, hand_dt) = gpu_future.result()
