@@ -39,6 +39,31 @@ STREAM_PERCEPTION = os.environ.get("STREAM_PERCEPTION", "1") not in ("0", "false
 # Set STREAM_DINOV2=0 to disable.
 STREAM_DINOV2 = os.environ.get("STREAM_DINOV2", "1") not in ("0", "false", "False")
 
+# How many clips may be streaming at once. Each live StreamingPerception holds a MediaPipe
+# detector, its retained stride-2 RGB frames (~193MB for a 419-frame clip) and its own
+# DINOv2 thread -- and a signer does not wait for the translation before starting the next
+# sentence. In the first real signing session six streams piled up and CUDA OOM'd 5 of 9
+# clips; every prior validation had fed clips sequentially, so it never saw more than one.
+# Past this cap a clip still records, it just buffers frames and does its perception after
+# the cut (slower for that clip, but bounded). gpu_serial.py bounds the device side.
+MAX_LIVE_STREAMS = int(os.environ.get("MAX_LIVE_STREAMS", "2"))
+_live_lock = threading.Lock()
+_live_streams = [0]
+
+
+def _take_stream_slot():
+    """Reserve one of the MAX_LIVE_STREAMS slots. False if they are all taken."""
+    with _live_lock:
+        if _live_streams[0] >= MAX_LIVE_STREAMS:
+            return False
+        _live_streams[0] += 1
+        return True
+
+
+def _release_stream_slot():
+    with _live_lock:
+        _live_streams[0] -= 1
+
 MODELS_BASE = "/home/sllu/.cache/huggingface/hub/models--ShesterG--SHuBERT/snapshots/578a0233e770c8ce4dc75d859b91fdea7c34f5aa/models"
 
 config = {
@@ -98,16 +123,20 @@ def translation_worker(processor):
         item = clip_queue.get()
         if item is None:
             break
-        # Streamed clips arrive as a live StreamingPerception whose backlog still has to
-        # be drained; legacy clips arrive as a path to an mp4 needing full processing.
-        streamed = isinstance(item, tuple)
-        label = item[0] if streamed else item
+        # Three shapes arrive here:
+        #   ("stream", label, stream, keep)  live StreamingPerception, backlog to drain
+        #   ("frames", label, frames)        buffered frames, perception not started (the
+        #                                    over-cap fallback; no mp4 round trip)
+        #   "<path>.mp4"                     legacy, only when STREAM_PERCEPTION=0
+        kind = item[0] if isinstance(item, tuple) else "path"
+        label = item[1] if isinstance(item, tuple) else item
+        streamed = kind == "stream"
         stream = None
         try:
             print(f"[worker] Translating {label} ...")
             t0 = time.time()
             if streamed:
-                _, stream, keep = item
+                _, _, stream, keep = item
                 # Drain here rather than on the camera thread: perception runs ~4.5x
                 # slower than realtime, so at the cut there is still a backlog worth
                 # seconds, and blocking the capture loop on it would freeze the preview
@@ -123,6 +152,11 @@ def translation_worker(processor):
                     mediapipe_seconds=stream.busy_seconds,
                     embeddings=embeddings,
                     embed_seconds=stream.embed_busy_seconds)
+            elif kind == "frames":
+                # Over the stream cap: landmarks were never started, so this pays the full
+                # perception cost here. Still cheaper than the legacy path, which wrote and
+                # re-read an mp4 and buffered full-rate BGR.
+                result = processor.process_frames(item[2])
             else:
                 result = processor.process_video(item)
             elapsed = time.time() - t0
@@ -139,8 +173,9 @@ def translation_worker(processor):
             # Jetson's shared pool after a few clips.
             if stream is not None:
                 stream.close()
+                _release_stream_slot()
             clip_queue.task_done()
-            if not streamed:
+            if kind == "path":
                 try:
                     os.remove(item)
                 except OSError:
@@ -177,6 +212,7 @@ def main():
     last_motion_time = None
     prev_gray = None
     stream = None          # StreamingPerception for the clip being recorded
+    deferred = False       # recording without a stream, because the cap was reached
     raw_frame_index = 0    # raw frames since RECORDING began, for applying the stride
     stride = stride_from_env()
     if STREAM_PERCEPTION:
@@ -223,7 +259,10 @@ def main():
                 raw_frame_index = 0
                 recorded_frames = []
                 frame_times = []
-                if STREAM_PERCEPTION:
+                # Stream only if a slot is free. Over the cap the clip is still recorded,
+                # just buffered at stride and translated after the cut — degraded latency
+                # for that one clip instead of an OOM that loses it entirely.
+                if STREAM_PERCEPTION and _take_stream_slot():
                     # One detector per clip — never reused, see streaming_perception.py.
                     stream = StreamingPerception(
                         config['mediapipe_face_model_path'],
@@ -233,18 +272,33 @@ def main():
                     stream.add_frame(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                     frame_times.append(now)
                     raw_frame_index = 1
+                    print(">>> RECORDING STARTED <<<")
+                elif STREAM_PERCEPTION:
+                    # Buffer stride-2 RGB, the same frames the stream would have retained,
+                    # so this fallback costs no more memory than streaming would have.
+                    deferred = True
+                    recorded_frames = [cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)]
+                    frame_times = [now]
+                    raw_frame_index = 1
+                    print(f">>> RECORDING STARTED (deferred — {MAX_LIVE_STREAMS} streams "
+                          f"already live) <<<")
                 else:
                     recorded_frames = [frame]
                     frame_times = [now]
-                print(">>> RECORDING STARTED <<<")
+                    print(">>> RECORDING STARTED <<<")
 
         elif state == "RECORDING":
-            if STREAM_PERCEPTION:
-                # Apply the stride here: features.py only strides at video read, which
-                # streamed frames never go through. Without this the model would get
-                # 30fps instead of the ~15fps SHuBERT expects.
+            # The stride is applied here for both streamed and deferred clips: features.py
+            # only strides at video read, which neither of them goes through. Without this
+            # the model would get 30fps instead of the ~15fps SHuBERT expects.
+            if stream is not None:
                 if raw_frame_index % stride == 0:
                     stream.add_frame(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+                    frame_times.append(now)
+                raw_frame_index += 1
+            elif deferred:
+                if raw_frame_index % stride == 0:
+                    recorded_frames.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                     frame_times.append(now)
                 raw_frame_index += 1
             else:
@@ -256,11 +310,12 @@ def main():
             still_duration = now - last_motion_time
             elapsed = now - record_start_time
 
-            if STREAM_PERCEPTION:
+            if stream is not None:
                 rec_label = (f"RECORDING - {len(frame_times)} frames, {elapsed:.1f}s "
                              f"(perception {stream.processed_frames}/{stream.queued_frames})")
             else:
-                rec_label = f"RECORDING - {len(recorded_frames)} frames, {elapsed:.1f}s"
+                rec_label = (f"RECORDING{' [deferred]' if deferred else ''} - "
+                             f"{len(recorded_frames)} frames, {elapsed:.1f}s")
             cv2.putText(display_frame, rec_label,
                         (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
             cv2.putText(display_frame, status_line, (10, 60),
@@ -277,14 +332,21 @@ def main():
 
                 if signing_duration >= MIN_CLIP_DURATION_SECONDS:
                     clip_counter[0] += 1
-                    if STREAM_PERCEPTION:
+                    if stream is not None:
                         label = f"clip_{clip_counter[0]} (streamed)"
-                        # Hand the whole stream over; the worker drains and closes it.
-                        clip_queue.put((label, stream, keep))
+                        # Hand the whole stream over; the worker drains, closes it and
+                        # releases the slot.
+                        clip_queue.put(("stream", label, stream, keep))
                         print(f"Queued {label} ({keep} frames, {signing_duration:.1f}s "
                               f"signing; trimmed {len(frame_times) - keep} still frames; "
                               f"{stream.processed_frames} already through MediaPipe)")
                         stream = None
+                    elif deferred:
+                        label = f"clip_{clip_counter[0]} (deferred)"
+                        clip_queue.put(("frames", label, recorded_frames[:keep]))
+                        print(f"Queued {label} ({keep} frames, {signing_duration:.1f}s "
+                              f"signing; trimmed {len(recorded_frames) - keep} still "
+                              f"frames; perception not started)")
                     else:
                         clip_path = os.path.join(config['temp_dir'],
                                                  f"clip_{clip_counter[0]}.mp4")
@@ -297,9 +359,11 @@ def main():
                           f"{len(frame_times)} frames).")
                     if stream is not None:
                         stream.close()
+                        _release_stream_slot()
                         stream = None
 
                 state = "IDLE"
+                deferred = False
                 recorded_frames = []
                 frame_times = []
 
@@ -315,6 +379,7 @@ def main():
     # Quitting mid-recording leaves a detector holding MediaPipe native resources.
     if stream is not None:
         stream.close()
+        _release_stream_slot()
 
     clip_queue.put(None)
     worker.join(timeout=5)

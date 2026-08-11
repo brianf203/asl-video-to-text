@@ -1,5 +1,7 @@
 import torch
 import torch.nn as nn
+
+from gpu_serial import gpu_serial
 from torchvision import transforms
 from PIL import Image
 try:
@@ -117,16 +119,20 @@ class DINOEmbedder:
             Numpy array of embeddings with shape (num_frames, embedding_dim)
         """
         all_embeddings = []
-        
+
         # Process frames in batches
         for idx in range(0, len(frames), self.batch_size):
             batch_frames = frames[idx:idx + self.batch_size]
-            
-            # Preprocess batch
+
+            # Preprocess batch. Deliberately OUTSIDE the GPU lock below -- this is CPU
+            # work, so leaving it unserialised lets it overlap with another thread's
+            # device work.
             batch_tensors = self._preprocess_frames_batch(batch_frames)
-            
-            # Extract embeddings
-            with torch.no_grad():
+
+            # Extract embeddings. Serialised process-wide: on the live path several clips
+            # can be embedding at once while the worker runs ByT5, and nothing else bounds
+            # the peak on this 8GB shared-memory board. See gpu_serial.py.
+            with gpu_serial(), torch.no_grad():
                 # Cast back to fp32 so callers keep receiving float32 arrays regardless
                 # of the compute dtype -- downstream (SHuBERT/ByT5) sets its own dtype.
                 batch_embeddings = self.model(batch_tensors).float().cpu().numpy()

@@ -7,6 +7,8 @@ import numpy as np
 import random
 import warnings
 
+from gpu_serial import gpu_serial
+
 from transformers import (
     ByT5Tokenizer,
     Seq2SeqTrainingArguments,
@@ -783,9 +785,10 @@ def generate_text_from_features(
     right_hand_tensor = torch.tensor(right_hand_embeddings, dtype=_dtype).unsqueeze(0).to(device)
     pose_tensor = torch.tensor(body_posture_embeddings, dtype=_dtype).unsqueeze(0).to(device)
     
-    # Generate text
+    # Generate text. Serialised against the DINOv2 embedding stages, which on the live path
+    # are running concurrently for whatever clip is being signed right now. See gpu_serial.py.
     _t0 = _time.time()
-    with torch.no_grad():
+    with gpu_serial(), torch.no_grad():
         generated_ids = model.generate(
             face_features=face_tensor,
             left_hand_features=left_hand_tensor,
