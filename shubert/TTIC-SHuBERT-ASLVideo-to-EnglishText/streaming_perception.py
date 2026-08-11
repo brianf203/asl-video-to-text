@@ -26,6 +26,20 @@ import numpy as np
 
 from kpe_mediapipe import HolisticDetector
 
+# Frame-level parallelism. HolisticDetector already runs its three detectors concurrently
+# WITHIN a frame (3 threads), but frames themselves were processed one at a time -- so on a
+# 6-core box only about half the CPU was ever in use, while perception is the entire
+# remaining latency. arXiv 2607.09611, which runs this same MediaPipe -> DINOv2 -> SHuBERT
+# -> ByT5 stack, reports 107-111 -> 45-48 ms/frame from exactly this change (two CPU
+# perception workers, 10-frame chunks, reorder buffer).
+#
+# Frames are handed out in CONTIGUOUS CHUNKS, not round-robin per frame, because MediaPipe
+# tracks landmarks temporally: a worker that sees frames 0..9 keeps useful tracking state,
+# one that sees every other frame does not. The cost is a re-detection at each chunk
+# boundary, which is why chunks should not be tiny.
+PERCEPTION_WORKERS = max(1, int(os.environ.get("PERCEPTION_WORKERS", "2")))
+PERCEPTION_CHUNK = max(1, int(os.environ.get("PERCEPTION_CHUNK", "10")))
+
 
 class StreamingPerception:
     """Feed frames in as they are captured; collect landmarks when the clip is cut.
@@ -36,16 +50,32 @@ class StreamingPerception:
     """
 
     def __init__(self, face_model_path: str, hand_model_path: str, embed_config: dict = None,
-                 chunk_size: int = None):
-        self._detector = HolisticDetector(face_model_path, hand_model_path)
-        self._queue: "queue.Queue" = queue.Queue()
+                 chunk_size: int = None, workers: int = None):
+        self._face_model_path = face_model_path
+        self._hand_model_path = hand_model_path
+        self._n_workers = workers or PERCEPTION_WORKERS
+        # One detector per worker, built inside the worker thread so the several-hundred-ms
+        # construction cost happens in parallel rather than serially at clip start.
+        self._detectors = [None] * self._n_workers
+        self._queues = [queue.Queue() for _ in range(self._n_workers)]
         self._frames = []          # RGB, stride-applied, in capture order
         self._landmarks = {}       # index -> landmarks
         self._lock = threading.Lock()
         self._closed = False
         self._error = None
         self._processed = 0
+        # Aggregate CPU time across workers, NOT wall time -- with N workers the sum can
+        # exceed the elapsed wall clock. Reported as-is so the stage breakdown still shows
+        # what perception costs in CPU terms.
         self._busy_seconds = 0.0
+
+        # Reorder buffer. Workers finish out of order, but the crop extractors downstream
+        # carry fallback state from frame to frame (prev_left_frame and friends), so the
+        # embed stage must see frames in strictly increasing index order or the crops
+        # silently change. This is the piece that makes parallel perception safe.
+        self._ready = {}           # index -> (frame, landmarks) completed but not yet emitted
+        self._next_to_emit = 0
+        self._emit_lock = threading.Lock()
 
         # Optional second stage: crop + DINOv2 as landmarks land, pipelined behind
         # perception. DINOv2 is GPU work and MediaPipe is CPU-bound, so this stage runs
@@ -60,8 +90,13 @@ class StreamingPerception:
         self._left_chunks, self._right_chunks, self._face_chunks = [], [], []
         self._embed_worker = None
 
-        self._worker = threading.Thread(target=self._run, name="perception", daemon=True)
-        self._worker.start()
+        self._workers = [
+            threading.Thread(target=self._run, args=(i,), name=f"perception-{i}",
+                             daemon=True)
+            for i in range(self._n_workers)
+        ]
+        for w in self._workers:
+            w.start()
         if self._embed_config is not None:
             self._embed_worker = threading.Thread(target=self._embed_run, name="embed",
                                                   daemon=True)
@@ -74,7 +109,9 @@ class StreamingPerception:
         with self._lock:
             index = len(self._frames)
             self._frames.append(frame_rgb)
-        self._queue.put((index, frame_rgb))
+        # Contiguous chunks per worker, so each detector's temporal tracking stays useful.
+        worker = (index // PERCEPTION_CHUNK) % self._n_workers
+        self._queues[worker].put((index, frame_rgb))
         return index
 
     @property
@@ -88,16 +125,20 @@ class StreamingPerception:
 
     # -- consumer side (perception thread) -----------------------------------
 
-    def _run(self):
+    def _run(self, worker_id: int):
+        detector = HolisticDetector(self._face_model_path, self._hand_model_path)
+        self._detectors[worker_id] = detector
+        my_queue = self._queues[worker_id]
         while True:
-            item = self._queue.get()
+            item = my_queue.get()
             if item is None:
                 break
             index, frame = item
             try:
                 t0 = time.time()
-                _boxes, landmarks = self._detector.detect_frame_landmarks(frame)
-                self._busy_seconds += time.time() - t0
+                _boxes, landmarks = detector.detect_frame_landmarks(frame)
+                with self._lock:
+                    self._busy_seconds += time.time() - t0
                 self._landmarks[index] = landmarks
             except Exception as e:
                 # Match process_video_frames(): a bad frame becomes a None entry rather
@@ -105,13 +146,24 @@ class StreamingPerception:
                 print(f"[stream] error on frame {index}: {type(e).__name__}: {e}")
                 self._landmarks[index] = None
             finally:
-                self._processed += 1
+                with self._lock:
+                    self._processed += 1
                 if self._embed_config is not None:
-                    # Hand off in perception order; the crop extractors carry fallback
-                    # state across frames, so order here is not optional.
-                    self._embed_queue.put((frame, self._landmarks[index]))
-        if self._embed_config is not None:
-            self._embed_queue.put(None)
+                    self._emit_in_order(index, frame)
+
+    def _emit_in_order(self, index, frame):
+        """Release completed frames to the embed stage in index order, never out of it.
+
+        Workers complete out of order; the crop extractors downstream fall back to the
+        PREVIOUS frame's crop when a hand or face is missing, so feeding them out of order
+        would silently corrupt crops with no error raised.
+        """
+        with self._emit_lock:
+            self._ready[index] = (frame, self._landmarks[index])
+            while self._next_to_emit in self._ready:
+                f, lm = self._ready.pop(self._next_to_emit)
+                self._embed_queue.put((f, lm))
+                self._next_to_emit += 1
 
     def _embed_run(self):
         """Crop and embed frames in chunks as their landmarks become available."""
@@ -167,8 +219,20 @@ class StreamingPerception:
         may already have been processed; their results are dropped, which is equivalent
         to never having submitted them.
         """
-        self._queue.put(None)
-        self._worker.join()
+        for q in self._queues:
+            q.put(None)
+        for w in self._workers:
+            w.join()
+        if self._embed_config is not None:
+            # Only now is every frame through perception, so only now can the reorder
+            # buffer be empty. Sending the sentinel from a worker (as the single-threaded
+            # version did) would end the embed stage while other workers were still
+            # producing frames it had not seen.
+            with self._emit_lock:
+                assert not self._ready, (
+                    f"reorder buffer still holds {sorted(self._ready)} after all workers "
+                    f"finished; next expected {self._next_to_emit}")
+            self._embed_queue.put(None)
         if self._embed_worker is not None:
             self._embed_worker.join()
             if self._embed_error is not None:
@@ -197,10 +261,13 @@ class StreamingPerception:
         if self._closed:
             return
         self._closed = True
-        if self._worker.is_alive():
-            self._queue.put(None)
-            self._worker.join(timeout=30)
-        self._detector.close()
+        for q, w in zip(self._queues, self._workers):
+            if w.is_alive():
+                q.put(None)
+                w.join(timeout=30)
+        for d in self._detectors:
+            if d is not None:
+                d.close()
 
     @property
     def busy_seconds(self) -> float:

@@ -358,6 +358,48 @@ def report(res, tag=""):
     print("=" * 72)
 
 
+def score_streaming(processor, path):
+    """Translate a clip through StreamingPerception instead of process_video().
+
+    The default eval path is `process_video()` -> `video_holistic()`, a single detector
+    processing frames sequentially. That means it CANNOT see anything about the live
+    path's parallel perception -- frames are fed to `PERCEPTION_WORKERS` detectors in
+    chunks there, so landmarks differ at every chunk boundary. Without this branch a
+    perception change can look validated when it was never exercised.
+
+    Frames are pushed as fast as they read rather than at wall-clock camera rate: this
+    measures the TEXT, and pacing would only make the run take as long as the footage.
+    Latency conclusions must come from live_worker_probe.py, not from here.
+    """
+    from streaming_perception import StreamingPerception, stride_from_env
+
+    stride = stride_from_env()
+    cap = cv2.VideoCapture(path)
+    stream = StreamingPerception(
+        config['mediapipe_face_model_path'],
+        config['mediapipe_hands_model_path'],
+        embed_config=config,
+    )
+    try:
+        read_count = 0
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            if read_count % stride == 0:
+                stream.add_frame(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            read_count += 1
+        cap.release()
+        frames, landmarks, embeddings = stream.finish()
+        return processor.process_frames(
+            frames, landmarks=landmarks,
+            mediapipe_seconds=stream.busy_seconds,
+            embeddings=embeddings,
+            embed_seconds=stream.embed_busy_seconds)
+    finally:
+        stream.close()
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--tag", default="", help="label for the results file")
@@ -367,6 +409,9 @@ def main():
                     help="score the raw clips instead of trimming to the moving span")
     ap.add_argument("--rescore", metavar="FILE",
                     help="recompute metrics from a saved results file (no inference)")
+    ap.add_argument("--streaming", action="store_true",
+                    help="translate through StreamingPerception (the live path) instead of "
+                         "process_video, so parallel-perception changes are exercised")
     ap.add_argument("--fresh", action="store_true",
                     help="discard any partial run for this tag and start from clip 1")
     args = ap.parse_args()
@@ -412,6 +457,12 @@ def main():
         "frame_stride": os.environ.get("FRAME_STRIDE", "2"),
         "use_onnx_perception": os.environ.get("USE_ONNX_PERCEPTION", "0"),
         "mediapipe_video_mode": os.environ.get("MEDIAPIPE_VIDEO_MODE", "1"),
+        "streaming": args.streaming,
+        # Only affects output when --streaming: the sequential path uses one detector.
+        "perception_workers": (os.environ.get("PERCEPTION_WORKERS", "2")
+                               if args.streaming else "n/a"),
+        "perception_chunk": (os.environ.get("PERCEPTION_CHUNK", "10")
+                             if args.streaming else "n/a"),
         "dinov2_hands_dtype": str(dinov2_features.HANDS_DTYPE),
         "dinov2_face_dtype": str(dinov2_features.FACE_DTYPE),
         "byt5_dtype": os.environ.get("BYT5_DTYPE", "bfloat16"),
@@ -458,7 +509,8 @@ def main():
 
             t0 = time.time()
             try:
-                hyp = processor.process_video(path)
+                hyp = (score_streaming(processor, path) if args.streaming
+                       else processor.process_video(path))
             except Exception as e:
                 hyp = ""
                 print(f"[{it['id']}] FAILED {type(e).__name__}: {e}")
