@@ -733,7 +733,8 @@ def generate_text_from_features(
     model_checkpoint: str,
     tokenizer_checkpoint: str,
     output_dir: str,
-    generation_max_length: int = 2048,
+    # None -> read BYT5_MAX_LENGTH at call time, same reasoning as the beam default below.
+    generation_max_length: int = None,
     # None -> read BYT5_NUM_BEAMS at call time (a literal default would be evaluated once at
     # import, so setting the env var later would silently do nothing). Greedy unless asked.
     generation_num_beams: int = None,
@@ -768,6 +769,21 @@ def generate_text_from_features(
     # both with and without beams. Looping remains a separate, rarer problem.
     if generation_num_beams is None:
         generation_num_beams = max(1, int(os.environ.get("BYT5_NUM_BEAMS", "4")))
+
+    # ByT5 is BYTE-level, so max_length is a character budget, not a token one -- 2048 is
+    # room for a paragraph and no clip should ever want it. Measured over 1850 hypotheses
+    # from the OpenASL eval runs: median 65 bytes, p99 302, p99.9 513, and the longest
+    # REFERENCE in the set is 321. Exactly one clip ever reached the old 2048 cap, emitting
+    # "The form is a form of a form of a form of..." and costing 94.8s for a sentence whose
+    # reference is one line.
+    #
+    # 768 sits above every real output measured (1.5x the p99.9, 2.4x the longest
+    # reference) while bounding the degenerate case to roughly a third of its worst time.
+    # This does NOT fix looping -- it caps what looping costs. Note it also does not explain
+    # the other slow decodes: z3jAMn3xpoM_07 emits 22 bytes and has taken 2.6s, 4.5s, 93s
+    # and 401s across runs, so that one is system state (throttling/swap), not length.
+    if generation_max_length is None:
+        generation_max_length = max(64, int(os.environ.get("BYT5_MAX_LENGTH", "768")))
 
     # Load model and tokenizer (cached across calls — see _get_cached_model)
     import time as _time

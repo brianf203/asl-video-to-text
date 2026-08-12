@@ -468,6 +468,7 @@ def main():
         "byt5_dtype": os.environ.get("BYT5_DTYPE", "bfloat16"),
         "byt5_device": os.environ.get("BYT5_DEVICE", "cuda"),
         "byt5_num_beams": os.environ.get("BYT5_NUM_BEAMS", "4"),
+        "byt5_max_length": os.environ.get("BYT5_MAX_LENGTH", "768"),
         "no_trim": args.no_trim,
     }
 
