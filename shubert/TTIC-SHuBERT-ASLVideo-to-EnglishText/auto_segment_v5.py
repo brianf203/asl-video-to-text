@@ -246,6 +246,22 @@ QUIT_DRAIN_SECONDS = float(os.environ.get("QUIT_DRAIN_SECONDS", "180"))
 # translating a spurious one. Raise it if false starts keep reaching the worker.
 MIN_MOTION_FRACTION = float(os.environ.get("MIN_MOTION_FRACTION", "0.5"))
 
+# Push-to-record: SPACE starts a clip, SPACE ends it. No motion detection at all.
+#
+# This is the DEFAULT because segmentation is not what the project is trying to solve. A
+# global pixel-difference mean cannot reliably separate signing from ordinary movement
+# (measured: the two overlap at 1.0-1.05x separation), so automatic segmentation costs a
+# calibration ritual, a threshold that varies run to run, and a class of failure -- false
+# starts, missed starts, cuts mid-fingerspelling -- that contaminates every latency and
+# quality measurement taken through it. A key press has none of that.
+#
+# It also REMOVES LATENCY: automatic mode waits STILL_DURATION_SECONDS (2.5s) of stillness
+# before it will cut, and every one of those seconds is perceived latency on every
+# sentence. Pressing space ends the clip immediately.
+#
+# RECORD_MODE=motion restores the automatic path (calibration, thresholds, hand veto).
+MANUAL_RECORD = os.environ.get("RECORD_MODE", "manual").lower() != "motion"
+
 # Calibrate at every launch, in this window, before signing starts. The whole point is
 # that anyone can sit down in any room and have the machine fit itself to THEM: their
 # lighting, their camera distance, how big they sign. A saved profile is still written and
@@ -602,8 +618,11 @@ def main():
     retained_this_clip = 0  # frames this clip has added to the global retained budget
     # Started before calibration so its MediaPipe graph loads during it, rather than
     # costing the first sentence a ~1s load at the moment it is needed.
+    # The hand trigger only ever gated STARTS, so manual mode has no use for it -- and
+    # skipping it frees a core, which matters: detection is ~102ms/frame on a 6-core box
+    # whose bottleneck is CPU-bound MediaPipe perception.
     hand_gate = None
-    if LANDMARK_TRIGGER:
+    if LANDMARK_TRIGGER and not MANUAL_RECORD:
         hand_gate = HandPresenceTrigger(config['mediapipe_hands_model_path'])
         hand_gate.start()
         print("Landmark trigger ON — a start also requires hands to be visible.")
@@ -615,7 +634,9 @@ def main():
     # profile instead (for unattended probes), and ADAPTIVE_MOTION=0 drops to fixed
     # constants outright.
     profile = None
-    if ADAPTIVE_MOTION and STARTUP_CALIBRATION:
+    if MANUAL_RECORD:
+        print("Push-to-record: press SPACE to start a clip, SPACE again to end it.")
+    elif ADAPTIVE_MOTION and STARTUP_CALIBRATION:
         # One retry. The common failure is a signer who did not realise the SIGN phase had
         # started, and re-prompting costs 28s against a whole session of bad thresholds.
         # Bounded at two attempts so an empty room cannot loop forever.
@@ -630,12 +651,12 @@ def main():
                 break
             print("\nCalibration did not see any signing — running it once more. "
                   "During the SIGN phase, sign as you normally would.\n")
-    elif ADAPTIVE_MOTION:
+    elif ADAPTIVE_MOTION and not MANUAL_RECORD:
         profile = load_profile()
     gate = MotionGate(MOTION_SMOOTHING_FRAMES,
                       MOTION_START_THRESHOLD, MOTION_STOP_THRESHOLD,
                       adaptive=ADAPTIVE_MOTION, profile=profile)
-    if profile:
+    if profile and not MANUAL_RECORD:
         print(f"[gate] calibrated {profile.get('created', '?')} — "
               f"start {gate.start_threshold:.2f}, stop {gate.stop_threshold:.2f} "
               f"(separation {profile.get('separation') or 0:.2f}x)")
@@ -643,7 +664,7 @@ def main():
             print("[gate] WARNING: calibration could not cleanly separate signing from "
                   "ordinary movement — expect occasional false starts; the hand veto and "
                   "the empty-clip test cover some of them.")
-    elif ADAPTIVE_MOTION:
+    elif ADAPTIVE_MOTION and not MANUAL_RECORD:
         print("[gate] no calibration — inferring thresholds from the room's noise floor.")
 
     # Do not open for signing before the models exist: a clip queued now would sit unread
@@ -653,15 +674,25 @@ def main():
         cv2.destroyAllWindows()
         clip_queue.put(None)
         return
-    pre_roll = deque(maxlen=int(PRE_ROLL_MAX_SECONDS * 30))
+    # The pre-roll ring exists only to back-date an automatic trigger that fires late.
+    # Manual mode has nothing to back-date, and the ring is not free: 2.5s of 640x480 BGR
+    # is ~66MB held permanently on an 8GB box that OOMs under memory pressure.
+    pre_roll = deque(maxlen=0 if MANUAL_RECORD else int(PRE_ROLL_MAX_SECONDS * 30))
     above_start = 0        # consecutive frames over the start threshold (the debounce)
+    # SPACE, read at the bottom of the previous iteration. waitKey has to follow imshow to
+    # render, so the press is acted on one frame (~33ms) later -- irrelevant next to a
+    # translation, and it keeps all the key handling in one place.
+    toggle_pressed = False
     stride = stride_from_env()
     if STREAM_PERCEPTION:
         print(f"Streaming perception ON (stride {stride}) — landmarks are extracted "
               f"during recording, not after the cut.")
 
-    print("Auto-segmentation active. Sign naturally, pause briefly between sentences.")
-    print("Press 'q' to quit.")
+    if MANUAL_RECORD:
+        print("Ready. SPACE starts and ends each clip; 'q' quits.")
+    else:
+        print("Auto-segmentation active. Sign naturally, pause briefly between sentences.")
+        print("Press 'q' to quit.")
 
     while cap.isOpened():
         ret, frame = cap.read()
@@ -718,6 +749,38 @@ def main():
         if not models_ready.is_set():
             cv2.putText(display_frame, status_line, (10, 30),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 200, 255), 2)
+
+        elif state == "IDLE" and MANUAL_RECORD:
+            cv2.putText(display_frame, status_line, (10, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+            cv2.putText(display_frame, "SPACE to start recording", (10, 90),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
+            start_now = toggle_pressed
+            toggle_pressed = False
+            if start_now:
+                budget_ok, budget_reason = _capture_budget()
+                if not budget_ok:
+                    # Same refusal as the automatic path: the camera thread must never
+                    # block, and a visibly dropped clip beats OOMing the ones in flight.
+                    start_now = False
+                    print(f"Not starting — {budget_reason}")
+            if start_now:
+                state = "RECORDING"
+                retained_this_clip = 0
+                # No back-dating: the signer pressed the key before signing, so there is
+                # no lead-in sitting in the past to recover. That is the whole appeal --
+                # the pre-roll, the onset search and the lead pad exist to undo a trigger
+                # that fires late, and a key press does not fire late.
+                record_start_time = now
+                last_motion_time = now
+                raw_frame_index = 0
+                recorded_frames = []
+                frame_times = []
+                frame_scores = []
+                stream, deferred = _begin_perception()
+                extra = (f" (deferred — {MAX_LIVE_STREAMS} streams already live)"
+                         if deferred else "")
+                print(f">>> RECORDING{extra} <<<")
 
         elif state == "IDLE":
             cv2.putText(display_frame, status_line, (10, 30),
@@ -851,16 +914,22 @@ def main():
             else:
                 rec_label = (f"RECORDING{' [deferred]' if deferred else ''} - "
                              f"{len(recorded_frames)} frames, {elapsed:.1f}s")
+            if MANUAL_RECORD:
+                rec_label += "  [SPACE to stop]"
             cv2.putText(display_frame, rec_label,
                         (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
             cv2.putText(display_frame, status_line, (10, 60),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
             force_cut = elapsed >= MAX_CLIP_SECONDS
-            if still_duration >= STILL_DURATION_SECONDS or force_cut:
-                if force_cut:
-                    # Still signing: there is no still tail to trim and every frame counts
-                    # as signing, so keep the lot and measure the duration to now.
+            manual_stop = MANUAL_RECORD and toggle_pressed
+            if manual_stop:
+                toggle_pressed = False
+            if manual_stop or force_cut or (
+                    not MANUAL_RECORD and still_duration >= STILL_DURATION_SECONDS):
+                if force_cut or manual_stop:
+                    # Nothing to trim: a forced cut lands mid-sentence and a manual stop
+                    # lands where the signer chose, so keep the lot and measure to now.
                     keep = len(frame_times)
                     signing_duration = now - record_start_time
                     print(f">>> FORCED CUT at {elapsed:.1f}s "
@@ -886,8 +955,11 @@ def main():
                     sum(1 for s in scored if s > gate.stop_threshold) / len(scored)
                     if scored else 1.0)
 
-                if (signing_duration >= MIN_CLIP_DURATION_SECONDS
-                        and motion_fraction >= MIN_MOTION_FRACTION):
+                # In manual mode the signer explicitly asked for this clip, so the
+                # motion test does not apply -- it exists to catch FALSE STARTS, which
+                # cannot happen when a key press starts the clip.
+                enough_motion = MANUAL_RECORD or motion_fraction >= MIN_MOTION_FRACTION
+                if signing_duration >= MIN_CLIP_DURATION_SECONDS and enough_motion:
                     clip_counter[0] += 1
                     if stream is not None:
                         label = f"clip_{clip_counter[0]} (streamed)"
@@ -969,7 +1041,10 @@ def main():
                     (10, 470),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1)
         cv2.imshow(WINDOW_TITLE, display_frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord(' '):
+            toggle_pressed = True
+        if key == ord('q'):
             break
 
     cap.release()
