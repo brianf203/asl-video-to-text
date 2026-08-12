@@ -218,6 +218,18 @@ class StreamingPerception:
         except Exception as e:
             # Record and stop; finish() reports it rather than returning partial features.
             print(f"[stream] embedding stage failed: {type(e).__name__}: {e}")
+            # Include memory state: this stage is where CUDA OOM surfaces first, and
+            # without the numbers it is impossible to tell a genuine backlog problem from
+            # the box simply having started short of headroom.
+            try:
+                with open("/proc/meminfo") as f:
+                    info = {k.strip(): v for k, v in
+                            (line.split(":", 1) for line in f)}
+                print(f"[stream] at failure: MemAvailable={info['MemAvailable'].strip()}"
+                      f" frames_queued={len(self._frames)}"
+                      f" embedded={self._embedded}")
+            except Exception:
+                pass
             self._embed_error = e
 
     # -- finishing -----------------------------------------------------------
