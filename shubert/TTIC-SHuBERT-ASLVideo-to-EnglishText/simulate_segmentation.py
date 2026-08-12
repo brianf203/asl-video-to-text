@@ -37,11 +37,32 @@ def load(path):
         return [json.loads(line) for line in f]
 
 
-def simulate(rows, adaptive, scale=1.0, metric="current"):
-    """Run v5's state machine over the rows. Returns per-clip spans and gate history."""
+def load_hand_presence(path):
+    """Per-frame hand presence from analyze_hand_trigger.py, indexed by frame."""
+    if not os.path.exists(path):
+        return None
+    present = {}
+    with open(path) as f:
+        for line in f:
+            r = json.loads(line)
+            present[r["i"]] = r["n_hands"] > 0
+    return present
+
+
+def simulate(rows, adaptive, scale=1.0, metric="current", hands=None,
+             pregate_factor=1.0):
+    """Run v5's state machine over the rows. Returns per-clip spans and gate history.
+
+    `hands` enables the hybrid trigger: the pixel threshold is divided by
+    `pregate_factor` (so it becomes a sensitive, high-recall pre-gate) and a start also
+    requires hand presence confirmed over the rolling window.
+    """
     gate = MotionGate(v5.MOTION_SMOOTHING_FRAMES,
                       v5.MOTION_START_THRESHOLD, v5.MOTION_STOP_THRESHOLD,
                       adaptive=adaptive)
+    from collections import deque as _deque
+    from hand_trigger import HAND_WINDOW, HAND_NEEDED
+    hand_recent = _deque(maxlen=HAND_WINDOW)
     state = "IDLE"
     above_start = 0
     record_start_i = None
@@ -58,10 +79,21 @@ def simulate(rows, adaptive, scale=1.0, metric="current"):
         floors.append(gate.floor)
 
         if state == "IDLE":
-            above_start = above_start + 1 if smoothed > gate.start_threshold else 0
+            # With the hybrid the pixel test becomes a sensitive pre-gate; hands supply
+            # the precision, so the threshold no longer has to sit inside the narrow
+            # still-max/signing-max window.
+            threshold = gate.start_threshold / pregate_factor
+            above_start = above_start + 1 if smoothed > threshold else 0
+            if hands is not None:
+                # Detection only runs on frames the pre-gate lets through; unchecked
+                # frames count as absent, mirroring HandPresenceTrigger.note_absent().
+                hand_recent.append(1 if (above_start and hands.get(i, False)) else 0)
+            hands_ok = (hands is None or sum(hand_recent) >= HAND_NEEDED)
             # The interlock: in adaptive mode nothing records until a floor exists.
-            if above_start >= v5.START_DEBOUNCE_FRAMES and (not adaptive or gate.ready):
+            if (above_start >= v5.START_DEBOUNCE_FRAMES and hands_ok
+                    and (not adaptive or gate.ready)):
                 above_start = 0
+                hand_recent.clear()
                 state = "RECORDING"
                 # Back-date exactly as the live path does, using v5's own function and
                 # the gate's CURRENT stop threshold -- without this the simulation loses
@@ -166,6 +198,14 @@ def main():
     ap.add_argument("--scale", nargs="*", type=float, default=[1.0],
                     help="multiply every score, to stand in for a different room/camera")
     ap.add_argument("--metric", default="current")
+    ap.add_argument("--hands", default=os.path.join(HERE, "hand_trigger.jsonl"),
+                    help="per-frame hand presence from analyze_hand_trigger.py")
+    ap.add_argument("--pregate", type=float, default=1.0,
+                    help="divide the pixel start threshold by this for the hybrid pre-gate. "
+                         "1.0 (the shipped setting) means hands act as a pure veto and the "
+                         "threshold is unchanged; loosening it was measured worse -- it "
+                         "adds a false start while the signer settles into position and "
+                         "rejects nothing extra")
     args = ap.parse_args()
 
     rows = load(args.calib)
@@ -173,16 +213,23 @@ def main():
     print(f"{'scale':>6} {'config':>9} {'clips':>6} {'cover%':>7} {'false':>6} "
           f"{'frag':>5} {'lead lost':>10} {'floor':>7} {'start thr':>10}")
     print("-" * 78)
+    hands = load_hand_presence(args.hands)
+    if hands is None:
+        print("(no hand_trigger.jsonl -- run analyze_hand_trigger.py for the hybrid row)\n")
+    configs = [("fixed", False, None), ("adaptive", True, None)]
+    if hands is not None:
+        configs.append(("hybrid", True, hands))
     for scale in args.scale:
-        for adaptive in (False, True):
+        for name, adaptive, hnd in configs:
             clips, floors = simulate(rows, adaptive=adaptive, scale=scale,
-                                     metric=args.metric)
+                                     metric=args.metric, hands=hnd,
+                                     pregate_factor=args.pregate if hnd else 1.0)
             s = score(rows, clips)
             seen = [f for f in floors if f is not None]
             floor = seen[-1] if seen else float("nan")
             gate_start = (floor * __import__("motion_gate").START_MULTIPLIER
                           if adaptive and seen else v5.MOTION_START_THRESHOLD)
-            print(f"{scale:>6.2f} {'adaptive' if adaptive else 'fixed':>9} "
+            print(f"{scale:>6.2f} {name:>9} "
                   f"{s['clips']:>6} {s['coverage']:>7.1f} {s['false_starts']:>6} "
                   f"{s['fragments']:>5} {s['lead_lost']:>9.2f}s "
                   f"{floor:>7.3f} {gate_start:>10.2f}")

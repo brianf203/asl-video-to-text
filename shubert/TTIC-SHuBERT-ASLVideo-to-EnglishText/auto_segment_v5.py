@@ -22,6 +22,7 @@ import queue
 import time
 from collections import deque
 from features import SHuBERTProcessor
+from hand_trigger import HandPresenceTrigger
 from motion_gate import MotionGate
 from streaming_perception import StreamingPerception, stride_from_env
 
@@ -34,6 +35,16 @@ from streaming_perception import StreamingPerception, stride_from_env
 # while adaptive held 97.9% coverage with 0 false starts at every scale.
 # Set ADAPTIVE_MOTION=0 to restore the old fixed-threshold behaviour.
 ADAPTIVE_MOTION = os.environ.get("ADAPTIVE_MOTION", "1") not in ("0", "false", "False")
+
+# Require hands to be visible before a clip starts. The pixel metric cannot tell a signer
+# from anything else that moves pixels; hand presence is semantic and separates far better
+# (measured on calib.mp4: 7.7% of still frames vs 79-84% of signing frames, and 0.0% across
+# the 452-frame post-signing still span). Acts as a pure VETO on top of the existing pixel
+# threshold, which is NOT loosened -- see hand_trigger.py for why lowering it was rejected.
+# On clean calibration data the hybrid is identical to pixel-only (4 clips, 97.9% coverage,
+# 0 false starts) and additionally rejects a 20x background-motion burst that makes
+# pixel-only false-start. Set LANDMARK_TRIGGER=0 to disable.
+LANDMARK_TRIGGER = os.environ.get("LANDMARK_TRIGGER", "1") not in ("0", "false", "False")
 
 # Run MediaPipe on each frame as it is captured rather than after the cut. Perception is
 # ~4.5x slower than realtime so it never finishes early, but it absorbs the whole recording
@@ -419,6 +430,13 @@ def main():
     gate = MotionGate(MOTION_SMOOTHING_FRAMES,
                       MOTION_START_THRESHOLD, MOTION_STOP_THRESHOLD,
                       adaptive=ADAPTIVE_MOTION)
+    # Started here so its MediaPipe graph loads while the models warm up, rather than
+    # costing the first sentence a ~1s load at the moment it is needed.
+    hand_gate = None
+    if LANDMARK_TRIGGER:
+        hand_gate = HandPresenceTrigger(config['mediapipe_hands_model_path'])
+        hand_gate.start()
+        print("Landmark trigger ON — a start also requires hands to be visible.")
     pre_roll = deque(maxlen=int(PRE_ROLL_MAX_SECONDS * 30))
     above_start = 0        # consecutive frames over the start threshold (the debounce)
     stride = stride_from_env()
@@ -475,6 +493,15 @@ def main():
             cv2.putText(display_frame, status_line, (10, 30),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
             above_start = above_start + 1 if motion_score > gate.start_threshold else 0
+            if hand_gate is not None:
+                if above_start:
+                    # Only while the pixel gate is hot: detection is ~102ms and must not
+                    # run continuously. submit() is non-blocking and drops frames the
+                    # detector cannot keep up with.
+                    hand_gate.submit(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+                else:
+                    # Decay, so a hit from minutes ago cannot confirm a later start.
+                    hand_gate.note_absent()
             if not gate.ready and ADAPTIVE_MOTION:
                 # No floor estimate yet -- refuse to record. Without this interlock a
                 # noisy room latches on within a few frames, and because the floor is
@@ -494,8 +521,11 @@ def main():
                 above_start = 0
                 cv2.putText(display_frame, f"BUSY - backlog full ({budget_reason})",
                             (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 165, 255), 2)
-            elif above_start >= START_DEBOUNCE_FRAMES:
+            elif above_start >= START_DEBOUNCE_FRAMES and (
+                    hand_gate is None or hand_gate.confirmed):
                 above_start = 0
+                if hand_gate is not None:
+                    hand_gate.reset()
                 state = "RECORDING"
                 retained_this_clip = 0
                 # Back-date to motion onset. The trigger is late by the debounce plus the
@@ -695,6 +725,8 @@ def main():
         stream.close()
         _release_stream_slot()
     _release_frames(retained_this_clip)
+    if hand_gate is not None:
+        hand_gate.close()
 
     # Drain properly instead of abandoning whatever is mid-flight.
     #
