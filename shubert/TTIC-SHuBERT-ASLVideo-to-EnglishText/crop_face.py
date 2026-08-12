@@ -13,6 +13,7 @@ import argparse
 import json
 import time
 from typing import Dict, Optional, Tuple, List, Union, Any
+from crop_jitter import jitter_corners
 
 
 class FaceExtractor:
@@ -88,6 +89,15 @@ class FaceExtractor:
         left_eye_box = self.calculate_bounding_box(facial_landmarks, self.left_eye_indices, image_shape)
         right_eye_box = self.calculate_bounding_box(facial_landmarks, self.right_eye_indices, image_shape)
         mouth_box = self.calculate_bounding_box(facial_landmarks, self.mouth_indices, image_shape)
+
+        # Measurement hook, no-op unless CROP_JITTER_* is set. The three boxes are
+        # perturbed INDEPENDENTLY because a different face landmarker would displace the
+        # eyes and the mouth by different amounts; moving them together would only
+        # simulate a translated head.
+        index = getattr(self, "_jitter_index", 0)
+        left_eye_box = jitter_corners(left_eye_box, "left_eye", index, image_shape)
+        right_eye_box = jitter_corners(right_eye_box, "right_eye", index, image_shape)
+        mouth_box = jitter_corners(mouth_box, "mouth", index, image_shape)
 
         # Calculate the overall bounding box
         min_x = min(left_eye_box[0], right_eye_box[0], mouth_box[0])
@@ -189,6 +199,7 @@ class FaceExtractor:
     def _reset_state(self):
         """Clear cross-frame fallback state. See HandExtractor._reset_state()."""
         self._prev_face_frame = None
+        self._frame_index = 0
         self._prev_landmarks = None
 
     def _blank(self) -> np.ndarray:
@@ -197,6 +208,8 @@ class FaceExtractor:
     def _process_one(self, frame, frame_landmarks):
         """Crop one frame's face, updating fallback state. Returns the face frame."""
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        self._jitter_index = self._frame_index
+        self._frame_index += 1
 
         if frame_landmarks is None:
             if self._prev_landmarks is not None:

@@ -58,6 +58,12 @@ def main():
         "byt5_device": os.environ.get("BYT5_DEVICE", "cuda"),
         "byt5_num_beams": os.environ.get("BYT5_NUM_BEAMS", "4"),
         "byt5_max_length": os.environ.get("BYT5_MAX_LENGTH", "768"),
+        # Perturbation condition. Load-bearing in the resume guard: resuming a
+        # clean run into a jittered one would produce a BLEU score describing no
+        # configuration at all, while still looking valid.
+        "crop_jitter_px": os.environ.get("CROP_JITTER_PX", "0"),
+        "crop_jitter_scale": os.environ.get("CROP_JITTER_SCALE", "0"),
+        "crop_jitter_seed": os.environ.get("CROP_JITTER_SEED", "0"),
     }
     differs = {k: (data.get(k), v) for k, v in want.items()
                if k in data and str(data[k]) != str(v)}

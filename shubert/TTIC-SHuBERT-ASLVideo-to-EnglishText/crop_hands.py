@@ -13,6 +13,7 @@ import argparse
 import json
 import time
 from typing import Dict, Optional, Tuple, List, Union, Any
+from crop_jitter import jitter_xywh
 import tempfile
 
 
@@ -48,6 +49,10 @@ class HandExtractor:
         self._prev_left_frame = None
         self._prev_right_frame = None
         self._prev_landmarks = None
+        # Frame counter, so crop_jitter's perturbation is a pure function of position in
+        # the clip rather than of call order. extract_hand_frames() resets it, and the
+        # streaming path continues it across chunks -- same contract as the crop state.
+        self._frame_index = 0
 
     def _blank(self) -> np.ndarray:
         return np.zeros((*self.output_size, 3), dtype=np.uint8)
@@ -55,6 +60,8 @@ class HandExtractor:
     def _process_one(self, frame, frame_landmarks):
         """Crop one frame's hands, updating fallback state. Returns (left, right)."""
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        index = self._frame_index
+        self._frame_index += 1
 
         if frame_landmarks is None:
             if self._prev_landmarks is not None:
@@ -77,6 +84,9 @@ class HandExtractor:
 
         if left_hand_landmarks is not None:
             left_box = self.get_bounding_box(left_hand_landmarks, frame_rgb.shape, self.scale_factor)
+            # Measurement hook, no-op unless CROP_JITTER_* is set. Applied BEFORE the
+            # clamp so a displaced box is still legal.
+            left_box = jitter_xywh(left_box, "left_hand", index)
             left_box = self.adjust_bounding_box(left_box, frame_rgb.shape)
             left_frame = self.resize_frame(self.crop_frame(frame_rgb, left_box), self.output_size)
             self._prev_left_frame = left_frame
@@ -87,6 +97,7 @@ class HandExtractor:
 
         if right_hand_landmarks is not None:
             right_box = self.get_bounding_box(right_hand_landmarks, frame_rgb.shape, self.scale_factor)
+            right_box = jitter_xywh(right_box, "right_hand", index)
             right_box = self.adjust_bounding_box(right_box, frame_rgb.shape)
             right_frame = self.resize_frame(self.crop_frame(frame_rgb, right_box), self.output_size)
             self._prev_right_frame = right_frame
