@@ -55,6 +55,7 @@ pre-roll ring, so a slower, more careful trigger costs no lead-in.
 """
 import os
 import threading
+import time
 from collections import deque
 
 HAND_CONFIDENCE = float(os.environ.get("HAND_TRIGGER_CONF", "0.3"))
@@ -79,6 +80,10 @@ class HandPresenceTrigger:
         self._needed = HAND_NEEDED if needed is None else needed
         self._recent = deque(maxlen=self._window)
         self._detector = None
+        # Most recent detection, for callers that want more than the rolling verdict --
+        # currently the startup calibration, which logs it so a future landmark-based
+        # motion score can be fitted from real labelled data instead of guessed at.
+        self._latest = None
         self._lock = threading.Lock()
         self._cv = threading.Condition()
         self._pending = None
@@ -134,11 +139,22 @@ class HandPresenceTrigger:
                 self._counter += 1
                 result = self._detector.detect_for_video(image, self._counter * 33)
                 found = bool(result.hand_landmarks)
+                # Landmark 0 is the wrist. Its normalised position is enough to describe
+                # where the hands are and how they move; the full 21 points are not
+                # needed for a trigger and would be noise to log.
+                latest = {
+                    "t": time.time(),
+                    "n_hands": len(result.hand_landmarks),
+                    "wrists": [[round(h[0].x, 4), round(h[0].y, 4)]
+                               for h in result.hand_landmarks],
+                }
             except Exception as e:
                 print(f"[hand-trigger] detection failed: {type(e).__name__}: {e}")
                 found = False
+                latest = {"t": time.time(), "n_hands": 0, "wrists": []}
             with self._lock:
                 self._recent.append(1 if found else 0)
+                self._latest = latest
 
     def submit(self, frame_rgb):
         """Offer the latest frame for checking. Never blocks; drops frames if busy."""
@@ -159,6 +175,13 @@ class HandPresenceTrigger:
     def confirmed(self):
         with self._lock:
             return sum(self._recent) >= self._needed
+
+    def latest(self):
+        """The most recent detection dict, or None. Lags capture by ~100-200ms and
+        arrives at the detector's ~10fps, not the camera's 30 -- fine for logging a
+        distribution, not a per-frame signal."""
+        with self._lock:
+            return self._latest
 
     @property
     def recent_hits(self):

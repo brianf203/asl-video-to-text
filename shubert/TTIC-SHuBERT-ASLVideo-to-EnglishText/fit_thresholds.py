@@ -146,19 +146,25 @@ def fit(negative, positive, fps=30.0):
     }
 
     if not all_peaks:
-        # Every positive phase stayed under the negative maximum. Placing the threshold
-        # above the negative side would then never trigger at all, so fall back to
-        # separating on the positive side's own peaks and report the overlap honestly.
+        # No signing event cleared the non-signing maximum, so this recording contains no
+        # evidence of where the boundary is. REFUSE rather than emit a number.
+        #
+        # The first version returned sqrt(neg_p50 * pos_peak) here, reasoning that some
+        # threshold beats none. Measured on a calibration run where nobody signed: it
+        # produced start 0.769 against a non-signing maximum of 2.615 -- a value certain
+        # to fire on the very motion it was fitted to reject, presented to the user as a
+        # successful calibration. A threshold placed above neg_max instead would be the
+        # opposite failure (nothing ever triggers) and just as silent. Both are worse than
+        # saying so: the caller falls back and can ask for the calibration again.
         pos_all = [v for vals in positive.values() for v in vals]
-        pos_peak = max(pos_all) if pos_all else 0.0
-        start = math.sqrt(max(neg_p50, 1e-6) * pos_peak) if pos_peak else None
         report.update({
             "ok": False,
-            "reason": (f"no signing event exceeded the non-signing maximum "
-                       f"({neg_max:.3f}); the two classes fully overlap"),
-            "weakest_move_peak": pos_peak, "separation": 1.0,
+            "reason": (f"no signing rose above ordinary movement (which reached "
+                       f"{neg_max:.3f}) — was anyone signing during the SIGN phase?"),
+            "weakest_move_peak": max(pos_all) if pos_all else 0.0,
+            "separation": 1.0,
         })
-        return start, (start * STOP_RATIO if start else None), report
+        return None, None, report
 
     # The weakest event that must trigger -- a low quantile rather than the raw minimum,
     # so one half-hearted movement cannot drag the ceiling down onto the floor.

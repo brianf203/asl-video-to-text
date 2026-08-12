@@ -12,6 +12,7 @@ translation; clips are handed off through a queue.
 
 Measured on my_please.mp4: ~57s cold -> ~41s warm per clip.
 """
+import json
 import os
 os.environ.setdefault("PYTORCH_NO_CUDA_MEMORY_CACHING", "1")
 
@@ -21,9 +22,10 @@ import threading
 import queue
 import time
 from collections import deque
+import fit_thresholds
 from features import SHuBERTProcessor
 from hand_trigger import HandPresenceTrigger
-from motion_gate import MotionGate, load_profile
+from motion_gate import MotionGate, PROFILE_PATH, load_profile
 from streaming_perception import StreamingPerception, stride_from_env
 
 # Scale the start/stop thresholds to the room's measured noise floor instead of using the
@@ -244,7 +246,169 @@ QUIT_DRAIN_SECONDS = float(os.environ.get("QUIT_DRAIN_SECONDS", "180"))
 # translating a spurious one. Raise it if false starts keep reaching the worker.
 MIN_MOTION_FRACTION = float(os.environ.get("MIN_MOTION_FRACTION", "0.5"))
 
+# Calibrate at every launch, in this window, before signing starts. The whole point is
+# that anyone can sit down in any room and have the machine fit itself to THEM: their
+# lighting, their camera distance, how big they sign. A saved profile is still written and
+# is reused when this is off (STARTUP_CALIBRATION=0), which is also how an automated probe
+# runs without a human to prompt.
+STARTUP_CALIBRATION = os.environ.get("STARTUP_CALIBRATION", "1") not in ("0", "false",
+                                                                        "False")
+
+# Kept SHORT deliberately: this runs before every session, and it is hidden inside the
+# ~20s the worker spends loading models, so it costs nothing as long as it stays under
+# that. The long-form version in calibrate_motion.py (7 phases, ~100s) exists for
+# analysis -- more phases, saved footage, per-metric comparison -- not for daily use.
+#
+# Three phases is the minimum that measures the real decision: what the room does when
+# nobody signs (SIT STILL), what the SIGNER does when they are not signing (MOVE -- the
+# phase that matters, see fit_thresholds.py), and what signing looks like.
+CALIB_PHASES = [
+    ("SIT STILL", "Sit still and look at the camera", 6.0),
+    ("MOVE (NO SIGNING)", "Move but DO NOT sign - shift around, scratch your face", 7.0),
+    ("SIGN", "Sign anything - a sentence, your name, fingerspelling", 9.0),
+]
+# Instruction shown on a static screen before each phase, so reading it does not land in
+# the measured window.
+CALIB_LEAD_SECONDS = 2.0
+
 CAMERA_INDEX = 0
+# One window for calibration, loading and signing: reusing the title means the same OS
+# window is reused rather than a new one popping up at each stage.
+WINDOW_TITLE = 'Auto ASL Translation (v5 - persistent worker)'
+
+
+def _gray_for_motion(frame):
+    """The exact preprocessing the live loop uses. Shared so the two cannot drift apart:
+    a threshold fitted on one blur radius and applied against another is silently wrong."""
+    return cv2.GaussianBlur(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), (21, 21), 0)
+
+
+def _draw_calibration(frame, prompt, banner, seconds_left, score, models_loading):
+    disp = frame.copy()
+    cv2.putText(disp, banner, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 200, 255), 2)
+    cv2.putText(disp, prompt, (10, 62), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 255, 255), 1)
+    cv2.putText(disp, f"{seconds_left:.0f}", (10, 100),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
+    if models_loading:
+        cv2.putText(disp, "loading models in the background...", (10, 455),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.45, (180, 180, 180), 1)
+    if score is not None:
+        cv2.putText(disp, f"motion {score:.2f}", (520, 455),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.45, (180, 180, 180), 1)
+    return disp
+
+
+# Every calibration writes its labelled frames here, overwritten each launch. It is the
+# only recording that contains a labelled MOVE (NO SIGNING) phase -- no existing capture
+# does -- which is exactly the class needed to answer whether a HAND-LANDMARK motion score
+# separates signing from fidgeting where the pixel mean does not. Costs one small file per
+# launch and saves having to stage a whole recording session to find out.
+CALIB_LOG_PATH = os.environ.get("CALIB_LOG", "last_calibration.jsonl")
+
+
+def run_startup_calibration(cap, hand_gate=None):
+    """Prompt through the short guided calibration.
+
+    Returns (profile, keep_going). `profile` is None if the fit failed, in which case the
+    caller falls back to inferring thresholds online. `keep_going` is False only when the
+    user pressed q, which means quit the program -- not "carry on uncalibrated".
+
+    Runs in the live preview window and uses the live loop's own motion metric, so what is
+    fitted is exactly what will be compared against. Deliberately placed while the
+    translation models load: the wait already exists, so calibration is free.
+    """
+    rows = []
+    prev_gray = None
+    total = sum(s for _, _, s in CALIB_PHASES) + CALIB_LEAD_SECONDS * len(CALIB_PHASES)
+    print(f"Calibrating to this room and signer (~{total:.0f}s) — follow the prompts.")
+
+    for index, (label, prompt, seconds) in enumerate(CALIB_PHASES, start=1):
+        banner = f"CALIBRATION {index}/{len(CALIB_PHASES)}"
+        for measuring in (False, True):
+            phase_end = time.time() + (seconds if measuring else CALIB_LEAD_SECONDS)
+            while time.time() < phase_end:
+                ret, frame = cap.read()
+                if not ret:
+                    print("Calibration aborted: camera read failed.")
+                    return None, True
+                gray = _gray_for_motion(frame)
+                score = None
+                if prev_gray is not None:
+                    score = float(np.mean(cv2.absdiff(prev_gray, gray)))
+                    if measuring:
+                        row = {"current": score, "phase": label, "t": time.time()}
+                        if hand_gate is not None:
+                            # Whatever the detector last produced. It lags ~100-200ms and
+                            # arrives at ~10fps, so consecutive rows repeat a result --
+                            # deliberate: dropping to the detector's rate here would make
+                            # the pixel and landmark series different lengths.
+                            row["hands"] = hand_gate.latest()
+                        rows.append(row)
+                prev_gray = gray
+                if hand_gate is not None:
+                    # Keep the detector fed so the landmark log covers the whole session,
+                    # and so its CPU cost is present during calibration exactly as it will
+                    # be during signing -- the pixel score depends on the frame interval,
+                    # so calibrating without this load would fit the wrong thing.
+                    hand_gate.submit(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+
+                cv2.imshow(WINDOW_TITLE,
+                           _draw_calibration(frame,
+                                             prompt if measuring else f"NEXT: {prompt}",
+                                             banner if measuring else "GET READY",
+                                             phase_end - time.time(), score,
+                                             not models_ready.is_set()))
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    print("Calibration cancelled.")
+                    return None, False
+
+    try:
+        with open(CALIB_LOG_PATH, "w") as fh:
+            for row in rows:
+                fh.write(json.dumps(row) + "\n")
+    except OSError as e:
+        print(f"(could not save {CALIB_LOG_PATH}: {e})")
+
+    start, stop, rep = fit_thresholds.fit_rows(rows, metric="current",
+                                               window=MOTION_SMOOTHING_FRAMES)
+    print(fit_thresholds.describe(start, stop, rep))
+    if start is None:
+        print("Calibration could not fit thresholds — falling back to the noise floor.")
+        return None, True
+
+    profile = {
+        "created": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "metric": "current", "smoothing_frames": MOTION_SMOOTHING_FRAMES, "fps": 30.0,
+        "start_threshold": start, "stop_threshold": stop,
+        # No online floor from a window this short: the floor estimator needs a sustained
+        # quiet run and 6s of stillness may not contain one. The live gate simply skips
+        # drift correction when this is absent, which is right -- calibration just ran.
+        "floor": None,
+        "separation": rep.get("separation"), "separable": rep.get("ok", False),
+        "n_frames": len(rows),
+        "stats": {k: rep.get(k) for k in ("neg_max", "neg_p50", "weakest_move_peak")},
+    }
+    try:
+        with open(PROFILE_PATH, "w") as fh:
+            json.dump(profile, fh, indent=2)
+    except OSError as e:
+        print(f"(could not save {PROFILE_PATH}: {e})")
+    return profile, True
+
+
+def wait_for_models(cap):
+    """Hold the preview open until the worker has loaded, so the camera never freezes."""
+    while not models_ready.is_set():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        disp = frame.copy()
+        cv2.putText(disp, "Loading translation models...", (10, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 200, 255), 2)
+        cv2.imshow(WINDOW_TITLE, disp)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            return False
+    return True
 
 def _begin_perception():
     """Start perception for a new clip. Returns (stream, deferred).
@@ -436,12 +600,38 @@ def main():
     deferred = False       # recording without a stream, because the cap was reached
     raw_frame_index = 0    # raw frames since RECORDING began, for applying the stride
     retained_this_clip = 0  # frames this clip has added to the global retained budget
-    # Thresholds come from calibration when a profile exists (run calibrate_motion.py),
-    # because measuring both classes beats inferring signing from the noise floor: a
-    # multiplier fitted in one room put the start threshold at 7.06 in a noisier one,
-    # above anything signing can produce. Without a profile this falls back to the online
-    # floor x multiplier, and ADAPTIVE_MOTION=0 restores the fixed constants outright.
-    profile = load_profile() if ADAPTIVE_MOTION else None
+    # Started before calibration so its MediaPipe graph loads during it, rather than
+    # costing the first sentence a ~1s load at the moment it is needed.
+    hand_gate = None
+    if LANDMARK_TRIGGER:
+        hand_gate = HandPresenceTrigger(config['mediapipe_hands_model_path'])
+        hand_gate.start()
+        print("Landmark trigger ON — a start also requires hands to be visible.")
+
+    # Calibrate this signer in this room, now, while the models load. Thresholds fitted to
+    # measured still / non-signing-motion / signing distributions beat inferring signing
+    # from the noise floor: that inference put the start threshold at 7.06 in a noisier
+    # room, above anything signing can produce. STARTUP_CALIBRATION=0 reuses the saved
+    # profile instead (for unattended probes), and ADAPTIVE_MOTION=0 drops to fixed
+    # constants outright.
+    profile = None
+    if ADAPTIVE_MOTION and STARTUP_CALIBRATION:
+        # One retry. The common failure is a signer who did not realise the SIGN phase had
+        # started, and re-prompting costs 28s against a whole session of bad thresholds.
+        # Bounded at two attempts so an empty room cannot loop forever.
+        for attempt in (1, 2):
+            profile, keep_going = run_startup_calibration(cap, hand_gate)
+            if not keep_going:
+                cap.release()
+                cv2.destroyAllWindows()
+                clip_queue.put(None)
+                return
+            if profile or attempt == 2:
+                break
+            print("\nCalibration did not see any signing — running it once more. "
+                  "During the SIGN phase, sign as you normally would.\n")
+    elif ADAPTIVE_MOTION:
+        profile = load_profile()
     gate = MotionGate(MOTION_SMOOTHING_FRAMES,
                       MOTION_START_THRESHOLD, MOTION_STOP_THRESHOLD,
                       adaptive=ADAPTIVE_MOTION, profile=profile)
@@ -450,19 +640,19 @@ def main():
               f"start {gate.start_threshold:.2f}, stop {gate.stop_threshold:.2f} "
               f"(separation {profile.get('separation') or 0:.2f}x)")
         if not profile.get("separable", True):
-            print("[gate] WARNING: calibration found signing and ordinary movement "
-                  "overlapping — expect occasional false starts; the hand veto covers "
-                  "some of them. Re-run calibrate_motion.py if the room changed.")
+            print("[gate] WARNING: calibration could not cleanly separate signing from "
+                  "ordinary movement — expect occasional false starts; the hand veto and "
+                  "the empty-clip test cover some of them.")
     elif ADAPTIVE_MOTION:
-        print("[gate] no motion_profile.json — inferring thresholds from the noise floor. "
-              "Run `python3 calibrate_motion.py` once for measured ones.")
-    # Started here so its MediaPipe graph loads while the models warm up, rather than
-    # costing the first sentence a ~1s load at the moment it is needed.
-    hand_gate = None
-    if LANDMARK_TRIGGER:
-        hand_gate = HandPresenceTrigger(config['mediapipe_hands_model_path'])
-        hand_gate.start()
-        print("Landmark trigger ON — a start also requires hands to be visible.")
+        print("[gate] no calibration — inferring thresholds from the room's noise floor.")
+
+    # Do not open for signing before the models exist: a clip queued now would sit unread
+    # while the signer assumes it was taken.
+    if not wait_for_models(cap):
+        cap.release()
+        cv2.destroyAllWindows()
+        clip_queue.put(None)
+        return
     pre_roll = deque(maxlen=int(PRE_ROLL_MAX_SECONDS * 30))
     above_start = 0        # consecutive frames over the start threshold (the debounce)
     stride = stride_from_env()
@@ -494,18 +684,23 @@ def main():
         was_ready = gate.ready
         had_floor = gate.floor is not None
         motion_score = gate.update(raw_motion, recording=(state == "RECORDING"))
-        if ADAPTIVE_MOTION and gate.ready and not was_ready:
+        if ADAPTIVE_MOTION and not profile and gate.ready and not was_ready:
             # Print once, when the floor is first established: without this the chosen
             # thresholds exist only on the preview overlay and a session log cannot be
-            # diagnosed afterwards.
+            # diagnosed afterwards. Guarded on `not profile` because with one the gate
+            # becomes ready on the ARMING timer instead, and the floor may still be None
+            # at that moment -- whether it is depends on whether the room happened to be
+            # quiet, so without the guard this crashes only sometimes.
             print(f"[gate] noise floor {gate.floor:.3f} -> start {gate.start_threshold:.2f}, "
                   f"stop {gate.stop_threshold:.2f} "
                   f"(fixed fallback was {MOTION_START_THRESHOLD}/{MOTION_STOP_THRESHOLD})")
         elif profile and gate.floor is not None and not had_floor:
             # With a profile the gate is armed immediately, so the floor's arrival is a
             # drift report rather than a threshold announcement.
-            print(f"[gate] room floor {gate.floor:.3f} vs {profile.get('floor')} at "
-                  f"calibration — drift x{gate.drift:.2f}, start "
+            calib_floor = profile.get("floor")
+            print(f"[gate] room floor {gate.floor:.3f} vs "
+                  + (f"{calib_floor:.3f}" if calib_floor else "no reference")
+                  + f" at calibration — drift x{gate.drift:.2f}, start "
                   f"{gate.start_threshold:.2f}, stop {gate.stop_threshold:.2f}"
                   + ("  [CLAMPED: the room has changed enough to be worth re-calibrating]"
                      if gate.drift_clamped else ""))
@@ -773,7 +968,7 @@ def main():
                        else "  floor --"),
                     (10, 470),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1)
-        cv2.imshow('Auto ASL Translation (v5 - persistent worker)', display_frame)
+        cv2.imshow(WINDOW_TITLE, display_frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
