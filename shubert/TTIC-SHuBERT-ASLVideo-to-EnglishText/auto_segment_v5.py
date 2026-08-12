@@ -22,7 +22,18 @@ import queue
 import time
 from collections import deque
 from features import SHuBERTProcessor
+from motion_gate import MotionGate
 from streaming_perception import StreamingPerception, stride_from_env
+
+# Scale the start/stop thresholds to the room's measured noise floor instead of using the
+# absolute constants below. Those constants are raw pixel-difference units fitted to one
+# camera, room and lighting setup, so they do not transfer: a dimmer room or a more distant
+# signer never reaches the start threshold, a noisier one trips it constantly. Simulated
+# over calib.jsonl across a 32x range of noise levels (simulate_segmentation.py --scale):
+# fixed thresholds recorded NOTHING at 0.25-0.5x and produced false starts at 2x and above,
+# while adaptive held 97.9% coverage with 0 false starts at every scale.
+# Set ADAPTIVE_MOTION=0 to restore the old fixed-threshold behaviour.
+ADAPTIVE_MOTION = os.environ.get("ADAPTIVE_MOTION", "1") not in ("0", "false", "False")
 
 # Run MediaPipe on each frame as it is captured rather than after the cut. Perception is
 # ~4.5x slower than realtime so it never finishes early, but it absorbs the whole recording
@@ -207,6 +218,12 @@ TAIL_PAD_SECONDS = 0.25
 # trade against losing the clip entirely to OOM.
 MAX_CLIP_SECONDS = float(os.environ.get("MAX_CLIP_SECONDS", "15"))
 
+# How long to wait on quit for the worker to finish what it is translating. Generous
+# because abandoning it destroys that clip AND tears the detector's thread pool down while
+# it is still in use; a deferred clip at the 15s cap can need a couple of minutes on this
+# box. Ctrl-C during the wait abandons deliberately.
+QUIT_DRAIN_SECONDS = float(os.environ.get("QUIT_DRAIN_SECONDS", "180"))
+
 CAMERA_INDEX = 0
 
 def _begin_perception():
@@ -305,6 +322,13 @@ def translation_worker(processor):
         except Exception as e:
             # Report rather than swallow — v2 discarded stderr and made failures invisible.
             print(f"[worker] Error translating {label}: {type(e).__name__}: {e}")
+            # State at the moment of failure, so an OOM can be attributed instead of
+            # guessed at. The 2026-08-11 adaptive session OOM'd with NO backlog, which
+            # only became clear afterwards -- without these numbers the queue-growth fix
+            # looked like it had failed when it simply did not apply.
+            print(f"[worker] at failure: retained={_retained_count()} frames, "
+                  f"available={_available_mb()}MB, live_streams={_live_streams[0]}, "
+                  f"queue={clip_queue.qsize()}")
             with state_lock:
                 latest_translation[0] = f"[translation failed: {type(e).__name__}]"
         finally:
@@ -326,7 +350,7 @@ def translation_worker(processor):
                     pass
 
 
-def find_motion_onset(ring):
+def find_motion_onset(ring, stop_threshold=None):
     """Walk back through the pre-roll ring to where this burst of motion began.
 
     The trigger fires late by construction (a debounce plus a 0.5s trailing mean), so the
@@ -336,11 +360,17 @@ def find_motion_onset(ring):
     which ends the clip at the last motion plus a pad.
 
     `ring` is a deque of (frame, timestamp, raw_score). Returns an index into it.
+
+    `stop_threshold` must be passed when thresholds are adaptive -- defaulting to the
+    module constant would back-date using this room's fitted value while the trigger used
+    an adapted one, so the two halves of the decision would disagree.
     """
+    if stop_threshold is None:
+        stop_threshold = MOTION_STOP_THRESHOLD
     quiet_needed = max(1, int(0.3 * 30))    # 0.3s of quiet marks a real boundary
     quiet = 0
     for i in range(len(ring) - 1, -1, -1):
-        if ring[i][2] <= MOTION_STOP_THRESHOLD:
+        if ring[i][2] <= stop_threshold:
             quiet += 1
             if quiet >= quiet_needed:
                 return min(i + quiet_needed, len(ring) - 1)
@@ -382,7 +412,13 @@ def main():
     deferred = False       # recording without a stream, because the cap was reached
     raw_frame_index = 0    # raw frames since RECORDING began, for applying the stride
     retained_this_clip = 0  # frames this clip has added to the global retained budget
-    motion_history = deque(maxlen=MOTION_SMOOTHING_FRAMES)
+    # Thresholds adapt to the room's noise floor rather than using the constants above,
+    # which were fitted to one camera/room/lighting and do not transfer. The constants
+    # remain as the fallback used before a floor estimate exists, and ADAPTIVE_MOTION=0
+    # restores the old fixed behaviour outright.
+    gate = MotionGate(MOTION_SMOOTHING_FRAMES,
+                      MOTION_START_THRESHOLD, MOTION_STOP_THRESHOLD,
+                      adaptive=ADAPTIVE_MOTION)
     pre_roll = deque(maxlen=int(PRE_ROLL_MAX_SECONDS * 30))
     above_start = 0        # consecutive frames over the start threshold (the debounce)
     stride = stride_from_env()
@@ -409,8 +445,17 @@ def main():
 
         # Decisions run on the smoothed score; the raw one is kept for locating motion
         # onset in the pre-roll, where the smoothing lag would blur the boundary.
-        motion_history.append(raw_motion)
-        motion_score = sum(motion_history) / len(motion_history)
+        # The floor is only sampled while idle -- during a clip the score IS signing, and
+        # folding that in would progressively deafen the trigger.
+        was_ready = gate.ready
+        motion_score = gate.update(raw_motion, recording=(state == "RECORDING"))
+        if ADAPTIVE_MOTION and gate.ready and not was_ready:
+            # Print once, when the floor is first established: without this the chosen
+            # thresholds exist only on the preview overlay and a session log cannot be
+            # diagnosed afterwards.
+            print(f"[gate] noise floor {gate.floor:.3f} -> start {gate.start_threshold:.2f}, "
+                  f"stop {gate.stop_threshold:.2f} "
+                  f"(fixed fallback was {MOTION_START_THRESHOLD}/{MOTION_STOP_THRESHOLD})")
         pre_roll.append((frame, now, raw_motion))
 
         display_frame = frame.copy()
@@ -429,7 +474,14 @@ def main():
         elif state == "IDLE":
             cv2.putText(display_frame, status_line, (10, 30),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-            above_start = above_start + 1 if motion_score > MOTION_START_THRESHOLD else 0
+            above_start = above_start + 1 if motion_score > gate.start_threshold else 0
+            if not gate.ready and ADAPTIVE_MOTION:
+                # No floor estimate yet -- refuse to record. Without this interlock a
+                # noisy room latches on within a few frames, and because the floor is
+                # only sampled while idle it would then never be established at all.
+                above_start = 0
+                cv2.putText(display_frame, "calibrating noise floor...", (10, 90),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 200, 255), 2)
             # Checked only when a start is actually due, not every idle frame: this reads
             # /proc/meminfo, and the capture loop runs 30x a second.
             budget_ok, budget_reason = (
@@ -450,7 +502,8 @@ def main():
                 # smoothing window, measured at ~2s on the calibration recording -- all of
                 # which is signing, so it must come from the ring buffer rather than being
                 # dropped.
-                onset = find_motion_onset(pre_roll)
+                onset = find_motion_onset(pre_roll,
+                                          stop_threshold=gate.stop_threshold)
                 # Extend back by the lead pad, the mirror of TAIL_PAD_SECONDS: cutting
                 # exactly at onset would clip the start of the first handshape.
                 onset = max(0, onset - int(LEAD_PAD_SECONDS * 30))
@@ -517,7 +570,7 @@ def main():
                 frame_times.append(now)
                 _retain_frame()
                 retained_this_clip += 1
-            if motion_score > MOTION_STOP_THRESHOLD:
+            if motion_score > gate.stop_threshold:
                 last_motion_time = now
 
             still_duration = now - last_motion_time
@@ -625,7 +678,9 @@ def main():
         # whether the score is near either of them.
         cv2.putText(display_frame,
                     f"motion: {motion_score:.2f} (raw {raw_motion:.2f})  "
-                    f"start {MOTION_START_THRESHOLD} stop {MOTION_STOP_THRESHOLD}",
+                    f"start {gate.start_threshold:.2f} stop {gate.stop_threshold:.2f}"
+                    + (f"  floor {gate.floor:.3f}" if gate.floor is not None
+                       else "  floor --"),
                     (10, 470),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1)
         cv2.imshow('Auto ASL Translation (v5 - persistent worker)', display_frame)
@@ -641,8 +696,32 @@ def main():
         _release_stream_slot()
     _release_frames(retained_this_clip)
 
+    # Drain properly instead of abandoning whatever is mid-flight.
+    #
+    # This used to be `worker.join(timeout=5)` followed by main() returning. Five seconds
+    # is far less than a clip takes, so the interpreter would start tearing down while the
+    # worker was still inside MediaPipe -- shutting its ThreadPoolExecutor down underneath
+    # it. Every remaining frame then failed with "cannot schedule new futures after
+    # shutdown" (measured: 377 frames of a 542-frame clip, landmarks all None, clip lost),
+    # and the process died with "terminate called without an active exception" as native
+    # threads were destroyed while still joinable. Reproduced with the real classes in
+    # scratchpad/quit_repro.py.
+    pending = clip_queue.qsize()
+    if pending:
+        print(f"Finishing {pending} queued clip(s) — press Ctrl-C to abandon them.")
     clip_queue.put(None)
-    worker.join(timeout=5)
+    t0 = time.time()
+    try:
+        worker.join(timeout=QUIT_DRAIN_SECONDS)
+        if worker.is_alive():
+            # Say so rather than tearing down silently: the clip IS lost at this point,
+            # and the old code lost it without ever admitting to it.
+            print(f"Worker still busy after {QUIT_DRAIN_SECONDS:.0f}s; abandoning the "
+                  f"clip in progress. Its translation is lost.")
+        else:
+            print(f"All clips finished ({time.time() - t0:.1f}s).")
+    except KeyboardInterrupt:
+        print("Abandoning queued clips at user request.")
 
 
 if __name__ == "__main__":

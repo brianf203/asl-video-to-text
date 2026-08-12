@@ -1,0 +1,193 @@
+#!/usr/bin/env python3
+"""Replay the segmentation state machine over labelled calibration data.
+
+The 2026-08-10 calibration established that per-frame metric statistics rank configs
+WRONGLY: a safety-margin sweep put `block` smoothed-5 first, and simulating the actual
+state machine then gave it 39.9% signing coverage. Only the end-to-end acceptance test
+found the right config. So any threshold change gets judged here, on the real decision
+rule, before it goes near a camera.
+
+Acceptance metrics (same four as that session):
+  false starts  -- clips begun during a labelled SIT STILL phase
+  coverage      -- fraction of labelled signing frames inside a kept span
+  fragments     -- signing phases broken into more than one clip
+  lead-in lost  -- signing time before the first kept frame of each clip
+
+Usage:
+    python3 simulate_segmentation.py                   # fixed vs adaptive, this room
+    python3 simulate_segmentation.py --scale 0.5 2 4   # simulate other rooms
+"""
+import argparse
+import json
+import os
+
+from motion_gate import MotionGate
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+# Mirrors auto_segment_v5.py. Imported rather than duplicated where possible; these are
+# the plain constants the state machine below needs.
+import auto_segment_v5 as v5
+
+SIGNING_PHASES = ("SIGN", "FINGERSPELL")
+
+
+def load(path):
+    with open(path) as f:
+        return [json.loads(line) for line in f]
+
+
+def simulate(rows, adaptive, scale=1.0, metric="current"):
+    """Run v5's state machine over the rows. Returns per-clip spans and gate history."""
+    gate = MotionGate(v5.MOTION_SMOOTHING_FRAMES,
+                      v5.MOTION_START_THRESHOLD, v5.MOTION_STOP_THRESHOLD,
+                      adaptive=adaptive)
+    state = "IDLE"
+    above_start = 0
+    record_start_i = None
+    last_motion_i = None
+    clips = []
+    floors = []
+
+    for i, r in enumerate(rows):
+        raw = r[metric] * scale
+        t = r["t"]
+        # Pass the recording's own clock: the floor's staleness logic is time-based,
+        # and wall-clock time would race ahead of the replayed data.
+        smoothed = gate.update(raw, recording=(state == "RECORDING"), now=t)
+        floors.append(gate.floor)
+
+        if state == "IDLE":
+            above_start = above_start + 1 if smoothed > gate.start_threshold else 0
+            # The interlock: in adaptive mode nothing records until a floor exists.
+            if above_start >= v5.START_DEBOUNCE_FRAMES and (not adaptive or gate.ready):
+                above_start = 0
+                state = "RECORDING"
+                # Back-date exactly as the live path does, using v5's own function and
+                # the gate's CURRENT stop threshold -- without this the simulation loses
+                # the lead-in the real machine recovers, and coverage reads far too low.
+                lo = max(0, i - int(v5.PRE_ROLL_MAX_SECONDS * 30))
+                ring = [(None, rows[j]["t"], rows[j][metric] * scale)
+                        for j in range(lo, i + 1)]
+                onset = v5.find_motion_onset(ring, stop_threshold=gate.stop_threshold)
+                onset = max(0, onset - int(v5.LEAD_PAD_SECONDS * 30))
+                record_start_i = lo + onset
+                last_motion_i = i
+        else:
+            if smoothed > gate.stop_threshold:
+                last_motion_i = i
+            still_duration = t - rows[last_motion_i]["t"]
+            elapsed = t - rows[record_start_i]["t"]
+            if still_duration >= v5.STILL_DURATION_SECONDS or elapsed >= v5.MAX_CLIP_SECONDS:
+                forced = elapsed >= v5.MAX_CLIP_SECONDS
+                end_i = i if forced else last_motion_i
+                signing = rows[end_i]["t"] - rows[record_start_i]["t"]
+                if signing >= v5.MIN_CLIP_DURATION_SECONDS:
+                    clips.append((record_start_i, end_i, forced))
+                if forced and signing >= v5.MIN_CLIP_DURATION_SECONDS:
+                    # v5 restarts immediately at the cut point rather than dropping to
+                    # IDLE -- the signer is still mid-sentence. Modelling this matters:
+                    # without it the simulation re-pays the debounce and loses coverage
+                    # the real machine keeps.
+                    record_start_i = i
+                    last_motion_i = i
+                else:
+                    state = "IDLE"
+                    above_start = 0
+
+    if state == "RECORDING" and last_motion_i is not None:
+        signing = rows[last_motion_i]["t"] - rows[record_start_i]["t"]
+        if signing >= v5.MIN_CLIP_DURATION_SECONDS:
+            clips.append((record_start_i, last_motion_i, False))
+    return clips, floors
+
+
+def phase_spans(rows):
+    """Contiguous runs of the same phase label, as (phase, start_i, end_i)."""
+    spans = []
+    start = 0
+    for i in range(1, len(rows) + 1):
+        if i == len(rows) or rows[i]["phase"] != rows[start]["phase"]:
+            spans.append((rows[start]["phase"], start, i - 1))
+            start = i
+    return spans
+
+
+def score(rows, clips):
+    spans = phase_spans(rows)
+    covered = set()
+    for a, b, _ in clips:
+        covered.update(range(a, b + 1))
+
+    signing_idx = [i for i, r in enumerate(rows) if r["phase"] in SIGNING_PHASES]
+    coverage = (len(covered & set(signing_idx)) / len(signing_idx) * 100
+                if signing_idx else 0.0)
+
+    # A false start is a clip containing NO signing at all -- i.e. triggered by noise.
+    # Do not test the start index alone: back-dating deliberately reaches into the
+    # preceding still phase, and a forced-cut restart begins wherever the cut landed, so
+    # an index test flags legitimate clips and makes noisy configs look better than they
+    # are.
+    false_starts = 0
+    for a, b, _ in clips:
+        if not any(rows[j]["phase"] in SIGNING_PHASES for j in range(a, b + 1)):
+            false_starts += 1
+
+    fragments = 0
+    for phase, s, e in spans:
+        if phase not in SIGNING_PHASES:
+            continue
+        n = sum(1 for a, b, _ in clips if a <= e and b >= s)
+        if n > 1:
+            fragments += n - 1
+
+    lead_lost = []
+    for phase, s, e in spans:
+        if phase not in SIGNING_PHASES:
+            continue
+        starts = [a for a, b, _ in clips if a <= e and b >= s]
+        if starts:
+            first = min(starts)
+            if first > s:
+                lead_lost.append(rows[first]["t"] - rows[s]["t"])
+    return {
+        "clips": len(clips),
+        "forced": sum(1 for _, _, f in clips if f),
+        "coverage": coverage,
+        "false_starts": false_starts,
+        "fragments": fragments,
+        "lead_lost": max(lead_lost) if lead_lost else 0.0,
+    }
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--calib", default=os.path.join(HERE, "calib.jsonl"))
+    ap.add_argument("--scale", nargs="*", type=float, default=[1.0],
+                    help="multiply every score, to stand in for a different room/camera")
+    ap.add_argument("--metric", default="current")
+    args = ap.parse_args()
+
+    rows = load(args.calib)
+    print(f"{len(rows)} frames, {rows[-1]['t'] - rows[0]['t']:.1f}s\n")
+    print(f"{'scale':>6} {'config':>9} {'clips':>6} {'cover%':>7} {'false':>6} "
+          f"{'frag':>5} {'lead lost':>10} {'floor':>7} {'start thr':>10}")
+    print("-" * 78)
+    for scale in args.scale:
+        for adaptive in (False, True):
+            clips, floors = simulate(rows, adaptive=adaptive, scale=scale,
+                                     metric=args.metric)
+            s = score(rows, clips)
+            seen = [f for f in floors if f is not None]
+            floor = seen[-1] if seen else float("nan")
+            gate_start = (floor * __import__("motion_gate").START_MULTIPLIER
+                          if adaptive and seen else v5.MOTION_START_THRESHOLD)
+            print(f"{scale:>6.2f} {'adaptive' if adaptive else 'fixed':>9} "
+                  f"{s['clips']:>6} {s['coverage']:>7.1f} {s['false_starts']:>6} "
+                  f"{s['fragments']:>5} {s['lead_lost']:>9.2f}s "
+                  f"{floor:>7.3f} {gate_start:>10.2f}")
+        print()
+
+
+if __name__ == "__main__":
+    main()
