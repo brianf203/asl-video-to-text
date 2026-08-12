@@ -31,3 +31,5 @@ shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/hand_trigger.jsonl
 shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/motion_profile.json
 # Labelled frames from the last startup calibration -- regenerated every launch.
 shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/last_calibration.jsonl
+# Working note, same as QLORA_SCOPING.md / PROJECT_CONTEXT.md — local, not public docs.
+POSE_SWAP_SCOPING.md
