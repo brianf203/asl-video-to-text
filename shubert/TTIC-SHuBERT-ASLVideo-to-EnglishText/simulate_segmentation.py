@@ -21,7 +21,8 @@ import argparse
 import json
 import os
 
-from motion_gate import MotionGate
+import fit_thresholds
+from motion_gate import MotionGate, load_profile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -50,7 +51,7 @@ def load_hand_presence(path):
 
 
 def simulate(rows, adaptive, scale=1.0, metric="current", hands=None,
-             pregate_factor=1.0):
+             pregate_factor=1.0, profile=None):
     """Run v5's state machine over the rows. Returns per-clip spans and gate history.
 
     `hands` enables the hybrid trigger: the pixel threshold is divided by
@@ -59,7 +60,7 @@ def simulate(rows, adaptive, scale=1.0, metric="current", hands=None,
     """
     gate = MotionGate(v5.MOTION_SMOOTHING_FRAMES,
                       v5.MOTION_START_THRESHOLD, v5.MOTION_STOP_THRESHOLD,
-                      adaptive=adaptive)
+                      adaptive=adaptive, profile=profile)
     from collections import deque as _deque
     from hand_trigger import HAND_WINDOW, HAND_NEEDED
     hand_recent = _deque(maxlen=HAND_WINDOW)
@@ -69,6 +70,8 @@ def simulate(rows, adaptive, scale=1.0, metric="current", hands=None,
     last_motion_i = None
     clips = []
     floors = []
+    smoothed_hist = []
+    trigger_i = None       # where the debounce fired, i.e. the first non-seeded frame
 
     for i, r in enumerate(rows):
         raw = r[metric] * scale
@@ -77,6 +80,7 @@ def simulate(rows, adaptive, scale=1.0, metric="current", hands=None,
         # and wall-clock time would race ahead of the replayed data.
         smoothed = gate.update(raw, recording=(state == "RECORDING"), now=t)
         floors.append(gate.floor)
+        smoothed_hist.append(smoothed)
 
         if state == "IDLE":
             # With the hybrid the pixel test becomes a sensitive pre-gate; hands supply
@@ -105,6 +109,7 @@ def simulate(rows, adaptive, scale=1.0, metric="current", hands=None,
                 onset = max(0, onset - int(v5.LEAD_PAD_SECONDS * 30))
                 record_start_i = lo + onset
                 last_motion_i = i
+                trigger_i = i
         else:
             if smoothed > gate.stop_threshold:
                 last_motion_i = i
@@ -114,15 +119,25 @@ def simulate(rows, adaptive, scale=1.0, metric="current", hands=None,
                 forced = elapsed >= v5.MAX_CLIP_SECONDS
                 end_i = i if forced else last_motion_i
                 signing = rows[end_i]["t"] - rows[record_start_i]["t"]
-                if signing >= v5.MIN_CLIP_DURATION_SECONDS:
+                # Mirror v5's empty-clip test: the fraction of KEPT, non-seeded frames
+                # that are actually moving. Frames before the trigger are the back-dated
+                # lead-in, which v5 excludes for the same reason.
+                lo_f = trigger_i if trigger_i is not None else record_start_i
+                window = smoothed_hist[lo_f:end_i + 1]
+                moving = (sum(1 for v in window if v > gate.stop_threshold) / len(window)
+                          if window else 1.0)
+                accepted = (signing >= v5.MIN_CLIP_DURATION_SECONDS
+                            and moving >= v5.MIN_MOTION_FRACTION)
+                if accepted:
                     clips.append((record_start_i, end_i, forced))
-                if forced and signing >= v5.MIN_CLIP_DURATION_SECONDS:
+                if forced and accepted:
                     # v5 restarts immediately at the cut point rather than dropping to
                     # IDLE -- the signer is still mid-sentence. Modelling this matters:
                     # without it the simulation re-pays the debounce and loses coverage
                     # the real machine keeps.
                     record_start_i = i
                     last_motion_i = i
+                    trigger_i = i
                 else:
                     state = "IDLE"
                     above_start = 0
@@ -200,6 +215,12 @@ def main():
     ap.add_argument("--metric", default="current")
     ap.add_argument("--hands", default=os.path.join(HERE, "hand_trigger.jsonl"),
                     help="per-frame hand presence from analyze_hand_trigger.py")
+    ap.add_argument("--profile", default=os.path.join(HERE, "motion_profile.json"),
+                    help="calibration profile to add a 'calibrated' row for, if present")
+    ap.add_argument("--fit-profile", action="store_true",
+                    help="fit a profile from THIS recording and simulate with it. Fitting "
+                         "and testing on the same data is circular as a quality claim, but "
+                         "it does check the fitted pair drives the state machine sanely")
     ap.add_argument("--pregate", type=float, default=1.0,
                     help="divide the pixel start threshold by this for the hybrid pre-gate. "
                          "1.0 (the shipped setting) means hands act as a pure veto and the "
@@ -216,19 +237,41 @@ def main():
     hands = load_hand_presence(args.hands)
     if hands is None:
         print("(no hand_trigger.jsonl -- run analyze_hand_trigger.py for the hybrid row)\n")
-    configs = [("fixed", False, None), ("adaptive", True, None)]
+    configs = [("fixed", False, None, None), ("adaptive", True, None, None)]
     if hands is not None:
-        configs.append(("hybrid", True, hands))
+        configs.append(("hybrid", True, hands, None))
+
+    profile = None
+    if args.fit_profile:
+        start, stop, rep = fit_thresholds.fit_rows(rows, metric=args.metric,
+                                                   window=v5.MOTION_SMOOTHING_FRAMES)
+        if start is not None:
+            profile = {"start_threshold": start, "stop_threshold": stop, "floor": None}
+            print(f"(fitted from this recording: start {start:.2f} stop {stop:.2f})")
+    else:
+        profile = load_profile(args.profile)
+    if profile is not None:
+        # Thresholds are ABSOLUTE here, so the scale sweep is the honest test of what a
+        # profile does NOT do: it cannot follow a room it was not measured in, beyond the
+        # +/-40% drift clamp. That is the deliberate trade -- measured beats inferred in
+        # the room you calibrated, and re-calibration is the answer elsewhere.
+        configs.append(("calibrated", True, hands, profile))
+
     for scale in args.scale:
-        for name, adaptive, hnd in configs:
+        for name, adaptive, hnd, prof in configs:
             clips, floors = simulate(rows, adaptive=adaptive, scale=scale,
                                      metric=args.metric, hands=hnd,
-                                     pregate_factor=args.pregate if hnd else 1.0)
+                                     pregate_factor=args.pregate if hnd else 1.0,
+                                     profile=prof)
             s = score(rows, clips)
             seen = [f for f in floors if f is not None]
             floor = seen[-1] if seen else float("nan")
-            gate_start = (floor * __import__("motion_gate").START_MULTIPLIER
-                          if adaptive and seen else v5.MOTION_START_THRESHOLD)
+            if prof is not None:
+                gate_start = prof["start_threshold"]
+            elif adaptive and seen:
+                gate_start = floor * __import__("motion_gate").START_MULTIPLIER
+            else:
+                gate_start = v5.MOTION_START_THRESHOLD
             print(f"{scale:>6.2f} {name:>9} "
                   f"{s['clips']:>6} {s['coverage']:>7.1f} {s['false_starts']:>6} "
                   f"{s['fragments']:>5} {s['lead_lost']:>9.2f}s "

@@ -23,7 +23,7 @@ import time
 from collections import deque
 from features import SHuBERTProcessor
 from hand_trigger import HandPresenceTrigger
-from motion_gate import MotionGate
+from motion_gate import MotionGate, load_profile
 from streaming_perception import StreamingPerception, stride_from_env
 
 # Scale the start/stop thresholds to the room's measured noise floor instead of using the
@@ -235,6 +235,15 @@ MAX_CLIP_SECONDS = float(os.environ.get("MAX_CLIP_SECONDS", "15"))
 # box. Ctrl-C during the wait abandons deliberately.
 QUIT_DRAIN_SECONDS = float(os.environ.get("QUIT_DRAIN_SECONDS", "180"))
 
+# A clip is only worth translating if enough of what it keeps is actually moving. Measured
+# on calib.jsonl (smoothed score vs a fitted stop threshold of 0.241): SIGN 87.4% of frames
+# above it, FINGERSPELL 93.9%, versus 47.0% / 62.6% for the still phases and 34.5% for the
+# settled-still span. Anything from 0.70 down separates those, but the default sits well
+# below the signing side rather than at the midpoint: this exists to discard the
+# essentially-empty case, and dropping a real sentence costs the signer far more than
+# translating a spurious one. Raise it if false starts keep reaching the worker.
+MIN_MOTION_FRACTION = float(os.environ.get("MIN_MOTION_FRACTION", "0.5"))
+
 CAMERA_INDEX = 0
 
 def _begin_perception():
@@ -416,6 +425,10 @@ def main():
     state = "IDLE"
     recorded_frames = []
     frame_times = []
+    # Smoothed motion score per retained frame, None for frames seeded from the pre-roll
+    # (those carry the raw score, a different quantity, and are the lead-in by
+    # construction). Used only to reject clips that contain essentially no motion.
+    frame_scores = []
     record_start_time = None
     last_motion_time = None
     prev_gray = None
@@ -423,13 +436,26 @@ def main():
     deferred = False       # recording without a stream, because the cap was reached
     raw_frame_index = 0    # raw frames since RECORDING began, for applying the stride
     retained_this_clip = 0  # frames this clip has added to the global retained budget
-    # Thresholds adapt to the room's noise floor rather than using the constants above,
-    # which were fitted to one camera/room/lighting and do not transfer. The constants
-    # remain as the fallback used before a floor estimate exists, and ADAPTIVE_MOTION=0
-    # restores the old fixed behaviour outright.
+    # Thresholds come from calibration when a profile exists (run calibrate_motion.py),
+    # because measuring both classes beats inferring signing from the noise floor: a
+    # multiplier fitted in one room put the start threshold at 7.06 in a noisier one,
+    # above anything signing can produce. Without a profile this falls back to the online
+    # floor x multiplier, and ADAPTIVE_MOTION=0 restores the fixed constants outright.
+    profile = load_profile() if ADAPTIVE_MOTION else None
     gate = MotionGate(MOTION_SMOOTHING_FRAMES,
                       MOTION_START_THRESHOLD, MOTION_STOP_THRESHOLD,
-                      adaptive=ADAPTIVE_MOTION)
+                      adaptive=ADAPTIVE_MOTION, profile=profile)
+    if profile:
+        print(f"[gate] calibrated {profile.get('created', '?')} — "
+              f"start {gate.start_threshold:.2f}, stop {gate.stop_threshold:.2f} "
+              f"(separation {profile.get('separation') or 0:.2f}x)")
+        if not profile.get("separable", True):
+            print("[gate] WARNING: calibration found signing and ordinary movement "
+                  "overlapping — expect occasional false starts; the hand veto covers "
+                  "some of them. Re-run calibrate_motion.py if the room changed.")
+    elif ADAPTIVE_MOTION:
+        print("[gate] no motion_profile.json — inferring thresholds from the noise floor. "
+              "Run `python3 calibrate_motion.py` once for measured ones.")
     # Started here so its MediaPipe graph loads while the models warm up, rather than
     # costing the first sentence a ~1s load at the moment it is needed.
     hand_gate = None
@@ -466,6 +492,7 @@ def main():
         # The floor is only sampled while idle -- during a clip the score IS signing, and
         # folding that in would progressively deafen the trigger.
         was_ready = gate.ready
+        had_floor = gate.floor is not None
         motion_score = gate.update(raw_motion, recording=(state == "RECORDING"))
         if ADAPTIVE_MOTION and gate.ready and not was_ready:
             # Print once, when the floor is first established: without this the chosen
@@ -474,6 +501,14 @@ def main():
             print(f"[gate] noise floor {gate.floor:.3f} -> start {gate.start_threshold:.2f}, "
                   f"stop {gate.stop_threshold:.2f} "
                   f"(fixed fallback was {MOTION_START_THRESHOLD}/{MOTION_STOP_THRESHOLD})")
+        elif profile and gate.floor is not None and not had_floor:
+            # With a profile the gate is armed immediately, so the floor's arrival is a
+            # drift report rather than a threshold announcement.
+            print(f"[gate] room floor {gate.floor:.3f} vs {profile.get('floor')} at "
+                  f"calibration — drift x{gate.drift:.2f}, start "
+                  f"{gate.start_threshold:.2f}, stop {gate.stop_threshold:.2f}"
+                  + ("  [CLAMPED: the room has changed enough to be worth re-calibrating]"
+                     if gate.drift_clamped else ""))
         pre_roll.append((frame, now, raw_motion))
 
         display_frame = frame.copy()
@@ -507,7 +542,10 @@ def main():
                 # noisy room latches on within a few frames, and because the floor is
                 # only sampled while idle it would then never be established at all.
                 above_start = 0
-                cv2.putText(display_frame, "calibrating noise floor...", (10, 90),
+                # With a profile this is only the short arming window; without one it is
+                # the floor estimate being built, which takes as long as it takes.
+                waiting = "arming..." if profile else "calibrating noise floor..."
+                cv2.putText(display_frame, waiting, (10, 90),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 200, 255), 2)
             # Checked only when a start is actually due, not every idle frame: this reads
             # /proc/meminfo, and the capture loop runs 30x a second.
@@ -544,6 +582,7 @@ def main():
                 raw_frame_index = 0
                 recorded_frames = []
                 frame_times = []
+                frame_scores = []
                 # Stream only if a slot is free. Over the cap the clip is still recorded,
                 # just buffered at stride and translated after the cut — degraded latency
                 # for that one clip instead of an OOM that loses it entirely.
@@ -553,6 +592,7 @@ def main():
                     # Legacy path keeps every frame and strides later, at video read.
                     recorded_frames = [f for f, _, _ in seed]
                     frame_times = [t for _, t, _ in seed]
+                    frame_scores = [None] * len(frame_times)
                     for _ in recorded_frames:
                         _retain_frame()
                     retained_this_clip += len(recorded_frames)
@@ -567,6 +607,7 @@ def main():
                             else:
                                 recorded_frames.append(rgb)
                             frame_times.append(t)
+                            frame_scores.append(None)
                             _retain_frame()
                             retained_this_clip += 1
                         raw_frame_index += 1
@@ -585,6 +626,7 @@ def main():
                 if raw_frame_index % stride == 0:
                     stream.add_frame(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                     frame_times.append(now)
+                    frame_scores.append(motion_score)
                     _retain_frame()
                     retained_this_clip += 1
                 raw_frame_index += 1
@@ -592,12 +634,14 @@ def main():
                 if raw_frame_index % stride == 0:
                     recorded_frames.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                     frame_times.append(now)
+                    frame_scores.append(motion_score)
                     _retain_frame()
                     retained_this_clip += 1
                 raw_frame_index += 1
             else:
                 recorded_frames.append(frame)
                 frame_times.append(now)
+                frame_scores.append(motion_score)
                 _retain_frame()
                 retained_this_clip += 1
             if motion_score > gate.stop_threshold:
@@ -635,7 +679,20 @@ def main():
                     keep = sum(1 for t in frame_times if t <= cutoff)
                     signing_duration = last_motion_time - record_start_time
 
-                if signing_duration >= MIN_CLIP_DURATION_SECONDS:
+                # How much of what is being KEPT is actually moving. A false start --
+                # auto-exposure hunting, someone crossing behind, a shadow -- clears the
+                # duration gate whenever the disturbance lasts a second or two, and then
+                # ByT5 invents a fluent sentence over the dead air rather than returning
+                # nothing (measured: a 49-frame near-still clip produced "I am here to show
+                # you how to do the heart artery"). Frames seeded from the pre-roll are
+                # excluded: they are the lead-in by construction.
+                scored = [s for s in frame_scores[:keep] if s is not None]
+                motion_fraction = (
+                    sum(1 for s in scored if s > gate.stop_threshold) / len(scored)
+                    if scored else 1.0)
+
+                if (signing_duration >= MIN_CLIP_DURATION_SECONDS
+                        and motion_fraction >= MIN_MOTION_FRACTION):
                     clip_counter[0] += 1
                     if stream is not None:
                         label = f"clip_{clip_counter[0]} (streamed)"
@@ -671,7 +728,9 @@ def main():
                         _release_frames(retained_this_clip)
                         retained_this_clip = 0
                 else:
-                    print(f"Too short, ignored ({signing_duration:.1f}s signing, "
+                    why = ("too short" if signing_duration < MIN_CLIP_DURATION_SECONDS
+                           else f"only {100 * motion_fraction:.0f}% of frames moving")
+                    print(f"Ignored — {why} ({signing_duration:.1f}s signing, "
                           f"{len(frame_times)} frames).")
                     if stream is not None:
                         stream.close()
@@ -683,6 +742,7 @@ def main():
 
                 recorded_frames = []
                 frame_times = []
+                frame_scores = []
                 deferred = False
                 if force_cut and signing_duration >= MIN_CLIP_DURATION_SECONDS:
                     # Still mid-sentence. Restart immediately, anchored at now: the clip

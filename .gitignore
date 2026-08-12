@@ -25,3 +25,7 @@ shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/calib*.jsonl
 # Per-frame hand presence from analyze_hand_trigger.py -- derived from calib.mp4,
 # regenerate rather than track (2534 lines, ~200KB).
 shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/hand_trigger.jsonl
+# Fitted motion thresholds from calibrate_motion.py. Specific to one camera, room and
+# lighting -- committing it would ship this room's numbers to any other machine, which is
+# the failure the calibration exists to end.
+shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/motion_profile.json

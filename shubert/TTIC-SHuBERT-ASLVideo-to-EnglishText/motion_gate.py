@@ -1,7 +1,20 @@
-"""Motion smoothing and start/stop thresholds that adapt to the room's noise floor.
+"""Motion smoothing and start/stop thresholds, from calibration where one exists.
 
-WHY THIS EXISTS
----------------
+THREE MODES, IN ORDER OF PREFERENCE
+-----------------------------------
+1. CALIBRATED (a `motion_profile.json` from `calibrate_motion.py`): thresholds are fitted
+   to measured still / non-signing-motion / signing distributions, and the online floor
+   only applies a drift correction clamped to +/-40%. This is the one to use.
+2. ADAPTIVE (no profile): floor x START_MULTIPLIER, described below. It measures only the
+   still side and infers the signing side from a multiplier fitted in one room, which
+   fails when a room's noise floor is high -- see the 7.06 case in PROFILE_PATH's comment.
+3. FIXED (adaptive=False): the hand-fitted constants, valid only in the room they came
+   from.
+
+Everything below documents mode 2, which remains the fallback when nobody has calibrated.
+
+WHY MODE 2 EXISTS
+-----------------
 `auto_segment_v5.py` used absolute thresholds (start 1.74, stop 0.29) fitted by
 `calibrate_motion.py` on one camera, one room and one lighting setup. Those numbers are
 raw pixel-difference units, so they do not transfer: a darker room raises the sensor noise
@@ -34,9 +47,51 @@ and back-dating to motion onset recovers the lead-in. Do not "fix" it to trigger
 readily without re-running the end-to-end acceptance test -- optimising a proxy picked the
 wrong config once already.
 """
+import json
 import os
 import time
 from collections import deque
+
+# A calibration profile, when one exists, REPLACES the floor x multiplier inference: the
+# thresholds come from measured still / non-signing-motion / signing distributions
+# (see calibrate_motion.py and fit_thresholds.py). The online floor is still tracked, but
+# only to correct for DRIFT since calibration -- the room dimming, the camera gaining a
+# different auto-exposure operating point.
+#
+# Why this exists: inferring the signing side from the still side was measured to fail.
+# Live 2026-08-12, a floor of 0.785 x 9.0 put the start threshold at 7.06 while signing's
+# smoothed maximum is 1.889 -- the second sentence of the session could not be started at
+# all. A multiplier fitted in one room cannot know how hard signing moves in another; only
+# a measurement can.
+PROFILE_PATH = os.environ.get("MOTION_PROFILE", "motion_profile.json")
+
+# Drift correction is CLAMPED to this factor either way. Past a 1.4x change in the noise
+# floor the room is not the room that was calibrated, and silently rescaling a measured
+# threshold by an arbitrary amount is how the floor x 9.0 design produced an unreachable
+# 7.06. Beyond the clamp the gate holds the calibrated value and says so.
+DRIFT_MAX = float(os.environ.get("MOTION_DRIFT_MAX", "1.4"))
+
+
+# A profile arms the gate immediately -- the thresholds are already known -- but not
+# INSTANTLY. Whoever launched the program is settling into frame, and that motion reaches
+# signing levels: simulating the calibrated config over calib.jsonl produced a spurious
+# clip at t+1.5s, inside the first SIT STILL span, which the adaptive path avoided only
+# because its floor interlock happened to refuse the first ~2s. The hand veto does not
+# help here (hands are visible while you settle), so hold the same window deliberately
+# rather than inheriting it by accident.
+ARMING_SECONDS = float(os.environ.get("MOTION_ARMING_SECONDS", "2.0"))
+
+
+def load_profile(path=PROFILE_PATH):
+    """Return the calibration profile dict, or None if there is not a usable one."""
+    try:
+        with open(path) as fh:
+            profile = json.load(fh)
+    except (OSError, ValueError):
+        return None
+    if not profile.get("start_threshold"):
+        return None
+    return profile
 
 # Multipliers on the ESTIMATED ONLINE FLOOR -- note that is not the same quantity as the
 # global still median. Fitting against the global median (0.264) gave 6.58x, but the
@@ -119,19 +174,27 @@ class MotionGate:
     """
 
     def __init__(self, smoothing_frames, fixed_start, fixed_stop, fps=30.0,
-                 adaptive=True):
+                 adaptive=True, profile=None):
         self._smooth = deque(maxlen=max(1, smoothing_frames))
         self._fixed_start = fixed_start
         self._fixed_stop = fixed_stop
         self.adaptive = adaptive
+        self.profile = profile
+        self._profile_floor = (profile or {}).get("floor")
         # Floor samples are the SMOOTHED score, because that is what the thresholds are
         # compared against. Estimating on the raw score would be a different quantity.
         self._floor_samples = deque(maxlen=max(FLOOR_MIN_SAMPLES,
                                                int(FLOOR_WINDOW_SECONDS * fps)))
         self.smoothed = 0.0
         self.floor = None
-        # Accept-everything phase, only until the first floor estimate exists.
-        self._bootstrapping = True
+        self._frames_seen = 0
+        # Accept-everything phase, only until the first floor estimate exists -- and only
+        # when there is no profile. With one, a meaningful stop threshold exists from the
+        # first frame, so the sustained-quiet-run rule can be applied immediately. That
+        # matters: bootstrapping accepts whatever the signer happens to be doing at launch,
+        # and if that is motion the floor starts inflated. Bounded by the drift clamp, but
+        # there is no reason to take the error at all when calibration already ran.
+        self._bootstrapping = profile is None
         self._last_quiet_t = None
         self._quiet_run = 0      # consecutive frames under the quiet bound
         self._relax = 1.0        # widens the bound if the room got genuinely noisier
@@ -146,6 +209,7 @@ class MotionGate:
         """
         self._smooth.append(raw_score)
         self.smoothed = sum(self._smooth) / len(self._smooth)
+        self._frames_seen += 1
         if now is None:
             now = time.time()
 
@@ -181,6 +245,27 @@ class MotionGate:
         return self.smoothed
 
     @property
+    def drift(self):
+        """Multiplier applied to calibrated thresholds, clamped to [1/DRIFT_MAX, DRIFT_MAX].
+
+        1.0 when there is no profile floor to compare against, or before the online floor
+        is established -- in both cases the calibrated thresholds are used unmodified,
+        which is the whole point of having measured them.
+        """
+        if not self.profile or not self._profile_floor or self.floor is None:
+            return 1.0
+        ratio = self.floor / self._profile_floor
+        return min(DRIFT_MAX, max(1.0 / DRIFT_MAX, ratio))
+
+    @property
+    def drift_clamped(self):
+        """True when the room has moved further than the clamp allows -- worth reporting."""
+        if not self.profile or not self._profile_floor or self.floor is None:
+            return False
+        ratio = self.floor / self._profile_floor
+        return ratio > DRIFT_MAX or ratio < 1.0 / DRIFT_MAX
+
+    @property
     def ready(self):
         """False until enough idle samples exist; the fixed fallback is in use.
 
@@ -190,17 +275,27 @@ class MotionGate:
         established at all -- measured: at 4x the calibration noise level the floor stayed
         unset for the whole recording and the gate silently ran on the fixed fallback
         thresholds forever. A ~2s pause before the first clip is a trivial price.
+
+        With a calibration profile the thresholds are already known, so the wait is only
+        ARMING_SECONDS -- long enough for whoever launched the program to stop settling
+        into frame, which is motion at signing levels.
         """
+        if self.profile is not None:
+            return self._frames_seen >= int(ARMING_SECONDS * self._fps)
         return self.floor is not None
 
     @property
     def start_threshold(self):
+        if self.profile:
+            return self.profile["start_threshold"] * self.drift
         if self.adaptive and self.floor is not None:
             return self.floor * START_MULTIPLIER
         return self._fixed_start
 
     @property
     def stop_threshold(self):
+        if self.profile:
+            return self.profile["stop_threshold"] * self.drift
         if self.adaptive and self.floor is not None:
             return self.floor * STOP_MULTIPLIER
         return self._fixed_stop
