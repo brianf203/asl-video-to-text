@@ -64,6 +64,7 @@ def main():
         "crop_jitter_px": os.environ.get("CROP_JITTER_PX", "0"),
         "crop_jitter_scale": os.environ.get("CROP_JITTER_SCALE", "0"),
         "crop_jitter_seed": os.environ.get("CROP_JITTER_SEED", "0"),
+        "crop_jitter_mode": os.environ.get("CROP_JITTER_MODE", "perframe"),
     }
     differs = {k: (data.get(k), v) for k, v in want.items()
                if k in data and str(data[k]) != str(v)}

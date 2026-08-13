@@ -475,6 +475,7 @@ def main():
         "crop_jitter_px": os.environ.get("CROP_JITTER_PX", "0"),
         "crop_jitter_scale": os.environ.get("CROP_JITTER_SCALE", "0"),
         "crop_jitter_seed": os.environ.get("CROP_JITTER_SEED", "0"),
+        "crop_jitter_mode": os.environ.get("CROP_JITTER_MODE", "perframe"),
         "no_trim": args.no_trim,
     }
 

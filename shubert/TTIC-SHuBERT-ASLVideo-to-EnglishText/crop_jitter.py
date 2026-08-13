@@ -48,6 +48,22 @@ CROP_JITTER_SCALE = float(os.environ.get("CROP_JITTER_SCALE", "0"))
 # result is about the magnitude and not about one unlucky draw.
 CROP_JITTER_SEED = int(os.environ.get("CROP_JITTER_SEED", "0"))
 
+# "perframe" (default): a fresh displacement every frame -- shimmer.
+# "static": ONE displacement per stream, held for every frame of every clip -- a constant
+#           reframing.
+#
+# WHY BOTH EXIST. The per-frame sweep found -2.95 BLEU at 8px, but that is not the error a
+# real estimator makes. A different model frames crops with a CONSISTENT offset and scale
+# bias plus a little noise; per-frame jitter is pure noise. SHuBERT is a temporal encoder,
+# so frame-to-frame inconsistency may cost far more than a uniform shift the DINOv2 crop
+# encoders could simply absorb. If static 8px is benign while per-frame 8px is not, then
+# the per-frame sweep overstates the cost of swapping extractors and the conclusion flips.
+#
+# NOTE ON EXPERIMENT DESIGN: static mode draws ONCE per stream, so a single run is a sample
+# of size one -- an unlucky draw could show either answer. Run it at two or more seeds
+# before believing it.
+CROP_JITTER_MODE = os.environ.get("CROP_JITTER_MODE", "perframe").lower()
+
 
 def enabled():
     return CROP_JITTER_PX > 0 or CROP_JITTER_SCALE > 0
@@ -55,6 +71,9 @@ def enabled():
 
 def _offsets(stream, index):
     """Deterministic (dx, dy, scale) for one box. Pure function of its arguments."""
+    if CROP_JITTER_MODE == "static":
+        # Drop the frame index: the same displacement for every frame of every clip.
+        index = 0
     # A cheap integer mix, then a fresh RandomState. Not cryptographic -- it only has to
     # decorrelate neighbouring frames and the two hands from each other.
     h = (CROP_JITTER_SEED * 2654435761
@@ -105,4 +124,11 @@ def jitter_corners(box, stream, index, image_shape=None):
 def describe():
     if not enabled():
         return "off"
-    return (f"px={CROP_JITTER_PX} scale={CROP_JITTER_SCALE} seed={CROP_JITTER_SEED}")
+    return (f"px={CROP_JITTER_PX} scale={CROP_JITTER_SCALE} seed={CROP_JITTER_SEED} "
+            f"mode={CROP_JITTER_MODE}")
+
+
+def realized_offsets(streams=("left_hand", "right_hand", "left_eye", "right_eye", "mouth")):
+    """The actual displacement each stream gets. Only meaningful in static mode, where it
+    is the whole experimental condition and therefore belongs in the write-up."""
+    return {s: tuple(round(v, 2) for v in _offsets(s, 0)) for s in streams}
