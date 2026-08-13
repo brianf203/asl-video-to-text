@@ -457,6 +457,7 @@ def main():
 
     # Imported here, not at module scope, so --compare/--rescore stay torch-free.
     import dinov2_features
+    import crop_jitter
     from features import SHuBERTProcessor
 
     # Everything that changes the output and therefore must not vary across a resume.
@@ -483,6 +484,9 @@ def main():
         "crop_jitter_scale": os.environ.get("CROP_JITTER_SCALE", "0"),
         "crop_jitter_seed": os.environ.get("CROP_JITTER_SEED", "0"),
         "crop_jitter_mode": os.environ.get("CROP_JITTER_MODE", "perframe"),
+        # Canonicalised, not the raw env string: "hands" and "left_hand,right_hand" are the
+        # same condition and must not look like different ones to the resume guard.
+        "crop_jitter_streams": crop_jitter.streams_spec(),
         "no_trim": args.no_trim,
     }
 

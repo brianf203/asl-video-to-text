@@ -64,6 +64,51 @@ CROP_JITTER_SEED = int(os.environ.get("CROP_JITTER_SEED", "0"))
 # before believing it.
 CROP_JITTER_MODE = os.environ.get("CROP_JITTER_MODE", "perframe").lower()
 
+ALL_STREAMS = ("left_hand", "right_hand", "left_eye", "right_eye", "mouth")
+_GROUPS = {
+    "all": ALL_STREAMS,
+    "hands": ("left_hand", "right_hand"),
+    "face": ("left_eye", "right_eye", "mouth"),
+}
+
+# Which streams to perturb; the rest are left exactly as MediaPipe framed them.
+# "all" (default), a group name ("hands" / "face"), or a comma-separated list of stream
+# names ("left_hand" alone, say).
+#
+# WHY. Two static seeds could not say whether the face or the hand crops carry the
+# sensitivity: seed 1 was healthier than seed 0 on every metric, but it displaced its face
+# AND its left hand less, so the two explanations were confounded. More seeds cannot
+# separate them -- perturbing one stream at a time can.
+#
+# THE DECOMPOSITION PROPERTY, which is why this is worth doing rather than just running
+# more seeds: `_offsets` is a pure function of (seed, stream, index), so removing a stream
+# from this set does NOT change what the remaining streams draw. hands-only at seed 0 gives
+# the left hand the same 9.97px it got in the full static seed-0 run. So hands-only and
+# face-only are the two HALVES of that exact run, and their deltas can be read against it.
+def _parse_streams(spec):
+    names = []
+    for part in spec.replace(" ", "").split(","):
+        if not part:
+            continue
+        if part in _GROUPS:
+            names.extend(_GROUPS[part])
+        elif part in ALL_STREAMS:
+            names.append(part)
+        else:
+            # Loud, not silent. A typo here would perturb nothing and produce a clean run
+            # wearing a jittered run's tag -- the exact silent-wrongness this tool exists
+            # to avoid, and it would look like "the swap is free".
+            raise SystemExit(
+                f"CROP_JITTER_STREAMS: unknown stream {part!r}. "
+                f"Valid: {', '.join(ALL_STREAMS)} or groups {', '.join(_GROUPS)}.")
+    if not names:
+        raise SystemExit("CROP_JITTER_STREAMS is empty -- that is a clean run, not a "
+                         "perturbed one. Leave it unset or set CROP_JITTER_PX=0.")
+    return frozenset(names)
+
+
+CROP_JITTER_STREAMS = _parse_streams(os.environ.get("CROP_JITTER_STREAMS", "all").lower())
+
 
 def enabled():
     return CROP_JITTER_PX > 0 or CROP_JITTER_SCALE > 0
@@ -71,6 +116,8 @@ def enabled():
 
 def _offsets(stream, index):
     """Deterministic (dx, dy, scale) for one box. Pure function of its arguments."""
+    if stream not in CROP_JITTER_STREAMS:
+        return 0.0, 0.0, 1.0
     if CROP_JITTER_MODE == "static":
         # Drop the frame index: the same displacement for every frame of every clip.
         index = 0
@@ -121,14 +168,21 @@ def jitter_corners(box, stream, index, image_shape=None):
     return nx1, ny1, nx2, ny2
 
 
+def streams_spec():
+    """Canonical, order-stable name for the selected set -- for the run record, where it
+    has to compare equal across runs and across resumes."""
+    return ",".join(s for s in ALL_STREAMS if s in CROP_JITTER_STREAMS)
+
+
 def describe():
     if not enabled():
         return "off"
     return (f"px={CROP_JITTER_PX} scale={CROP_JITTER_SCALE} seed={CROP_JITTER_SEED} "
-            f"mode={CROP_JITTER_MODE}")
+            f"mode={CROP_JITTER_MODE} streams={streams_spec()}")
 
 
-def realized_offsets(streams=("left_hand", "right_hand", "left_eye", "right_eye", "mouth")):
+def realized_offsets(streams=ALL_STREAMS):
     """The actual displacement each stream gets. Only meaningful in static mode, where it
-    is the whole experimental condition and therefore belongs in the write-up."""
+    is the whole experimental condition and therefore belongs in the write-up. Unselected
+    streams show as (0, 0, 1.0), which is what they actually get."""
     return {s: tuple(round(v, 2) for v in _offsets(s, 0)) for s in streams}
