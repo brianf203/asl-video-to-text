@@ -97,10 +97,17 @@ def main():
         if oa[i]["reference"] != ob[i]["reference"]:
             sys.exit(f"reference text differs for {i} -- these runs are not comparable")
 
+    # Compare EVERY scalar the run recorded, rather than a hand-listed subset. The listed
+    # version silently reported "config differences: NONE" between a clean run and one
+    # with 8px of crop jitter, because `crop_jitter_px` had been added to the run record
+    # afterwards and never here. A whitelist of knobs is guaranteed to go stale every time
+    # a knob is added -- which is exactly when this check matters.
+    SKIP = {"tag", "timestamp", "mean_seconds_per_clip", "results", "outputs",
+            "repaired_clips"}
+
     def cfg(d):
-        keys = ("streaming", "perception_workers", "perception_chunk", "byt5_num_beams",
-                "byt5_device", "mediapipe_video_mode", "frame_stride", "no_trim")
-        return {k: d.get(k) for k in keys}
+        return {k: v for k, v in d.items()
+                if k not in SKIP and isinstance(v, (str, int, float, bool, type(None)))}
 
     ca, cb = cfg(da), cfg(db)
     print(f"A = {args.a.split('/')[-1]}  tag={da.get('tag')!r}")
