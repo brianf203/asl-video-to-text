@@ -259,8 +259,15 @@ def load_partial(path, run_cfg):
                 print(f"  {os.path.basename(path)}:{lineno} truncated, ignoring")
                 continue
             if "_config" in rec:
-                differs = {k: (v, run_cfg.get(k)) for k, v in rec["_config"].items()
-                           if run_cfg.get(k) != v}
+                # Compare the UNION of keys. Iterating only the saved record hides any knob
+                # added since it was written: a partial from before `crop_jitter_mode`
+                # existed would resume under CROP_JITTER_MODE=static and merge two jitter
+                # modes into one score -- precisely what this guard exists to prevent.
+                saved = rec["_config"]
+                MISSING = "<not recorded>"
+                differs = {k: (saved.get(k, MISSING), run_cfg.get(k, MISSING))
+                           for k in saved.keys() | run_cfg.keys()
+                           if saved.get(k, MISSING) != run_cfg.get(k, MISSING)}
                 if differs:
                     raise SystemExit(
                         f"{path}\nis from a run with different settings, so resuming "

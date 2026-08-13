@@ -104,6 +104,7 @@ def main():
     # a knob is added -- which is exactly when this check matters.
     SKIP = {"tag", "timestamp", "mean_seconds_per_clip", "results", "outputs",
             "repaired_clips"}
+    MISSING = "<not recorded>"
 
     def cfg(d):
         return {k: v for k, v in d.items()
@@ -112,7 +113,12 @@ def main():
     ca, cb = cfg(da), cfg(db)
     print(f"A = {args.a.split('/')[-1]}  tag={da.get('tag')!r}")
     print(f"B = {args.b.split('/')[-1]}  tag={db.get('tag')!r}")
-    diffs = {k: (ca[k], cb[k]) for k in ca if ca[k] != cb[k]}
+    # Iterate the UNION, not A's keys: a knob added between the two runs exists in only one
+    # record, and iterating one side makes it invisible. That reported "NONE" between a
+    # per-frame and a static jitter run -- `crop_jitter_mode` was recorded only by the newer
+    # one -- i.e. the check failed on exactly the pair it was rewritten to catch.
+    diffs = {k: (ca.get(k, MISSING), cb.get(k, MISSING))
+             for k in ca.keys() | cb.keys() if ca.get(k, MISSING) != cb.get(k, MISSING)}
     print(f"config differences (A -> B): {diffs or 'NONE -- is this the same config?'}")
     print(f"clips paired: {len(shared)}")
     sa, sb = da.get("mean_seconds_per_clip"), db.get("mean_seconds_per_clip")
