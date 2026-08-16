@@ -234,12 +234,21 @@ class StreamingPerception:
 
     # -- finishing -----------------------------------------------------------
 
-    def finish(self, keep: int = None):
+    def finish(self, keep: int = None, start: int = 0):
         """Stop accepting frames, drain the backlog, and return (frames, landmarks).
 
         `keep` truncates to the first N frames (the still-tail trim). Frames past `keep`
         may already have been processed; their results are dropped, which is equivalent
         to never having submitted them.
+
+        `start` drops the first N frames (the still-HEAD trim, used by push-to-record,
+        where the clip begins at a key press rather than at motion). Unlike the tail this
+        is NOT equivalent to never having submitted them: the dropped frames still fed
+        MediaPipe's temporal tracking and the crop extractors' previous-frame fallback, so
+        a kept frame whose hand went undetected can inherit a crop from a dropped one.
+        That is history the model would have had anyway if the signer had started sooner,
+        so it is left in deliberately -- but it does mean a head-trimmed clip is not
+        reproducible by re-running perception over the kept frames alone.
         """
         for q in self._queues:
             q.put(None)
@@ -261,20 +270,24 @@ class StreamingPerception:
                 raise self._embed_error
 
         with self._lock:
-            frames = self._frames if keep is None else self._frames[:keep]
+            end = len(self._frames) if keep is None else keep
+            frames = self._frames[start:end]
         count = len(frames)
-        landmarks = {i: self._landmarks.get(i) for i in range(count)}
+        stop = start + count
+        # Landmarks are keyed by the index the frame had in the stream; re-key to the
+        # returned list's own indices, since process_frames() looks them up positionally.
+        landmarks = {i - start: self._landmarks.get(i) for i in range(start, stop)}
 
         embeddings = None
         if self._embed_config is not None:
-            # Chunks are appended in perception order, so concatenating then truncating to
-            # `keep` matches embedding exactly the kept frames: DINOv2 is a per-image
-            # encoder with no cross-frame state, and the trimmed frames are the last ones,
-            # so nothing retained depended on them.
+            # Chunks are appended in perception order, so concatenating then slicing to
+            # [start:stop) matches embedding exactly the kept frames: DINOv2 is a per-image
+            # encoder with no cross-frame state, so an embedding depends only on its own
+            # crop regardless of which neighbours were trimmed.
             embeddings = (
-                np.concatenate(self._left_chunks)[:count],
-                np.concatenate(self._right_chunks)[:count],
-                np.concatenate(self._face_chunks)[:count],
+                np.concatenate(self._left_chunks)[start:stop],
+                np.concatenate(self._right_chunks)[start:stop],
+                np.concatenate(self._face_chunks)[start:stop],
             )
         return frames, landmarks, embeddings
 

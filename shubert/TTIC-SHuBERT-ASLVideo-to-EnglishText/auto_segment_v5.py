@@ -217,6 +217,35 @@ LEAD_PAD_SECONDS = 0.25
 # carries meaning in ASL) isn't clipped off.
 TAIL_PAD_SECONDS = 0.25
 
+# Push-to-record gets the same trim, for the same two reasons. A key press cannot be
+# simultaneous with the sign: the hand has to leave the keyboard before the first sign and
+# come back after the last one, so both ends of a manual clip hold dead air the signer did
+# not intend to record.
+#   Latency: measured on the 4 probe clips (probe_w2_a / probe_w2_control, which agree to
+#   0.1 s/clip), post-cut latency runs ~0.85s per second of captured video on top of a
+#   ~3.4s floor -- so a second of reaching at each end is ~1.7s on a ~8s sentence.
+#   Quality: near-still frames are exactly what makes ByT5 invent a fluent sentence rather
+#   than return nothing (a 49-frame near-still clip once decoded as "I am here to show you
+#   how to do the heart artery").
+# MANUAL_TRIM=0 restores the previous behaviour of keeping every frame between the presses.
+MANUAL_TRIM = os.environ.get("MANUAL_TRIM", "1") not in ("0", "false", "False")
+# Hard bound on what either end may lose. The trim runs on a threshold fitted to the room's
+# noise floor, and if that estimate is wrong this is the difference between a clip that is
+# slightly short and a clip with no signing left in it. Nothing is trimmed beyond this.
+#
+# It doubles as the window the onset search may look in, which has a consequence worth
+# knowing: a head with MORE than this much dead air is not trimmed at ALL, rather than
+# trimmed back to the bound. That is deliberate. Absence of motion is not evidence of
+# absence of signing on a whole-frame pixel mean -- the calibration work measured most
+# fingerspelling frames reading as "still" -- so a long quiet head is as likely to be a slow
+# sentence as a pause, and only the tail has a positive motion detection (last_motion_time)
+# to anchor against. Press SPACE close to when you start signing and this never applies.
+MANUAL_TRIM_MAX_SECONDS = float(os.environ.get("MANUAL_TRIM_MAX_SECONDS", "2.5"))
+# A quiet stretch this long separates "settling into position" from signing. Same 0.3s the
+# pre-roll onset search uses, but expressed in TIME rather than frames: these frames are
+# strided (~15fps) while the pre-roll ring is not (30fps).
+HEAD_QUIET_SECONDS = 0.3
+
 # A clip is normally ended by STILL_DURATION_SECONDS of stillness -- so a signer who never
 # pauses is never cut. The 2026-08-11 live session produced a 542-frame / 35.8s clip that
 # way, which cost 477MB of retained frames on its own and decoded to a degenerate loop
@@ -474,7 +503,7 @@ def translation_worker(processor):
         if item is None:
             break
         # Three shapes arrive here:
-        #   ("stream", label, stream, keep, retained)  live StreamingPerception to drain
+        #   ("stream", label, stream, head, keep, retained)  StreamingPerception to drain
         #   ("frames", label, frames, retained)        buffered frames, perception not
         #                                    started (the over-cap fallback; no mp4 round
         #                                    trip)
@@ -492,13 +521,13 @@ def translation_worker(processor):
             print(f"[worker] Translating {label} ...")
             t0 = time.time()
             if streamed:
-                _, _, stream, keep, _ = item
+                _, _, stream, head, keep, _ = item
                 # Drain here rather than on the camera thread: perception runs ~4.5x
                 # slower than realtime, so at the cut there is still a backlog worth
                 # seconds, and blocking the capture loop on it would freeze the preview
                 # and drop frames of whatever the signer does next.
                 drain_start = time.time()
-                frames, landmarks, embeddings = stream.finish(keep)
+                frames, landmarks, embeddings = stream.finish(keep, start=head)
                 drain = time.time() - drain_start
                 print(f"[worker] drained perception backlog in {drain:.1f}s "
                       f"({stream.processed_frames} frames processed, "
@@ -579,6 +608,55 @@ def find_motion_onset(ring, stop_threshold=None):
     return 0    # the whole buffer is motion; keep all of it
 
 
+def find_signing_onset(times, raw_scores, stop_threshold, window_seconds):
+    """Index of the frame where signing begins, searching only the first `window_seconds`.
+
+    For push-to-record, where the clip starts at a key press. The head of such a clip is
+    the hand coming back from the keyboard, then usually a short settle, then the sign --
+    so taking the first MOVING frame would trim nothing, because the reach is real motion.
+    Onset is instead where motion RESUMES after the FIRST sustained quiet stretch, which is
+    that settle. A signer who goes straight from the key into the sign leaves no quiet
+    stretch to find, and this returns 0: keep everything, the mirror of find_motion_onset's
+    "the whole buffer is motion" case.
+
+    FIRST, not last, and that is not the arbitrary choice it looks like. find_motion_onset
+    walks BACK to the last quiet stretch because everything after it is known to be one
+    burst of motion. Here the search runs forward into unknown territory, and signing is
+    full of sub-threshold holds -- the calibration work measured 87-99% of fingerspelling
+    frames reading as "still" on this whole-frame metric. Taking the last quiet stretch in
+    the window therefore lands INSIDE the sentence: on a clip spliced from calib.jsonl it
+    cut 2.27s, about 1.3s of which was signing. The first stretch cannot do that, because
+    the sign has not started yet; and every way it can be wrong keeps more, not less.
+
+    Searching only a window at the front bounds the damage if the head holds no motion at
+    all -- without it, a clip whose first real motion is the sentence itself could be
+    trimmed by however long the signer hesitated.
+
+    `raw_scores` must be RAW, not smoothed: a 0.5s trailing mean carries stillness forward
+    into the sign and would move the boundary later by its own lag, eating the first
+    handshape. Entries may be None (pre-roll frames carry no comparable score); those are
+    skipped rather than treated as quiet.
+    """
+    if not times:
+        return 0
+    deadline = times[0] + window_seconds
+    onset = 0
+    quiet_start = None
+    for i, (t, score) in enumerate(zip(times, raw_scores)):
+        if t > deadline:
+            break
+        if score is None:
+            continue
+        if score <= stop_threshold:
+            if quiet_start is None:
+                quiet_start = t
+        else:
+            if quiet_start is not None and t - quiet_start >= HEAD_QUIET_SECONDS:
+                return i
+            quiet_start = None
+    return onset
+
+
 def write_clip(frames, path, fps=30.0):
     h, w = frames[0].shape[:2]
     out = cv2.VideoWriter(path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
@@ -609,6 +687,13 @@ def main():
     # (those carry the raw score, a different quantity, and are the lead-in by
     # construction). Used only to reject clips that contain essentially no motion.
     frame_scores = []
+    # The same frames' RAW scores, kept in parallel for the manual head trim: locating a
+    # boundary needs the unsmoothed signal, while deciding whether to cut needs the
+    # smoothed one. Pre-roll frames DO carry a comparable value here (the raw score is a
+    # difference between consecutive camera frames either way; the stride only decides
+    # which of them are retained), which is why this list has no None holes where
+    # frame_scores does.
+    frame_raw_scores = []
     record_start_time = None
     last_motion_time = None
     prev_gray = None
@@ -777,6 +862,7 @@ def main():
                 recorded_frames = []
                 frame_times = []
                 frame_scores = []
+                frame_raw_scores = []
                 stream, deferred = _begin_perception()
                 extra = (f" (deferred — {MAX_LIVE_STREAMS} streams already live)"
                          if deferred else "")
@@ -851,13 +937,14 @@ def main():
                     recorded_frames = [f for f, _, _ in seed]
                     frame_times = [t for _, t, _ in seed]
                     frame_scores = [None] * len(frame_times)
+                    frame_raw_scores = [r for _, _, r in seed]
                     for _ in recorded_frames:
                         _retain_frame()
                     retained_this_clip += len(recorded_frames)
                 else:
                     # Replay the pre-roll through the same stride the live branch uses, so
                     # seeded and live frames form one evenly-sampled sequence.
-                    for f, t, _ in seed:
+                    for f, t, r in seed:
                         if raw_frame_index % stride == 0:
                             rgb = cv2.cvtColor(f, cv2.COLOR_BGR2RGB)
                             if stream is not None:
@@ -866,6 +953,7 @@ def main():
                                 recorded_frames.append(rgb)
                             frame_times.append(t)
                             frame_scores.append(None)
+                            frame_raw_scores.append(r)
                             _retain_frame()
                             retained_this_clip += 1
                         raw_frame_index += 1
@@ -885,6 +973,7 @@ def main():
                     stream.add_frame(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                     frame_times.append(now)
                     frame_scores.append(motion_score)
+                    frame_raw_scores.append(raw_motion)
                     _retain_frame()
                     retained_this_clip += 1
                 raw_frame_index += 1
@@ -893,6 +982,7 @@ def main():
                     recorded_frames.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                     frame_times.append(now)
                     frame_scores.append(motion_score)
+                    frame_raw_scores.append(raw_motion)
                     _retain_frame()
                     retained_this_clip += 1
                 raw_frame_index += 1
@@ -900,6 +990,7 @@ def main():
                 recorded_frames.append(frame)
                 frame_times.append(now)
                 frame_scores.append(motion_score)
+                frame_raw_scores.append(raw_motion)
                 _retain_frame()
                 retained_this_clip += 1
             if motion_score > gate.stop_threshold:
@@ -927,13 +1018,58 @@ def main():
                 toggle_pressed = False
             if manual_stop or force_cut or (
                     not MANUAL_RECORD and still_duration >= STILL_DURATION_SECONDS):
-                if force_cut or manual_stop:
-                    # Nothing to trim: a forced cut lands mid-sentence and a manual stop
-                    # lands where the signer chose, so keep the lot and measure to now.
+                head = 0
+                if force_cut:
+                    # Nothing to trim: the cut lands mid-sentence, so every frame is
+                    # signing. Measure to now.
                     keep = len(frame_times)
                     signing_duration = now - record_start_time
                     print(f">>> FORCED CUT at {elapsed:.1f}s "
                           f"(MAX_CLIP_SECONDS={MAX_CLIP_SECONDS}) <<<")
+                elif manual_stop:
+                    # A key press brackets the sentence loosely at BOTH ends -- the hand
+                    # has to leave the keyboard before the first sign and come back after
+                    # the last -- so trim the dead air the signer did not mean to record.
+                    # Every guard here fails safe by keeping more, never less:
+                    #   * MANUAL_TRIM off, or no room-fitted floor yet, so the threshold is
+                    #     the untuned fallback constant -> trim nothing at all;
+                    #   * neither end may lose more than MANUAL_TRIM_MAX_SECONDS;
+                    #   * a trim that would leave less than a MIN_CLIP_DURATION_SECONDS
+                    #     span is discarded whole, because a near-empty clip is the one
+                    #     input that reliably makes ByT5 hallucinate (and its decode can
+                    #     run for minutes -- see the 40-frame "Hmm." clip).
+                    # Acceptance still measures press-to-press: the human asked for this
+                    # clip, so trimming must not be able to reject it.
+                    keep = len(frame_times)
+                    signing_duration = now - record_start_time
+                    if MANUAL_TRIM and gate.floor is not None and frame_times:
+                        stop_threshold = gate.stop_threshold
+                        onset = find_signing_onset(frame_times, frame_raw_scores,
+                                                   stop_threshold,
+                                                   MANUAL_TRIM_MAX_SECONDS)
+                        # Back off by the same pad the automatic path uses, so the first
+                        # handshape is not clipped. The head cannot run away: the onset
+                        # search only looks inside the first MANUAL_TRIM_MAX_SECONDS.
+                        lead_cutoff = frame_times[onset] - LEAD_PAD_SECONDS
+                        while onset > 0 and frame_times[onset - 1] >= lead_cutoff:
+                            onset -= 1
+
+                        # Taking the LATER of the two cutoffs is what bounds the tail:
+                        # last_motion_time only advances above the stop threshold, so a
+                        # sentence signed below it (measured on the eval clips:
+                        # fingerspelling reads far lower than a whole-frame mean suggests)
+                        # would otherwise trim back to almost nothing.
+                        tail_cutoff = max(last_motion_time + TAIL_PAD_SECONDS,
+                                          frame_times[-1] - MANUAL_TRIM_MAX_SECONDS)
+                        tail = sum(1 for t in frame_times if t <= tail_cutoff)
+
+                        span = frame_times[tail - 1] - frame_times[onset] if tail > onset \
+                            else 0.0
+                        if span >= MIN_CLIP_DURATION_SECONDS:
+                            head, keep = onset, tail
+                        else:
+                            print(f"Trim skipped — would leave {span:.1f}s "
+                                  f"(< MIN_CLIP_DURATION_SECONDS)")
                 else:
                     # Drop the trailing stillness; keep everything up to the last motion
                     # plus TAIL_PAD_SECONDS. Gate on signing time rather than wall-clock
@@ -950,7 +1086,7 @@ def main():
                 # nothing (measured: a 49-frame near-still clip produced "I am here to show
                 # you how to do the heart artery"). Frames seeded from the pre-roll are
                 # excluded: they are the lead-in by construction.
-                scored = [s for s in frame_scores[:keep] if s is not None]
+                scored = [s for s in frame_scores[head:keep] if s is not None]
                 motion_fraction = (
                     sum(1 for s in scored if s > gate.stop_threshold) / len(scored)
                     if scored else 1.0)
@@ -965,10 +1101,11 @@ def main():
                         label = f"clip_{clip_counter[0]} (streamed)"
                         # Hand the whole stream over; the worker drains, closes it,
                         # releases the slot and releases this clip's retained frames.
-                        clip_queue.put(("stream", label, stream, keep,
+                        clip_queue.put(("stream", label, stream, head, keep,
                                         retained_this_clip))
-                        print(f"Queued {label} ({keep} frames, {signing_duration:.1f}s "
-                              f"signing; trimmed {len(frame_times) - keep} still frames; "
+                        print(f"Queued {label} ({keep - head} frames, "
+                              f"{signing_duration:.1f}s signing; trimmed {head} lead-in + "
+                              f"{len(frame_times) - keep} still frames; "
                               f"{stream.processed_frames} already through MediaPipe)")
                         stream = None
                         # Ownership passes to the worker, which releases them in its
@@ -976,20 +1113,22 @@ def main():
                         retained_this_clip = 0
                     elif deferred:
                         label = f"clip_{clip_counter[0]} (deferred)"
-                        clip_queue.put(("frames", label, recorded_frames[:keep],
+                        clip_queue.put(("frames", label, recorded_frames[head:keep],
                                         retained_this_clip))
-                        print(f"Queued {label} ({keep} frames, {signing_duration:.1f}s "
-                              f"signing; trimmed {len(recorded_frames) - keep} still "
-                              f"frames; perception not started)")
+                        print(f"Queued {label} ({keep - head} frames, "
+                              f"{signing_duration:.1f}s signing; trimmed {head} lead-in + "
+                              f"{len(recorded_frames) - keep} still frames; perception "
+                              f"not started)")
                         # As above: the worker owns these frames from here.
                         retained_this_clip = 0
                     else:
                         clip_path = os.path.join(config['temp_dir'],
                                                  f"clip_{clip_counter[0]}.mp4")
-                        write_clip(recorded_frames[:keep], clip_path)
+                        write_clip(recorded_frames[head:keep], clip_path)
                         clip_queue.put(clip_path)
-                        print(f"Queued {clip_path} ({keep} frames, {signing_duration:.1f}s "
-                              f"signing; trimmed {len(recorded_frames) - keep} still frames)")
+                        print(f"Queued {clip_path} ({keep - head} frames, "
+                              f"{signing_duration:.1f}s signing; trimmed {head} lead-in + "
+                              f"{len(recorded_frames) - keep} still frames)")
                         # The legacy path hands over an mp4 path, not the frames, so the
                         # buffer is dropped here rather than by the worker.
                         _release_frames(retained_this_clip)
