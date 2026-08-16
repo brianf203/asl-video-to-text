@@ -478,7 +478,10 @@ def _begin_perception():
 clip_queue = queue.Queue()
 models_ready = threading.Event()
 state_lock = threading.Lock()
-latest_translation = ["Loading models..."]
+# What the camera window shows about the worker. Deliberately NOT the translated text:
+# translations go to the TERMINAL, one "Signer: ..." line per clip, so the video window
+# stays clean enough to record. This only ever holds short status strings.
+worker_status = ["Loading models..."]
 clip_counter = [0]
 
 
@@ -489,11 +492,11 @@ def translation_worker(processor):
         processor.warmup()
         print(f"[worker] Models loaded in {time.time() - t0:.1f}s")
         with state_lock:
-            latest_translation[0] = "Ready. Waiting for signing..."
+            worker_status[0] = "Ready to sign."
     except Exception as e:
         print(f"[worker] FATAL: model preload failed: {e}")
         with state_lock:
-            latest_translation[0] = f"Model load failed: {e}"
+            worker_status[0] = f"Model load failed: {e}"
         return
     finally:
         models_ready.set()
@@ -546,8 +549,11 @@ def translation_worker(processor):
                 result = processor.process_video(item)
             elapsed = time.time() - t0
             with state_lock:
-                latest_translation[0] = result
-            print(f"[worker] ({elapsed:.1f}s) {result}")
+                worker_status[0] = "Ready to sign."
+            # The translation itself goes ONLY here, on its own line and prefixed, so a
+            # terminal recording reads as a transcript rather than as a log.
+            print(f"[worker] {label} translated in {elapsed:.1f}s")
+            print(f"Signer: {result}", flush=True)
         except Exception as e:
             # Report rather than swallow — v2 discarded stderr and made failures invisible.
             print(f"[worker] Error translating {label}: {type(e).__name__}: {e}")
@@ -559,7 +565,9 @@ def translation_worker(processor):
                   f"available={_available_mb()}MB, live_streams={_live_streams[0]}, "
                   f"queue={clip_queue.qsize()}")
             with state_lock:
-                latest_translation[0] = f"[translation failed: {type(e).__name__}]"
+                # A failure is status, not a translation, so it does belong on screen --
+                # showing "Ready to sign." after a clip died would hide it.
+                worker_status[0] = f"[translation failed: {type(e).__name__}]"
         finally:
             # MediaPipe native objects must be released per clip or they exhaust the
             # Jetson's shared pool after a few clips.
@@ -824,10 +832,11 @@ def main():
 
         display_frame = frame.copy()
         with state_lock:
-            status_line = latest_translation[0][:70]
+            status_line = worker_status[0][:70]
         queued_count = clip_queue.qsize()
-        if queued_count > 0:
-            status_line += f"  ({queued_count} translating/queued)"
+        queue_line = f"{queued_count} translating/queued" if queued_count else ""
+        if queue_line:
+            status_line += f"  ({queue_line})"
 
         # Don't start recording until the models are up, otherwise clips pile up
         # in the queue while the 2.68GB checkpoint is still loading.
@@ -1009,8 +1018,12 @@ def main():
                 rec_label += "  [SPACE to stop]"
             cv2.putText(display_frame, rec_label,
                         (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
-            cv2.putText(display_frame, status_line, (10, 60),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+            # While recording, the second line carries the backlog only. The worker's
+            # status belongs to the idle screen, and repeating "Ready to sign." under a
+            # RECORDING banner just reads as a contradiction.
+            if queue_line:
+                cv2.putText(display_frame, queue_line, (10, 60),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
             force_cut = elapsed >= MAX_CLIP_SECONDS
             manual_stop = MANUAL_RECORD and toggle_pressed
