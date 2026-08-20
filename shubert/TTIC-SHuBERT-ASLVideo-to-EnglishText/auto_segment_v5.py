@@ -24,7 +24,7 @@ import time
 from collections import deque
 import fit_thresholds
 from features import SHuBERTProcessor
-from hand_trigger import HandPresenceTrigger
+from hand_trigger import HAND_NEEDED, HAND_WINDOW, HandPresenceTrigger
 from motion_gate import MotionGate, PROFILE_PATH, load_profile
 from streaming_perception import StreamingPerception, stride_from_env
 
@@ -47,6 +47,30 @@ ADAPTIVE_MOTION = os.environ.get("ADAPTIVE_MOTION", "1") not in ("0", "false", "
 # 0 false starts) and additionally rejects a 20x background-motion burst that makes
 # pixel-only false-start. Set LANDMARK_TRIGGER=0 to disable.
 LANDMARK_TRIGGER = os.environ.get("LANDMARK_TRIGGER", "1") not in ("0", "false", "False")
+
+# Promote hand presence from VETO to TRIGGER: the detector runs on every idle frame and a
+# start needs only its confirmation, with no pixel threshold in the decision at all.
+#
+# "auto" (the default) turns this on exactly when calibration reports a hand-gated fit --
+# i.e. when it measured that signing does not clear ordinary movement on the pixel metric,
+# which is what happens as soon as the signer is far enough away that their hands are a
+# small share of the frame. Measured 2026-08-16, standing: signing peaked at 0.497 smoothed
+# against 0.514 for deliberate non-signing movement and 0.227 for stillness, and hand
+# presence over the same recording was 0 detections in 184 non-signing checks against 32 in
+# 101 signing checks. Pixels had no usable boundary; hands had a clean one.
+#
+# The pre-gated hybrid does not work in that regime and the reason is worth keeping: a
+# pixel threshold safe against stillness is cleared by only one 0.53s burst in 9s of
+# signing, so the detector is fed for 0.53s of every 9 and its 5-verdict window never
+# fills. Simulated over last_calibration.jsonl, the pre-gated path fired 0 starts on 9s of
+# real signing.
+#
+# COST, and it is real: ~102ms/frame of one core, continuously, WHILE IDLE. That is the
+# cost hand_trigger.py's pre-gate exists to avoid, and it competes with the CPU-bound
+# perception of any clip still translating. It buys the only working trigger at this
+# distance, so it is on only where the cheap path has been measured to fail. During
+# RECORDING the detector goes quiet again -- the stop side is still the pixel threshold.
+HAND_TRIGGER_PRIMARY = os.environ.get("HAND_TRIGGER_PRIMARY", "auto").lower()
 
 # Run MediaPipe on each frame as it is captured rather than after the cut. Perception is
 # ~4.5x slower than realtime so it never finishes early, but it absorbs the whole recording
@@ -308,7 +332,7 @@ STARTUP_CALIBRATION = os.environ.get("STARTUP_CALIBRATION", "1") not in ("0", "f
 # nobody signs (SIT STILL), what the SIGNER does when they are not signing (MOVE -- the
 # phase that matters, see fit_thresholds.py), and what signing looks like.
 CALIB_PHASES = [
-    ("SIT STILL", "Sit still and look at the camera", 6.0),
+    ("STAND STILL", "Stand still and look at the camera", 6.0),
     ("MOVE (NO SIGNING)", "Move but DO NOT sign - shift around, scratch your face", 7.0),
     ("SIGN", "Sign anything - a sentence, your name, fingerspelling", 9.0),
 ]
@@ -320,6 +344,41 @@ CAMERA_INDEX = 0
 # One window for calibration, loading and signing: reusing the title means the same OS
 # window is reused rather than a new one popping up at each stage.
 WINDOW_TITLE = 'Auto ASL Translation (v5 - persistent worker)'
+
+# How much bigger than the captured frame to DISPLAY the preview, for demos where the
+# screen is a few feet away.
+#
+# This upscales the display copy only. Capture stays at 640x480, and that is the point:
+# every frame that reaches the pipeline is unchanged, so nothing downstream shifts. Raising
+# cv2.CAP_PROP_FRAME_* instead would (a) invalidate the motion thresholds, which are fitted
+# against the mean absolute difference of 640x480 frames, (b) make MediaPipe and the DINOv2
+# crops slower on every clip, and (c) inflate every retained frame against the
+# MAX_RETAINED_FRAMES budget, whose 0.88MB/frame figure assumes 640x480x3.
+#
+# Cost of the upscale, measured on this box at 1.6x (640x480 -> 1024x768): 1.6 ms/frame
+# with OpenCV's default 6 threads, 7.3 ms pinned to one. The capture loop has ~33 ms per
+# frame, and it is not what bounds latency -- perception is, on its own threads. Set
+# WINDOW_SCALE=1 to get the old behaviour and spend nothing.
+#
+# Doing it here rather than with resizeWindow is not a stylistic choice: this OpenCV is
+# built against Qt5, and a WINDOW_NORMAL resize there PADS the window instead of scaling
+# the image (measured -- a 400px circle stayed 408px in a 1024-wide window).
+WINDOW_SCALE = float(os.environ.get("WINDOW_SCALE", "1.6"))
+# INTER_NEAREST is ~3x cheaper (0.5 vs 1.6 ms) and keeps the overlay text crisp at the cost
+# of jagged edges; INTER_LINEAR reads better on the video itself. The overlays are drawn at
+# 640x480 coordinates either way and are magnified with everything else.
+WINDOW_INTERP = (cv2.INTER_NEAREST
+                 if os.environ.get("WINDOW_INTERP", "linear").lower() == "nearest"
+                 else cv2.INTER_LINEAR)
+
+
+def show(frame):
+    """Draw one frame into the preview window, upscaled for readability."""
+    if WINDOW_SCALE != 1.0:
+        h, w = frame.shape[:2]
+        frame = cv2.resize(frame, (int(w * WINDOW_SCALE), int(h * WINDOW_SCALE)),
+                           interpolation=WINDOW_INTERP)
+    cv2.imshow(WINDOW_TITLE, frame)
 
 
 def _gray_for_motion(frame):
@@ -354,9 +413,13 @@ CALIB_LOG_PATH = os.environ.get("CALIB_LOG", "last_calibration.jsonl")
 def run_startup_calibration(cap, hand_gate=None):
     """Prompt through the short guided calibration.
 
-    Returns (profile, keep_going). `profile` is None if the fit failed, in which case the
-    caller falls back to inferring thresholds online. `keep_going` is False only when the
-    user pressed q, which means quit the program -- not "carry on uncalibrated".
+    Returns (profile, keep_going, retry_worthy). `profile` is None if the fit failed, in
+    which case the caller falls back to inferring thresholds online. `keep_going` is False
+    only when the user pressed q, which means quit the program -- not "carry on
+    uncalibrated". `retry_worthy` says whether running it AGAIN could plausibly help: only
+    when the recording holds no evidence anyone signed. A fit that failed because signing
+    and ordinary movement overlap will fail again identically, and re-prompting a signer
+    who did exactly what was asked is worse than useless.
 
     Runs in the live preview window and uses the live loop's own motion metric, so what is
     fitted is exactly what will be compared against. Deliberately placed while the
@@ -375,7 +438,7 @@ def run_startup_calibration(cap, hand_gate=None):
                 ret, frame = cap.read()
                 if not ret:
                     print("Calibration aborted: camera read failed.")
-                    return None, True
+                    return None, True, False
                 gray = _gray_for_motion(frame)
                 score = None
                 if prev_gray is not None:
@@ -397,15 +460,14 @@ def run_startup_calibration(cap, hand_gate=None):
                     # so calibrating without this load would fit the wrong thing.
                     hand_gate.submit(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
-                cv2.imshow(WINDOW_TITLE,
-                           _draw_calibration(frame,
-                                             prompt if measuring else f"NEXT: {prompt}",
-                                             banner if measuring else "GET READY",
-                                             phase_end - time.time(), score,
-                                             not models_ready.is_set()))
+                show(_draw_calibration(frame,
+                                       prompt if measuring else f"NEXT: {prompt}",
+                                       banner if measuring else "GET READY",
+                                       phase_end - time.time(), score,
+                                       not models_ready.is_set()))
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     print("Calibration cancelled.")
-                    return None, False
+                    return None, False, False
 
     try:
         with open(CALIB_LOG_PATH, "w") as fh:
@@ -418,8 +480,21 @@ def run_startup_calibration(cap, hand_gate=None):
                                                window=MOTION_SMOOTHING_FRAMES)
     print(fit_thresholds.describe(start, stop, rep))
     if start is None:
-        print("Calibration could not fit thresholds — falling back to the noise floor.")
-        return None, True
+        # Only reachable now when the recording holds no evidence of signing at all. The
+        # noise-floor fallback is a genuinely bad outcome (floor x 9 produced an
+        # unreachable 1.7 in the 2026-08-16 standing session and 7.06 before that), so it
+        # is stated as the failure it is rather than as a graceful degradation.
+        print("Calibration could not fit thresholds — falling back to the noise floor, "
+              "which infers the signing side rather than measuring it.")
+        return None, True, rep.get("retry_worthy", True)
+
+    if rep.get("hand_gated"):
+        print("\n*** This room/distance cannot be segmented on pixel motion alone. ***")
+        print("Thresholds are fitted to STILLNESS only and ordinary movement will cross "
+              "them; hand presence is what has to reject it, so LANDMARK_TRIGGER must "
+              "stay on. Expect occasional false starts.")
+        print("Standing closer to the camera, or framing it tighter on your upper body, "
+              "restores the normal fit — signing moves a larger share of the frame.\n")
 
     profile = {
         "created": time.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -430,15 +505,20 @@ def run_startup_calibration(cap, hand_gate=None):
         # drift correction when this is absent, which is right -- calibration just ran.
         "floor": None,
         "separation": rep.get("separation"), "separable": rep.get("ok", False),
+        # Recorded so the live gate can refuse to run this profile without the veto, and
+        # so a session log says which of the two fits produced these numbers.
+        "hand_gated": bool(rep.get("hand_gated")),
         "n_frames": len(rows),
-        "stats": {k: rep.get(k) for k in ("neg_max", "neg_p50", "weakest_move_peak")},
+        "stats": {k: rep.get(k) for k in ("neg_max", "neg_p50", "weakest_move_peak",
+                                          "still_max", "stop_still_quiet_frames",
+                                          "stop_signing_quiet_frames")},
     }
     try:
         with open(PROFILE_PATH, "w") as fh:
             json.dump(profile, fh, indent=2)
     except OSError as e:
         print(f"(could not save {PROFILE_PATH}: {e})")
-    return profile, True
+    return profile, True, False
 
 
 def wait_for_models(cap):
@@ -450,7 +530,7 @@ def wait_for_models(cap):
         disp = frame.copy()
         cv2.putText(disp, "Loading translation models...", (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 200, 255), 2)
-        cv2.imshow(WINDOW_TITLE, disp)
+        show(disp)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             return False
     return True
@@ -688,6 +768,10 @@ def main():
         print(f"ERROR: could not open camera at index {CAMERA_INDEX}")
         return
 
+    # AUTOSIZE so the window fits whatever show() hands it -- the frame is already
+    # upscaled by then, so the window follows WINDOW_SCALE without any resize call.
+    cv2.namedWindow(WINDOW_TITLE, cv2.WINDOW_AUTOSIZE)
+
     state = "IDLE"
     recorded_frames = []
     frame_times = []
@@ -730,30 +814,58 @@ def main():
     if MANUAL_RECORD:
         print("Push-to-record: press SPACE to start a clip, SPACE again to end it.")
     elif ADAPTIVE_MOTION and STARTUP_CALIBRATION:
-        # One retry. The common failure is a signer who did not realise the SIGN phase had
-        # started, and re-prompting costs 28s against a whole session of bad thresholds.
-        # Bounded at two attempts so an empty room cannot loop forever.
+        # One retry, and ONLY when a second run could plausibly differ -- i.e. the
+        # recording holds no evidence anyone signed, the case where the signer missed the
+        # prompt. When the fit failed because signing and ordinary movement overlap, a
+        # second run reproduces it exactly: the 2026-08-16 standing session sat through
+        # calibration twice and was then told to "sign as you normally would", which is
+        # what it had been doing. Bounded at two attempts so an empty room cannot loop.
         for attempt in (1, 2):
-            profile, keep_going = run_startup_calibration(cap, hand_gate)
+            profile, keep_going, retry_worthy = run_startup_calibration(cap, hand_gate)
             if not keep_going:
                 cap.release()
                 cv2.destroyAllWindows()
                 clip_queue.put(None)
                 return
-            if profile or attempt == 2:
+            if profile or attempt == 2 or not retry_worthy:
                 break
-            print("\nCalibration did not see any signing — running it once more. "
-                  "During the SIGN phase, sign as you normally would.\n")
+            # The fit's own reason, not a fixed line: the two failures that reach here
+            # need opposite corrections from the signer (sign during SIGN / hold still
+            # during STILL), and the old message only ever gave one of them.
+            print("\nRunning calibration once more.\n")
     elif ADAPTIVE_MOTION and not MANUAL_RECORD:
         profile = load_profile()
     gate = MotionGate(MOTION_SMOOTHING_FRAMES,
                       MOTION_START_THRESHOLD, MOTION_STOP_THRESHOLD,
                       adaptive=ADAPTIVE_MOTION, profile=profile)
+    # Hand presence drives the START when the pixel metric has been MEASURED unable to (a
+    # hand-gated fit), unless the env var forces the answer. It needs the detector, so
+    # LANDMARK_TRIGGER=0 or manual mode rules it out whatever the profile says.
+    if HAND_TRIGGER_PRIMARY in ("1", "true", "yes", "on"):
+        hand_primary = hand_gate is not None
+    elif HAND_TRIGGER_PRIMARY in ("0", "false", "no", "off"):
+        hand_primary = False
+    else:
+        hand_primary = bool((profile or {}).get("hand_gated")) and hand_gate is not None
+    if hand_primary:
+        print("[gate] HAND-PRIMARY start: pixel motion does not separate signing at this "
+              "distance, so a clip starts on hand presence alone "
+              f"({HAND_NEEDED} of {HAND_WINDOW} detector verdicts). The detector now runs "
+              "continuously while idle (~1 core); the pixel stop threshold still ends the "
+              "clip. HAND_TRIGGER_PRIMARY=0 restores the pre-gated veto.")
+
     if profile and not MANUAL_RECORD:
         print(f"[gate] calibrated {profile.get('created', '?')} — "
               f"start {gate.start_threshold:.2f}, stop {gate.stop_threshold:.2f} "
               f"(separation {profile.get('separation') or 0:.2f}x)")
-        if not profile.get("separable", True):
+        if profile.get("hand_gated") and hand_gate is None:
+            # These thresholds sit inside the non-signing movement distribution by
+            # construction -- they are only a pre-filter, and the veto is the actual
+            # decision. Running them without it is a false start on every fidget.
+            print("[gate] WARNING: these thresholds were fitted for hand-gated use but "
+                  "LANDMARK_TRIGGER is OFF. Ordinary movement WILL start clips. Turn the "
+                  "trigger on, or use push-to-record (RECORD_MODE=manual, the default).")
+        elif not profile.get("separable", True):
             print("[gate] WARNING: calibration could not cleanly separate signing from "
                   "ordinary movement — expect occasional false starts; the hand veto and "
                   "the empty-clip test cover some of them.")
@@ -881,7 +993,15 @@ def main():
             cv2.putText(display_frame, status_line, (10, 30),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
             above_start = above_start + 1 if motion_score > gate.start_threshold else 0
-            if hand_gate is not None:
+            if hand_primary:
+                # Hand presence IS the trigger; the pixel score no longer gates anything
+                # on the start side. Feed the detector every idle frame -- submit() is
+                # non-blocking and drops what it cannot keep up with, so this runs at the
+                # detector's own ~10fps -- and never call note_absent(): every verdict in
+                # the window now comes from an actual check, which is what makes 3-of-5
+                # mean what hand_trigger.py measured it to mean.
+                hand_gate.submit(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            elif hand_gate is not None:
                 if above_start:
                     # Only while the pixel gate is hot: detection is ~102ms and must not
                     # run continuously. submit() is non-blocking and drops frames the
@@ -890,30 +1010,51 @@ def main():
                 else:
                     # Decay, so a hit from minutes ago cannot confirm a later start.
                     hand_gate.note_absent()
-            if not gate.ready and ADAPTIVE_MOTION:
+            armed = gate.ready or not ADAPTIVE_MOTION
+            if not armed:
                 # No floor estimate yet -- refuse to record. Without this interlock a
                 # noisy room latches on within a few frames, and because the floor is
                 # only sampled while idle it would then never be established at all.
+                # It applies in hand-primary mode too: the START does not use the floor
+                # there, but the STOP still does, and a clip that cannot end is worse
+                # than one that starts a second later.
                 above_start = 0
                 # With a profile this is only the short arming window; without one it is
                 # the floor estimate being built, which takes as long as it takes.
                 waiting = "arming..." if profile else "calibrating noise floor..."
                 cv2.putText(display_frame, waiting, (10, 90),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 200, 255), 2)
+            if hand_primary:
+                # No pixel debounce: at this distance signing does not reliably clear any
+                # threshold that stillness stays under, so requiring both means requiring
+                # the impossible. The debounce's job -- rejecting a one-frame blip -- is
+                # done instead by needing HAND_NEEDED of HAND_WINDOW detector verdicts.
+                start_due = armed and hand_gate.confirmed
+                # What the trigger is actually seeing, on screen. Without it a signer who
+                # is standing too far away or out of frame has no way to tell whether the
+                # detector can see their hands, which is now the entire start decision.
+                hits, seen = hand_gate.recent_hits
+                cv2.putText(display_frame,
+                            f"hands {hits}/{seen} (need {HAND_NEEDED} of {HAND_WINDOW})",
+                            (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.6,
+                            (0, 255, 0) if hits >= HAND_NEEDED else (0, 200, 255), 2)
+            else:
+                start_due = (armed and above_start >= START_DEBOUNCE_FRAMES
+                             and (hand_gate is None or hand_gate.confirmed))
             # Checked only when a start is actually due, not every idle frame: this reads
             # /proc/meminfo, and the capture loop runs 30x a second.
-            budget_ok, budget_reason = (
-                _capture_budget() if above_start >= START_DEBOUNCE_FRAMES else (True, ""))
+            budget_ok, budget_reason = _capture_budget() if start_due else (True, "")
             if not budget_ok:
                 # Refuse to start rather than pile another clip's frames onto a backlog
                 # that is already at the limit. Say so on screen: a dropped sentence the
                 # signer can see and repeat beats an OOM that silently loses clips
                 # already in flight.
                 above_start = 0
+                if hand_primary:
+                    hand_gate.reset()
                 cv2.putText(display_frame, f"BUSY - backlog full ({budget_reason})",
                             (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 165, 255), 2)
-            elif above_start >= START_DEBOUNCE_FRAMES and (
-                    hand_gate is None or hand_gate.confirmed):
+            elif start_due:
                 above_start = 0
                 if hand_gate is not None:
                     hand_gate.reset()
@@ -1192,7 +1333,7 @@ def main():
                        else "  floor --"),
                     (10, 470),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1)
-        cv2.imshow(WINDOW_TITLE, display_frame)
+        show(display_frame)
         key = cv2.waitKey(1) & 0xFF
         if key == ord(' '):
             toggle_pressed = True

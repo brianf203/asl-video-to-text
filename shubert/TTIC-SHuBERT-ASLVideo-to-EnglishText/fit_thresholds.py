@@ -58,7 +58,23 @@ MIN_SEPARATION = 1.30
 STOP_RATIO = 1.0 / 6.0
 
 # Phases whose motion must NOT trigger a clip. Matched as a prefix of the phase label.
-NEGATIVE_PHASES = ("SIT STILL", "MOVE")
+# "SIT STILL" is kept alongside "STAND STILL" so calibration logs recorded before the
+# prompt was reworded still fit -- a still phase that fails this test is treated as
+# POSITIVE (signing), which silently poisons the fit rather than erroring.
+NEGATIVE_PHASES = ("STAND STILL", "SIT STILL", "MOVE")
+# The subset of those that is pure stillness. The rest ("MOVE") is deliberate non-signing
+# MOTION, and the difference matters in the hand-gated path below: stillness is what a
+# pixel threshold can still separate when signing has fallen into the fidget distribution.
+STILL_PHASES = ("STAND STILL", "SIT STILL")
+
+# How far above the still maximum the SIGN phase has to reach before the recording counts
+# as evidence that anyone signed at all. Below this the two failures are indistinguishable
+# -- an empty SIGN phase and a signer whose signing does not register -- and re-prompting
+# is worth the 28s. Above it the signer demonstrably WAS signing, so a second identical
+# calibration only wastes their time and produces the same failure. That distinction is
+# what stopped the 2026-08-16 standing session re-running calibration twice and then
+# telling the user to "sign as you normally would", which they had been doing.
+SIGNING_EVIDENCE_RATIO = 1.30
 
 
 def smooth(values, window):
@@ -116,6 +132,25 @@ def is_negative(phase):
     return any(phase.upper().startswith(p) for p in NEGATIVE_PHASES)
 
 
+def is_still(phase):
+    return any(phase.upper().startswith(p) for p in STILL_PHASES)
+
+
+def longest_run_below(values, threshold):
+    """Longest contiguous run at or below `threshold`, in frames.
+
+    This is what the stop threshold is actually judged on. A fraction of frames below the
+    threshold says nothing: ending a clip needs STILL_DURATION_SECONDS of CONSECUTIVE
+    quiet, and holding a sign mid-sentence produces exactly that if the threshold is too
+    high. So report the run lengths on both sides and let the caller see the margin.
+    """
+    run = best = 0
+    for v in values:
+        run = run + 1 if v <= threshold else 0
+        best = max(best, run)
+    return best
+
+
 def fit(negative, positive, fps=30.0):
     """Fit thresholds. `negative`/`positive` are dicts of phase label -> smoothed scores.
 
@@ -157,14 +192,78 @@ def fit(negative, positive, fps=30.0):
         # opposite failure (nothing ever triggers) and just as silent. Both are worse than
         # saying so: the caller falls back and can ask for the calibration again.
         pos_all = [v for vals in positive.values() for v in vals]
+        pos_max = max(pos_all) if pos_all else 0.0
+        still_all = [v for name, vals in negative.items() if is_still(name) for v in vals]
+        still_max = max(still_all) if still_all else neg_max
         report.update({
             "ok": False,
-            "reason": (f"no signing rose above ordinary movement (which reached "
-                       f"{neg_max:.3f}) — was anyone signing during the SIGN phase?"),
-            "weakest_move_peak": max(pos_all) if pos_all else 0.0,
-            "separation": 1.0,
+            "weakest_move_peak": pos_max,
+            "separation": (pos_max / neg_max) if neg_max > 0 else 1.0,
+            "still_max": still_max,
         })
-        return None, None, report
+
+        if pos_max <= still_max * SIGNING_EVIDENCE_RATIO:
+            # Nothing in the SIGN phase rose meaningfully above sitting/standing still, so
+            # the recording carries no evidence of where the boundary is. Worth asking for
+            # again -- the common cause is a signer who missed the prompt.
+            # Two very different recordings land here, and telling a signer the wrong one
+            # sends them back to repeat what they were already doing. If the STILL phase
+            # was nearly as loud as the MOVE phase, the problem is at the other end: the
+            # still baseline is contaminated (standing still is genuinely harder than
+            # sitting still -- measured on the first of the 2026-08-16 attempts, STAND
+            # STILL reached 0.617 against MOVE's 0.687), and every threshold derived from
+            # it is inflated.
+            contaminated = still_max >= 0.80 * neg_max
+            report.update({
+                "retry_worthy": True,
+                "contaminated_still": contaminated,
+                "reason": (
+                    (f"the STILL phase recorded almost as much motion ({still_max:.3f}) "
+                     f"as the MOVE phase ({neg_max:.3f}) — the still baseline is "
+                     f"contaminated, so nothing can rise above it. Settle into position "
+                     f"BEFORE the countdown and hold still through it.")
+                    if contaminated else
+                    (f"no signing rose above ordinary movement (which reached "
+                     f"{neg_max:.3f}) — was anyone signing during the SIGN phase?")),
+            })
+            return None, None, report
+
+        # Signing WAS measured (it cleared stillness by more than SIGNING_EVIDENCE_RATIO)
+        # but it never cleared non-signing MOVEMENT. That is not a bad recording, it is a
+        # fact about the metric at this distance: a signer far enough from the camera moves
+        # a smaller share of the frame with their hands than with their whole body, so
+        # shifting your weight outscores a sentence. Measured 2026-08-16, standing:
+        # signing peaked at 0.497 smoothed against 0.514 for "move but do not sign".
+        #
+        # Refusing outright is what used to happen, and the caller's fallback -- floor x
+        # START_MULTIPLIER -- then ignored this measurement entirely and produced a start
+        # threshold of 1.7 against signing that never exceeded 0.5. Unreachable, which is
+        # the same failure as the 7.06 case that motivated this whole module.
+        #
+        # So emit a pair fitted to the STILL side only, and say plainly that it is only
+        # safe behind the hand-presence veto: it WILL fire on ordinary movement (that is
+        # unavoidable -- signing sits inside that distribution), and hand presence is what
+        # separates the two. On the same recording the veto measured 0 detections in 184
+        # non-signing checks against 32 in 101 signing checks.
+        start = math.sqrt(still_max * pos_max)
+        stop = math.sqrt(quantile(still_all, 0.50) * quantile(pos_all, 0.50))
+        report.update({
+            "retry_worthy": False,
+            "hand_gated": True,
+            "reason": ("signing never cleared ordinary movement — this metric cannot "
+                       "separate them at this distance; thresholds fitted to stillness "
+                       "instead and ONLY valid with the hand-presence veto on"),
+            "negative_frames_above_start":
+                sum(1 for v in neg_all if v > start) / len(neg_all),
+            "still_frames_above_start":
+                sum(1 for v in still_all if v > start) / len(still_all) if still_all else 0,
+            # The stop side is the half that decides whether a clip ever ENDS. Both runs
+            # are reported because the threshold has to sit between them, and when signing
+            # falls into the still distribution there may be no gap left at all.
+            "stop_still_quiet_frames": longest_run_below(still_all, stop),
+            "stop_signing_quiet_frames": longest_run_below(pos_all, stop),
+        })
+        return start, stop, report
 
     # The weakest event that must trigger -- a low quantile rather than the raw minimum,
     # so one half-hearted movement cannot drag the ceiling down onto the floor.
@@ -226,6 +325,27 @@ def describe(start, stop, rep):
         lines.append(f"    {name:<34} {len(peaks):>2} events: {shown}")
     if start is None:
         lines.append(f"FAILED: {rep['reason']}")
+        return "\n".join(lines)
+    if rep.get("hand_gated"):
+        # A different fit with different guarantees, so it is reported differently rather
+        # than dressed up as a normal one with a poor separation number.
+        lines.append(f"DEGRADED (hand-gated): {rep['reason']}")
+        lines.append(f"    signing peaked at {rep.get('weakest_move_peak', 0):.3f}, "
+                     f"non-signing movement at {rep['neg_max']:.3f}, "
+                     f"stillness at {rep.get('still_max', 0):.3f}")
+        lines.append(f"    at start {start:.3f}: "
+                     f"{100 * rep.get('still_frames_above_start', 0):.1f}% of STILL frames "
+                     f"and {100 * rep.get('negative_frames_above_start', 0):.1f}% of all "
+                     f"non-signing frames are above it (the hand veto has to reject those)")
+        quiet_still = rep.get("stop_still_quiet_frames", 0)
+        quiet_sign = rep.get("stop_signing_quiet_frames", 0)
+        lines.append(f"    at stop {stop:.3f}: longest quiet run is {quiet_still} frames "
+                     f"({quiet_still / 30:.1f}s) when still, {quiet_sign} frames "
+                     f"({quiet_sign / 30:.1f}s) while signing "
+                     f"— a clip ends after 2.5s (75 frames) of quiet, so this "
+                     + ("cuts mid-sentence" if quiet_sign >= 75 else
+                        "never ends a clip" if quiet_still < 75 else "should cut cleanly"))
+        lines.append(f"=> start {start:.3f}  stop {stop:.3f}")
         return "\n".join(lines)
     lines.append(f"weakest signing event (p10 of {rep['n_events']}): "
                  f"{rep.get('weakest_move_peak', 0):.3f}")
