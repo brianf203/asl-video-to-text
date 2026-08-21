@@ -57,20 +57,40 @@ def make_clip(segments):
     return times, scores
 
 
+class StubGate:
+    """Just the two attributes manual_head_trim reads off the real MotionGate."""
+
+    def __init__(self, stop_threshold, floor=0.1):
+        self.stop_threshold = stop_threshold
+        self.floor = floor
+
+
 def run_trim(times, scores, stop_threshold, last_motion_time,
              max_seconds=2.5, min_clip=1.0):
-    """The exact arithmetic auto_segment_v5 runs on a manual stop."""
+    """The exact arithmetic auto_segment_v5 runs on a manual stop.
+
+    The head half CALLS the shipped code (`manual_head_trim`) rather than restating it, so
+    a change there cannot pass this test by being duplicated in both places.
+    """
     import auto_segment_v5 as v5
-    onset = v5.find_signing_onset(times, scores, stop_threshold, max_seconds)
-    lead_cutoff = times[onset] - v5.LEAD_PAD_SECONDS
-    while onset > 0 and times[onset - 1] >= lead_cutoff:
-        onset -= 1
+    onset = v5.manual_head_trim(times, scores, StubGate(stop_threshold))
     tail_cutoff = max(last_motion_time + v5.TAIL_PAD_SECONDS, times[-1] - max_seconds)
     tail = sum(1 for t in times if t <= tail_cutoff)
     span = times[tail - 1] - times[onset] if tail > onset else 0.0
     if span < min_clip:
         return 0, len(times), span, "skipped"
     return onset, tail, span, "trimmed"
+
+
+def run_forced_cut(times, scores, stop_threshold):
+    """What a FORCED cut does in manual mode: head trimmed, tail kept whole.
+
+    The tail of a forced cut is mid-sentence by construction, so only the head moves. Added
+    2026-08-21, when a live clip with a ~7s pause after the key press went to the model
+    untrimmed because this branch skipped the trim entirely.
+    """
+    import auto_segment_v5 as v5
+    return v5.manual_head_trim(times, scores, StubGate(stop_threshold)), len(times)
 
 
 def last_motion(times, scores, stop_threshold):
@@ -182,6 +202,22 @@ def main():
     head, keep, span, how = run_trim(times, scores, stop_threshold, lm)
     report("pause mid-sentence", times, head, keep, f"[{how}]")
     assert head <= len(reach) + len(settle), "onset jumped past a mid-sentence pause"
+
+    print("\nE. FORCED cut in manual mode (head trimmed, tail kept whole)")
+    # A clip that hit MAX_CLIP_SECONDS mid-sentence: reach, settle, then signing that never
+    # stops. The head is the same key-press dead air any manual clip has and must go; the
+    # tail is mid-sentence by construction and must NOT be touched.
+    times, scores = make_clip([reach, settle, body])
+    head, keep = run_forced_cut(times, scores, stop_threshold)
+    report("forced cut mid-sentence", times, head, keep, "[head only]")
+    assert head > 0, "forced cut did not trim the head — the 2026-08-21 defect is back"
+    assert head <= len(reach) + len(settle), "forced cut trimmed into the sentence"
+    assert keep == len(times), "forced cut trimmed the tail, which is mid-sentence"
+    # And the same guard the manual stop has: no floor yet -> keep everything.
+    import auto_segment_v5 as v5
+    no_floor = v5.manual_head_trim(times, scores, StubGate(stop_threshold, floor=None))
+    assert no_floor == 0, "trimmed without a room floor"
+    print("  no floor yet -> keeps every frame")
 
     print("\nD. StreamingPerception.finish(keep, start=...) slicing")
     from streaming_perception import StreamingPerception

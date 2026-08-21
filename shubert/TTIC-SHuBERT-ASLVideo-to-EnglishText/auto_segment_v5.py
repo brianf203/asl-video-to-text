@@ -245,12 +245,23 @@ TAIL_PAD_SECONDS = 0.25
 # simultaneous with the sign: the hand has to leave the keyboard before the first sign and
 # come back after the last one, so both ends of a manual clip hold dead air the signer did
 # not intend to record.
-#   Latency: measured on the 4 probe clips (probe_w2_a / probe_w2_control, which agree to
-#   0.1 s/clip), post-cut latency runs ~0.85s per second of captured video on top of a
-#   ~3.4s floor -- so a second of reaching at each end is ~1.7s on a ~8s sentence.
-#   Quality: near-still frames are exactly what makes ByT5 invent a fluent sentence rather
-#   than return nothing (a 49-frame near-still clip once decoded as "I am here to show you
-#   how to do the heart artery").
+#   Quality -- and on the live path this is the ONLY reason. Near-still frames are exactly
+#   what makes ByT5 invent a fluent sentence rather than return nothing (a 49-frame
+#   near-still clip once decoded as "I am here to show you how to do the heart artery";
+#   live on 2026-08-21 a clip the signer deliberately held still through decoded as "I'm
+#   fluent in Spain").
+#   NOT latency, though it was justified that way and the claim stood until it was
+#   measured. The original figure -- ~0.85s of post-cut per second of captured video on a
+#   ~3.4s floor, from probe_w2_a / probe_w2_control -- comes from the EVAL path, where
+#   perception runs after the cut over exactly the kept frames. On the LIVE streamed path
+#   StreamingPerception.finish() drains every queue and joins all workers BEFORE it slices
+#   [start:end], so trimmed frames have already been through MediaPipe and DINOv2 by the
+#   time they are dropped (its docstring says so for the head, and the same holds for the
+#   tail). Post-cut = drain + ByT5, and the drain is set by the perception BACKLOG at the
+#   cut, which trimming the FRONT cannot reduce -- those are the oldest frames and the
+#   first processed. What is left is a shorter SHuBERT/ByT5 input, too small to measure
+#   against ByT5 generate time, which tracks OUTPUT length. See the 2026-08-21 section of
+#   PROJECT_CONTEXT.md.
 # MANUAL_TRIM=0 restores the previous behaviour of keeping every frame between the presses.
 MANUAL_TRIM = os.environ.get("MANUAL_TRIM", "1") not in ("0", "false", "False")
 # Hard bound on what either end may lose. The trim runs on a threshold fitted to the room's
@@ -562,6 +573,17 @@ state_lock = threading.Lock()
 # translations go to the TERMINAL, one "Signer: ..." line per clip, so the video window
 # stays clean enough to record. This only ever holds short status strings.
 worker_status = ["Loading models..."]
+# Clips the cut-time checks flagged as holding no detectable signing, keyed by label. The
+# camera thread writes, the worker pops when it prints the translation. A side channel
+# rather than a queue field because the legacy path queues a bare mp4 path, which has
+# nowhere to carry one. Guarded by state_lock, like worker_status.
+suspect_clips = {}
+
+
+def flag_suspect(label, note):
+    """Mark a queued clip so its translation is printed with a warning attached."""
+    with state_lock:
+        suspect_clips[label] = note
 clip_counter = [0]
 
 
@@ -600,6 +622,10 @@ def translation_worker(processor):
         # Frames this clip is keeping alive, released in the finally once they are no
         # longer referenced -- that release is what lets the camera thread start again.
         retained = item[-1] if isinstance(item, tuple) else 0
+        # Popped here, not at print time, so a clip that raises cannot leave an entry
+        # behind for a later clip to inherit.
+        with state_lock:
+            suspect = suspect_clips.pop(label, None)
         try:
             print(f"[worker] Translating {label} ...")
             t0 = time.time()
@@ -633,7 +659,11 @@ def translation_worker(processor):
             # The translation itself goes ONLY here, on its own line and prefixed, so a
             # terminal recording reads as a transcript rather than as a log.
             print(f"[worker] {label} translated in {elapsed:.1f}s")
-            print(f"Signer: {result}", flush=True)
+            # The warning rides INSIDE the Signer line rather than on one of its own,
+            # because demo_transcript.py shows only these lines -- a caveat printed
+            # anywhere else is invisible exactly where it matters most, on a demo screen.
+            marker = f"[{suspect} — likely invented] " if suspect else ""
+            print(f"Signer: {marker}{result}", flush=True)
         except Exception as e:
             # Report rather than swallow — v2 discarded stderr and made failures invisible.
             print(f"[worker] Error translating {label}: {type(e).__name__}: {e}")
@@ -742,6 +772,34 @@ def find_signing_onset(times, raw_scores, stop_threshold, window_seconds):
             if quiet_start is not None and t - quiet_start >= HEAD_QUIET_SECONDS:
                 return i
             quiet_start = None
+    return onset
+
+
+def manual_head_trim(times, raw_scores, gate):
+    """Frames to drop from the front of a push-to-record clip, or 0 to keep them all.
+
+    Split out of the manual-stop path so a FORCED cut can use it too. That cut lands
+    mid-sentence, so its TAIL is all signing and must not be touched -- but its HEAD is the
+    same key-press dead air every manual clip carries, and skipping the trim there fed a
+    signer's ~7s pause straight to the model on 2026-08-21.
+    """
+    if not (MANUAL_TRIM and times):
+        return 0
+    if gate.floor is None:
+        # The floor needs ~60 sustained-quiet samples (~2s of stillness,
+        # motion_gate.FLOOR_MIN_SAMPLES) and manual mode runs no calibration, so pressing
+        # SPACE straight after launch lands here. Say it out loud: the clip otherwise
+        # reports "trimmed 0 lead-in" and reads as the onset search finding nothing to cut.
+        print("Trim skipped — no room floor yet (needs ~2s of stillness after launch)")
+        return 0
+    onset = find_signing_onset(times, raw_scores, gate.stop_threshold,
+                               MANUAL_TRIM_MAX_SECONDS)
+    # Back off by the same pad the automatic path uses, so the first handshape is not
+    # clipped. The head cannot run away: the onset search only looks inside the first
+    # MANUAL_TRIM_MAX_SECONDS.
+    lead_cutoff = times[onset] - LEAD_PAD_SECONDS
+    while onset > 0 and times[onset - 1] >= lead_cutoff:
+        onset -= 1
     return onset
 
 
@@ -1173,13 +1231,22 @@ def main():
             if manual_stop or force_cut or (
                     not MANUAL_RECORD and still_duration >= STILL_DURATION_SECONDS):
                 head = 0
+                empty_note = None
                 if force_cut:
-                    # Nothing to trim: the cut lands mid-sentence, so every frame is
-                    # signing. Measure to now.
+                    # The cut lands mid-sentence, so the TAIL is all signing and stays.
+                    # Measure to now.
                     keep = len(frame_times)
                     signing_duration = now - record_start_time
                     print(f">>> FORCED CUT at {elapsed:.1f}s "
                           f"(MAX_CLIP_SECONDS={MAX_CLIP_SECONDS}) <<<")
+                    # The HEAD is a different question, and this branch used to skip it.
+                    # In manual mode the clip began at a key press whatever ended it, so it
+                    # carries the same dead air as any other manual clip -- measured live
+                    # 2026-08-21, where a ~7s pause after the press went to the model whole.
+                    # No span guard here: the tail is known signing, so the head trim cannot
+                    # empty the clip the way it can on a manual stop.
+                    if MANUAL_RECORD:
+                        head = manual_head_trim(frame_times, frame_raw_scores, gate)
                 elif manual_stop:
                     # A key press brackets the sentence loosely at BOTH ends -- the hand
                     # has to leave the keyboard before the first sign and come back after
@@ -1196,18 +1263,8 @@ def main():
                     # clip, so trimming must not be able to reject it.
                     keep = len(frame_times)
                     signing_duration = now - record_start_time
+                    onset = manual_head_trim(frame_times, frame_raw_scores, gate)
                     if MANUAL_TRIM and gate.floor is not None and frame_times:
-                        stop_threshold = gate.stop_threshold
-                        onset = find_signing_onset(frame_times, frame_raw_scores,
-                                                   stop_threshold,
-                                                   MANUAL_TRIM_MAX_SECONDS)
-                        # Back off by the same pad the automatic path uses, so the first
-                        # handshape is not clipped. The head cannot run away: the onset
-                        # search only looks inside the first MANUAL_TRIM_MAX_SECONDS.
-                        lead_cutoff = frame_times[onset] - LEAD_PAD_SECONDS
-                        while onset > 0 and frame_times[onset - 1] >= lead_cutoff:
-                            onset -= 1
-
                         # Taking the LATER of the two cutoffs is what bounds the tail:
                         # last_motion_time only advances above the stop threshold, so a
                         # sentence signed below it (measured on the eval clips:
@@ -1222,8 +1279,20 @@ def main():
                         if span >= MIN_CLIP_DURATION_SECONDS:
                             head, keep = onset, tail
                         else:
+                            # The trim just measured that essentially nothing between the
+                            # two presses was signing. It keeps every frame anyway -- the
+                            # guard fails safe toward KEEPING, because the alternative is
+                            # truncating a real sentence -- but that is exactly the input
+                            # that makes ByT5 invent one, and MIN_MOTION_FRACTION does not
+                            # run in manual mode to catch it. Live 2026-08-21: a clip the
+                            # signer deliberately held still through came back as "I'm
+                            # fluent in Spain". So carry the finding to the translation
+                            # instead of dropping it here. Warn, do not reject: a rejected
+                            # clip is invisible to the signer, a flagged one is not.
+                            empty_note = f"no signing detected, trim span {span:.1f}s"
                             print(f"Trim skipped — would leave {span:.1f}s "
-                                  f"(< MIN_CLIP_DURATION_SECONDS)")
+                                  f"(< MIN_CLIP_DURATION_SECONDS). This clip looks EMPTY; "
+                                  f"any translation of it is probably invented.")
                 else:
                     # Drop the trailing stillness; keep everything up to the last motion
                     # plus TAIL_PAD_SECONDS. Gate on signing time rather than wall-clock
@@ -1253,6 +1322,8 @@ def main():
                     clip_counter[0] += 1
                     if stream is not None:
                         label = f"clip_{clip_counter[0]} (streamed)"
+                        if empty_note:
+                            flag_suspect(label, empty_note)
                         # Hand the whole stream over; the worker drains, closes it,
                         # releases the slot and releases this clip's retained frames.
                         clip_queue.put(("stream", label, stream, head, keep,
@@ -1267,6 +1338,8 @@ def main():
                         retained_this_clip = 0
                     elif deferred:
                         label = f"clip_{clip_counter[0]} (deferred)"
+                        if empty_note:
+                            flag_suspect(label, empty_note)
                         clip_queue.put(("frames", label, recorded_frames[head:keep],
                                         retained_this_clip))
                         print(f"Queued {label} ({keep - head} frames, "
@@ -1279,6 +1352,8 @@ def main():
                         clip_path = os.path.join(config['temp_dir'],
                                                  f"clip_{clip_counter[0]}.mp4")
                         write_clip(recorded_frames[head:keep], clip_path)
+                        if empty_note:
+                            flag_suspect(clip_path, empty_note)
                         clip_queue.put(clip_path)
                         print(f"Queued {clip_path} ({keep - head} frames, "
                               f"{signing_duration:.1f}s signing; trimmed {head} lead-in + "
