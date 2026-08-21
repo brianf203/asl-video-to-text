@@ -81,6 +81,60 @@ def main():
     if old <= signing_max:
         failures.append("control case did not reproduce the runaway; test proves nothing")
 
+    # --- 3b. THE BOOTSTRAP WINDOW: motion at LAUNCH must not set the floor ----------
+    # Distinct from case 2, which feeds motion once a floor already exists. Here the very
+    # first frames are contaminated, and until 2026-08-21 that window accepted everything
+    # and took a MEDIAN of it -- so the floor started wherever the signer happened to be.
+    # Live run 4 bootstrapped to 0.900 against a converged 0.157 and, while it drained, a
+    # genuinely signed clip measured 53% moving against the 50% empty-clip cutoff.
+    #
+    # Read the floor the moment bootstrapping ENDS: the steady-state estimator washes the
+    # contamination out given enough sustained quiet (that is why run 4 recovered by its
+    # third clip), so the damage lands only on the clips recorded before that.
+    #
+    # `moving` cannot be used raw here -- the SIGN phase OPENS with ~34 frames of the signer
+    # reading the prompt, below threshold, so moving[:60] is mostly quiet and a contaminated
+    # window built from it is not contaminated at all. The first version of this test was
+    # fooled by exactly that, as test_manual_trim.py was before it. Take the longest run
+    # that is genuinely above threshold instead.
+    n = motion_gate.FLOOR_MIN_SAMPLES
+    thr = sorted(still)[len(still) // 2] * 1.5
+    best, cur = (0, 0), 0
+    for i, x in enumerate(moving):
+        cur = cur + 1 if x > thr else 0
+        if cur > best[1] - best[0]:
+            best = (i - cur + 1, i + 1)
+    real_motion = (moving[best[0]:best[1]] * 3)
+    assert len(real_motion) >= n, "fixture: not enough genuinely-moving frames"
+
+    def bootstrap_floor(fraction, percentile):
+        saved = motion_gate.BOOTSTRAP_PERCENTILE
+        motion_gate.BOOTSTRAP_PERCENTILE = percentile
+        g = MotionGate(SMOOTHING, FIXED_START, FIXED_STOP)
+        k = int(n * fraction)
+        run(g, real_motion[:k] + still[:n - k])
+        motion_gate.BOOTSTRAP_PERCENTILE = saved
+        return g.floor
+
+    clean = bootstrap_floor(0.0, motion_gate.BOOTSTRAP_PERCENTILE)
+    print(f"[bootstrap] clean floor {clean:.3f}; inflation by contamination:")
+    worst_new = worst_old = 1.0
+    for fraction in (0.25, 0.5, 0.75):
+        new_r = bootstrap_floor(fraction, motion_gate.BOOTSTRAP_PERCENTILE) / clean
+        old_r = bootstrap_floor(fraction, 50) / clean
+        worst_new = max(worst_new, new_r)
+        worst_old = max(worst_old, old_r)
+        print(f"              {fraction:.0%} motion -> percentile {new_r:4.2f}x, "
+              f"median {old_r:4.2f}x")
+        # The claim is RELATIVE robustness, not immunity: p10 inflates too once most of the
+        # window is motion (2.1x at 50%). It must simply inflate substantially less.
+        if new_r > old_r / 1.5:
+            failures.append(f"bootstrap percentile is not clearly more robust than the "
+                            f"median at {fraction:.0%} motion ({new_r:.2f}x vs {old_r:.2f}x)")
+    if worst_old < 2.0:
+        failures.append("control case did not reproduce the bootstrap inflation; "
+                        "test proves nothing")
+
     # --- 4. a genuinely noisier room must still be trackable ------------------------
     # Quiet-only sampling could deadlock: if nothing ever looks quiet the floor can never
     # rise. QUIET_STALE_SECONDS is the escape hatch; check it works.

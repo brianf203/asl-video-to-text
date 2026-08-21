@@ -150,9 +150,37 @@ QUIET_RELAX_STEP = float(os.environ.get("MOTION_QUIET_RELAX", "1.5"))
 # Until this many idle samples exist there is no floor estimate, so the fixed fallback
 # thresholds are used -- which is what makes startup behave sanely.
 FLOOR_MIN_SAMPLES = int(os.environ.get("MOTION_FLOOR_MIN_SAMPLES", "60"))
+# The BOOTSTRAP estimate is a low percentile, not the median, because that window accepts
+# every frame -- there is no threshold yet to judge "quiet" against -- so it contains
+# whatever the signer was doing at launch. A median of a contaminated window tracks the
+# contamination; a low percentile tracks the quiet part of it, which is what a noise floor
+# is. Measured on calib.jsonl (2026-08-21), inflation of the bootstrap estimate against a
+# clean window, as the window fills with GENUINELY moving frames:
+#     contamination     25%     50%     75%
+#     p10 (this)       1.16x   2.06x   4.43x
+#     median (before)  3.51x   5.51x   8.36x
+# So this is RELATIVE robustness, not immunity -- p10 still inflates once most of the window
+# is motion. An earlier version of this comment claimed p10 was flat at 0.9x regardless;
+# that came from a fixture whose "motion" was the signer reading the calibration prompt
+# (below threshold), i.e. not motion at all. Same trap test_manual_trim.py hit. The sweep
+# above is in test_motion_gate.py so the claim cannot rot.
+# Live evidence this matters (run 4, 2026-08-21): a launch with motion in it bootstrapped
+# the floor to 0.900 against a converged value of ~0.157, and while it drained, a genuinely
+# SIGNED clip measured 53% moving against the 50% empty-clip cutoff -- three points from
+# having a real sentence marked "likely invented".
+BOOTSTRAP_PERCENTILE = float(os.environ.get("MOTION_BOOTSTRAP_PERCENTILE", "10"))
 # A floor of ~0 (a synthetic or perfectly static feed) would drive both thresholds to zero
 # and latch the machine on. Clamp it.
 FLOOR_MIN = float(os.environ.get("MOTION_FLOOR_MIN", "0.02"))
+
+
+def _percentile(values, pct):
+    """Nearest-rank percentile. Small windows, no numpy dependency in this module."""
+    ordered = sorted(values)
+    if not ordered:
+        return 0.0
+    k = int(round(pct / 100.0 * (len(ordered) - 1)))
+    return ordered[max(0, min(len(ordered) - 1, k))]
 
 
 def _median(values):
@@ -221,7 +249,11 @@ class MotionGate:
                 self._floor_samples.append(self.smoothed)
                 self._last_quiet_t = now
                 if len(self._floor_samples) >= FLOOR_MIN_SAMPLES:
-                    self.floor = max(FLOOR_MIN, _median(self._floor_samples))
+                    # Low percentile, NOT the median: see BOOTSTRAP_PERCENTILE. Steady
+                    # state keeps the median, because those samples are already filtered to
+                    # sustained quiet runs and do not need the robustness.
+                    self.floor = max(FLOOR_MIN,
+                                     _percentile(self._floor_samples, BOOTSTRAP_PERCENTILE))
                     self._bootstrapping = False
             else:
                 bound = self.stop_threshold * QUIET_ACCEPT_FACTOR * self._relax
