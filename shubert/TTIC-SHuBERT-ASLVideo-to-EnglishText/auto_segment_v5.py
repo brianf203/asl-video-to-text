@@ -1344,6 +1344,20 @@ def main():
                 #     standing (fixtures/standing_...jsonl)  still 30.5%  sign 55.6%
                 # Clean sitting, marginal standing -- so expect the occasional false
                 # warning on a standing signer, which is why this WARNS and never rejects.
+                # Everything the threshold question needs, once per manual clip. Written
+                # because three live sessions could not answer it: the fitted floor moved
+                # 0.197 -> 0.240 -> 0.423 across them (2.1x) and only the STARTUP value was
+                # ever logged, so what the trim and the empty-clip test actually compared
+                # against at each CUT is unknown. The clip's own percentiles are here too,
+                # since re-deriving the fraction cutoff needs the distribution, not just the
+                # verdict -- and calibration recordings cannot stand in for real clips.
+                if MANUAL_RECORD and scored:
+                    q = sorted(scored)
+                    pct = lambda f: q[min(len(q) - 1, int(f * len(q)))]
+                    print(f"[trim] floor {gate.floor if gate.floor is None else round(gate.floor, 3)} "
+                          f"stop {gate.stop_threshold:.3f} | clip p10/p50/p95 "
+                          f"{pct(0.10):.3f}/{pct(0.50):.3f}/{pct(0.95):.3f} | "
+                          f"moving {motion_fraction:.0%} of {len(scored)} frames")
                 if (MANUAL_RECORD and empty_note is None and scored
                         and motion_fraction < MANUAL_EMPTY_FRACTION):
                     empty_note = f"only {100 * motion_fraction:.0f}% of frames moving"
