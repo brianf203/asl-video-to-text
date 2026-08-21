@@ -1418,6 +1418,13 @@ def main():
                     # pre-roll would duplicate frames across the boundary. Falls back to
                     # IDLE if the backlog is now full, which is the same refusal the
                     # IDLE branch makes.
+                    # CONFIRMED CORRECT FOR MANUAL MODE TOO (user's call, 2026-08-21): queue
+                    # the capped clip for translation AND resume recording at once, because
+                    # a signer cut at MAX_CLIP_SECONDS is probably mid-sentence. Do not
+                    # "fix" this to go IDLE in push-to-record. The known cost is a trailing
+                    # clip when the signer stops instead of continuing -- that is what
+                    # produced run 2's unasked-for clip_2 -- and the empty-clip warning is
+                    # what covers it.
                     budget_ok, budget_reason = _capture_budget()
                     if budget_ok:
                         stream, deferred = _begin_perception()
