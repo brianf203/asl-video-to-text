@@ -1,254 +1,29 @@
 [
   {
-    "clip": "001.mp4",
-    "submitted": "My name is Brian.",
-    "enqueue": "Hi, my name is Brian.",
-    "wall_submitted": 21.83867597579956,
-    "wall_enqueue": 18.666804313659668,
-    "perception_submitted": 22.9128315448761,
-    "perception_enqueue": 20.634382963180542
-  },
-  {
-    "clip": "002.mp4",
-    "submitted": "My friend's name is Sarah.",
-    "enqueue": "My friend's name is Sarah.",
-    "wall_submitted": 17.930789470672607,
-    "wall_enqueue": 17.37387228012085,
-    "perception_submitted": 19.254295587539673,
-    "perception_enqueue": 17.985702991485596
-  },
-  {
-    "clip": "003.mp4",
-    "submitted": "I am going to OSU.",
-    "enqueue": "I am going to OSU.",
-    "wall_submitted": 12.504963874816895,
-    "wall_enqueue": 11.426472425460815,
-    "perception_submitted": 12.644248247146606,
-    "perception_enqueue": 10.66537618637085
-  },
-  {
-    "clip": "004.mp4",
-    "submitted": "My professor is Marasieoth.",
-    "enqueue": "My professor is Marassani Emah.",
-    "wall_submitted": 24.555932998657227,
-    "wall_enqueue": 22.972458600997925,
-    "perception_submitted": 29.4616596698761,
-    "perception_enqueue": 26.69116449356079
-  },
-  {
-    "clip": "005.mp4",
-    "submitted": "There are Columbian columbs.",
-    "enqueue": "Columbs",
-    "wall_submitted": 23.283170461654663,
-    "wall_enqueue": 20.492676496505737,
-    "perception_submitted": 28.442301034927368,
-    "perception_enqueue": 25.556577444076538
-  },
-  {
-    "clip": "006.mp4",
-    "submitted": "Her name is Snailyaf.",
-    "enqueue": "Her name is Snailyaf.",
-    "wall_submitted": 23.21766757965088,
-    "wall_enqueue": 23.06262755393982,
-    "perception_submitted": 29.644585847854614,
-    "perception_enqueue": 26.776569843292236
-  },
-  {
-    "clip": "007.mp4",
-    "submitted": "I learn ASL with Arkansas Skrint.",
-    "enqueue": "I learn ASL with Ark Skrimt.",
-    "wall_submitted": 23.07185435295105,
-    "wall_enqueue": 22.003214359283447,
-    "perception_submitted": 27.446714401245117,
-    "perception_enqueue": 26.166865825653076
-  },
-  {
-    "clip": "008.mp4",
-    "submitted": "There is a doctor named Psychiatrician.",
-    "enqueue": "There is a doctor named Pakistan.",
-    "wall_submitted": 18.864216327667236,
-    "wall_enqueue": 17.49036407470703,
-    "perception_submitted": 21.726014137268066,
-    "perception_enqueue": 19.597752809524536
-  },
-  {
-    "clip": "009.mp4",
-    "submitted": "I have 3 brothers.",
-    "enqueue": "I have two brothers.",
-    "wall_submitted": 17.789688110351562,
-    "wall_enqueue": 14.46377682685852,
-    "perception_submitted": 18.40970206260681,
-    "perception_enqueue": 15.504917860031128
-  },
-  {
-    "clip": "010.mp4",
-    "submitted": "The world starts in the ninth day.",
-    "enqueue": "We're going to start nine years later.",
-    "wall_submitted": 16.58360743522644,
-    "wall_enqueue": 14.986005783081055,
-    "perception_submitted": 15.125932455062866,
-    "perception_enqueue": 12.447840929031372
-  },
-  {
-    "clip": "011.mp4",
-    "submitted": "Green.",
-    "enqueue": "Green.",
-    "wall_submitted": 10.304605722427368,
-    "wall_enqueue": 9.374361991882324,
-    "perception_submitted": 9.522541046142578,
-    "perception_enqueue": 6.8774847984313965
-  },
-  {
-    "clip": "012.mp4",
-    "submitted": "15. Was the student in a small room in 1515?",
-    "enqueue": "15. Was the student room in a small room?",
-    "wall_submitted": 18.87161135673523,
-    "wall_enqueue": 16.856436491012573,
-    "perception_submitted": 16.42078971862793,
-    "perception_enqueue": 14.524523258209229
-  },
-  {
-    "clip": "013.mp4",
-    "submitted": "My 10th birthday is June.",
-    "enqueue": "My 10th birthday is June.",
-    "wall_submitted": 19.107497692108154,
-    "wall_enqueue": 17.8051495552063,
-    "perception_submitted": 21.883047103881836,
-    "perception_enqueue": 19.83907413482666
-  },
-  {
-    "clip": "014.mp4",
-    "submitted": "The cost is $5 and the cost is $5.",
-    "enqueue": "The cost is $5 and costs $5.",
-    "wall_submitted": 14.804977655410767,
-    "wall_enqueue": 13.46213173866272,
-    "perception_submitted": 14.276844263076782,
-    "perception_enqueue": 12.82018232345581
-  },
-  {
     "clip": "015.mp4",
     "submitted": "Nice to meet you.",
     "enqueue": "Nice to meet you.",
-    "wall_submitted": 11.202129364013672,
-    "wall_enqueue": 9.743542432785034,
-    "perception_submitted": 8.473251104354858,
-    "perception_enqueue": 6.408874273300171
+    "wall_submitted": 13.341249942779541,
+    "wall_enqueue": 10.423757553100586,
+    "perception_submitted": 8.723360776901245,
+    "perception_enqueue": 6.999499320983887
   },
   {
     "clip": "016.mp4",
     "submitted": "What is your name?",
     "enqueue": "What is your name?",
-    "wall_submitted": 12.254884243011475,
-    "wall_enqueue": 10.206578731536865,
-    "perception_submitted": 11.277058124542236,
-    "perception_enqueue": 8.57630443572998
+    "wall_submitted": 12.146734952926636,
+    "wall_enqueue": 11.829411506652832,
+    "perception_submitted": 10.410784006118774,
+    "perception_enqueue": 8.413163185119629
   },
   {
     "clip": "017.mp4",
     "submitted": "I want to eat lunch.",
     "enqueue": "I am starving to eat lunch.",
-    "wall_submitted": 14.008247137069702,
-    "wall_enqueue": 13.288229942321777,
-    "perception_submitted": 14.470494508743286,
-    "perception_enqueue": 11.654432773590088
-  },
-  {
-    "clip": "018.mp4",
-    "submitted": "Can you help me?",
-    "enqueue": "Can you help me please?",
-    "wall_submitted": 14.908581733703613,
-    "wall_enqueue": 12.110957384109497,
-    "perception_submitted": 14.734672784805298,
-    "perception_enqueue": 11.61986255645752
-  },
-  {
-    "clip": "019.mp4",
-    "submitted": "His population is slowly slowing down in Switzerland.",
-    "enqueue": "He is the slowest people in the world in Switzerland.",
-    "wall_submitted": 17.929760694503784,
-    "wall_enqueue": 17.118910551071167,
-    "perception_submitted": 15.35495138168335,
-    "perception_enqueue": 12.919695138931274
-  },
-  {
-    "clip": "020.mp4",
-    "submitted": "Thank you so much",
-    "enqueue": "So much good luck",
-    "wall_submitted": 11.529170751571655,
-    "wall_enqueue": 9.767889261245728,
-    "perception_submitted": 10.358963966369629,
-    "perception_enqueue": 7.394605398178101
-  },
-  {
-    "clip": "021.mp4",
-    "submitted": "Where should you put your bathroom?",
-    "enqueue": "Where should you start with the bathroom?",
-    "wall_submitted": 10.956057071685791,
-    "wall_enqueue": 11.391011476516724,
-    "perception_submitted": 8.132011651992798,
-    "perception_enqueue": 7.0223798751831055
-  },
-  {
-    "clip": "022.mp4",
-    "submitted": "I am learning sign language expressions.",
-    "enqueue": "I am learning sign language expressions.",
-    "wall_submitted": 15.464251518249512,
-    "wall_enqueue": 14.48764181137085,
-    "perception_submitted": 13.08171010017395,
-    "perception_enqueue": 11.087663888931274
-  },
-  {
-    "clip": "023.mp4",
-    "submitted": "Yesterday, I went to the store and bought food and English.",
-    "enqueue": "Yesterday, I went to the grocery store and bought dinner.",
-    "wall_submitted": 28.613104820251465,
-    "wall_enqueue": 27.772111654281616,
-    "perception_submitted": 31.194432735443115,
-    "perception_enqueue": 29.497650623321533
-  },
-  {
-    "clip": "024.mp4",
-    "submitted": "Wishing my mother would visit us next week.",
-    "enqueue": "Wishing my mother would visit us the next two weeks.",
-    "wall_submitted": 26.67711305618286,
-    "wall_enqueue": 26.296899795532227,
-    "perception_submitted": 29.840610027313232,
-    "perception_enqueue": 26.61038851737976
-  },
-  {
-    "clip": "025.mp4",
-    "submitted": "I want to become a teacher dreaming of helping children.",
-    "enqueue": "I want to become a teacher dreaming of helping children.",
-    "wall_submitted": 32.67381191253662,
-    "wall_enqueue": 31.212287425994873,
-    "perception_submitted": 36.41769814491272,
-    "perception_enqueue": 34.67981767654419
-  },
-  {
-    "clip": "026.mp4",
-    "submitted": "The cold weather is now so I am wearing a jacket.",
-    "enqueue": "The weather is cold now, so I am dressed and jacketed.",
-    "wall_submitted": 24.11891508102417,
-    "wall_enqueue": 25.06458282470703,
-    "perception_submitted": 23.970426559448242,
-    "perception_enqueue": 22.076797246932983
-  },
-  {
-    "clip": "027.mp4",
-    "submitted": "If you're done with your homescape, we can watch the movie a few more years later.",
-    "enqueue": "If you're done with your hometable membership, you can watch the movie a few more years later.",
-    "wall_submitted": 38.29486560821533,
-    "wall_enqueue": 36.175286531448364,
-    "perception_submitted": 39.787395000457764,
-    "perception_enqueue": 36.405067920684814
-  },
-  {
-    "clip": "028.mp4",
-    "submitted": "I have been studying astronomy for two years now.",
-    "enqueue": "I have been studying astronomy for two years now.",
-    "wall_submitted": 29.905185222625732,
-    "wall_enqueue": 24.313172101974487,
-    "perception_submitted": 28.46350336074829,
-    "perception_enqueue": 26.317906141281128
+    "wall_submitted": 14.483002662658691,
+    "wall_enqueue": 14.963033676147461,
+    "perception_submitted": 14.967528104782104,
+    "perception_enqueue": 12.36377239227295
   }
 ]
