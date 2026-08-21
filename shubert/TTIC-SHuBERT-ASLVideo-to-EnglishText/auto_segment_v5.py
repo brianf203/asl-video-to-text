@@ -309,6 +309,12 @@ QUIT_DRAIN_SECONDS = float(os.environ.get("QUIT_DRAIN_SECONDS", "180"))
 # essentially-empty case, and dropping a real sentence costs the signer far more than
 # translating a spurious one. Raise it if false starts keep reaching the worker.
 MIN_MOTION_FRACTION = float(os.environ.get("MIN_MOTION_FRACTION", "0.5"))
+# The same test, used in manual mode to WARN rather than to reject (a key press is not a
+# false start, but it is not evidence of signing either). Its own knob so the warning can be
+# made quieter or louder without touching what the automatic path REJECTS. See the comment
+# at the use site for the recording that fixes the default.
+MANUAL_EMPTY_FRACTION = float(os.environ.get("MANUAL_EMPTY_FRACTION",
+                                             str(MIN_MOTION_FRACTION)))
 
 # Push-to-record: SPACE starts a clip, SPACE ends it. No motion detection at all.
 #
@@ -1289,10 +1295,15 @@ def main():
                             # fluent in Spain". So carry the finding to the translation
                             # instead of dropping it here. Warn, do not reject: a rejected
                             # clip is invisible to the signer, a flagged one is not.
-                            empty_note = f"no signing detected, trim span {span:.1f}s"
-                            print(f"Trim skipped — would leave {span:.1f}s "
-                                  f"(< MIN_CLIP_DURATION_SECONDS). This clip looks EMPTY; "
-                                  f"any translation of it is probably invented.")
+                            # Two decimals, not one: the guard trips at span <
+                            # MIN_CLIP_DURATION_SECONDS (1.0), so a span of 0.97 printed
+                            # at .1f reads "would leave 1.0s (< MIN_CLIP_DURATION_SECONDS)"
+                            # -- a message that contradicts itself. Seen live 2026-08-21.
+                            empty_note = f"no signing detected, trim span {span:.2f}s"
+                            print(f"Trim skipped — would leave {span:.2f}s "
+                                  f"(< MIN_CLIP_DURATION_SECONDS={MIN_CLIP_DURATION_SECONDS}"
+                                  f"). This clip looks EMPTY; any translation of it is "
+                                  f"probably invented.")
                 else:
                     # Drop the trailing stillness; keep everything up to the last motion
                     # plus TAIL_PAD_SECONDS. Gate on signing time rather than wall-clock
@@ -1315,9 +1326,31 @@ def main():
                     if scored else 1.0)
 
                 # In manual mode the signer explicitly asked for this clip, so the
-                # motion test does not apply -- it exists to catch FALSE STARTS, which
+                # motion test does not REJECT -- it exists to catch FALSE STARTS, which
                 # cannot happen when a key press starts the clip.
                 enough_motion = MANUAL_RECORD or motion_fraction >= MIN_MOTION_FRACTION
+                # It still MEASURES, though, and in manual mode that measurement is the
+                # best empty-clip signal available -- better than the trim span, which is
+                # the distance between the two cutoffs and says nothing about the signing
+                # between them. Live 2026-08-21: a 5.5s clip the signer held still through
+                # kept a wide span (a key-press motion blip at each end) and went out
+                # UNFLAGGED, decoding to "...Spring of 2018 and 2017 Spring of 2018". The
+                # span check caught the other empty clip that day only because it was short.
+                # The threshold is the same MIN_MOTION_FRACTION, which the frozen
+                # calibration recordings support as a separator (fraction of smoothed
+                # frames above the stop threshold, measured 2026-08-21):
+                #     sitting  (calib.jsonl)                 still 37.0%  sign 76.5%
+                #                                                         fingerspell 78.2%
+                #     standing (fixtures/standing_...jsonl)  still 30.5%  sign 55.6%
+                # Clean sitting, marginal standing -- so expect the occasional false
+                # warning on a standing signer, which is why this WARNS and never rejects.
+                if (MANUAL_RECORD and empty_note is None and scored
+                        and motion_fraction < MANUAL_EMPTY_FRACTION):
+                    empty_note = f"only {100 * motion_fraction:.0f}% of frames moving"
+                    print(f"This clip looks EMPTY — only {100 * motion_fraction:.0f}% of "
+                          f"its frames are above the stop threshold "
+                          f"(< {100 * MANUAL_EMPTY_FRACTION:.0f}%); any translation of it "
+                          f"is probably invented.")
                 if signing_duration >= MIN_CLIP_DURATION_SECONDS and enough_motion:
                     clip_counter[0] += 1
                     if stream is not None:
