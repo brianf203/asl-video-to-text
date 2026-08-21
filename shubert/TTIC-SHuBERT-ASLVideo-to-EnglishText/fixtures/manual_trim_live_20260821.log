@@ -1,0 +1,239 @@
+Wav2Vec2Config is imported from: fairseq.models.wav2vec.wav2vec2
+Full path: /home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/fairseq/models/wav2vec/wav2vec2.py
+Starting persistent translation worker...
+Using cache found in /home/sllu/.cache/torch/hub/facebookresearch_dinov2_main
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:51: UserWarning: xFormers is not available (SwiGLU)
+  warnings.warn("xFormers is not available (SwiGLU)")
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:33: UserWarning: xFormers is not available (Attention)
+  warnings.warn("xFormers is not available (Attention)")
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:40: UserWarning: xFormers is not available (Block)
+  warnings.warn("xFormers is not available (Block)")
+2026-08-21 09:46:51 | INFO | dinov2 | using MLP layer as FFN
+Push-to-record: press SPACE to start a clip, SPACE again to end it.
+DINOEmbedder initialized on device: cuda dtype: torch.float16
+Using cache found in /home/sllu/.cache/torch/hub/facebookresearch_dinov2_main
+2026-08-21 09:46:53 | INFO | dinov2 | using MLP layer as FFN
+DINOEmbedder initialized on device: cuda dtype: torch.float16
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert.py:132: FutureWarning: Positional args are being deprecated, use kwargs instead. Refer to https://pytorch.org/docs/main/generated/torch.nn.Module.html#torch.nn.Module.state_dict for details.
+  state = super().state_dict(destination, prefix, keep_vars)
+[byt5] device: cuda dtype: bfloat16
+[worker] Models loaded in 26.9s
+Streaming perception ON (stride 2) — landmarks are extracted during recording, not after the cut.
+Ready. SPACE starts and ends each clip; 'q' quits.
+[gate] noise floor 0.197 -> start 1.77, stop 0.30 (fixed fallback was 1.74/0.29)
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+W0000 00:00:1787330858.082165    6581 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+W0000 00:00:1787330858.141666    6588 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+>>> RECORDING <<<
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/google/protobuf/symbol_database.py:55: UserWarning: SymbolDatabase.GetPrototype() is deprecated. Please use message_factory.GetMessageClass() instead. SymbolDatabase.GetPrototype() will be removed soon.
+  warnings.warn('SymbolDatabase.GetPrototype() is deprecated. Please '
+[worker] Translating clip_1 (streamed) ...
+Queued clip_1 (streamed) (42 frames, 4.4s signing; trimmed 22 lead-in + 0 still frames; 41 already through MediaPipe)
+[worker] drained perception backlog in 5.6s (64 frames processed, 9.6s inside MediaPipe)
+W0000 00:00:1787330868.991113    6631 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1787330869.061635    6638 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+>>> RECORDING <<<
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    9.6s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    5.2s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.6s
+  total               :    2.6s
+[worker] clip_1 (streamed) translated in 8.2s
+Signer: Hi.
+Queued clip_2 (streamed) (80 frames, 6.2s signing; trimmed 6 lead-in + 0 still frames; 68 already through MediaPipe)[worker] Translating clip_2 (streamed) ...
+
+W0000 00:00:1787330880.184530    6681 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1787330880.250926    6688 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+>>> RECORDING <<<
+[worker] drained perception backlog in 6.3s (86 frames processed, 12.4s inside MediaPipe)
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    5.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   12.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    7.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.5s
+  total               :    5.6s
+[worker] clip_2 (streamed) translated in 12.0s
+Signer: What is my name?
+Queued clip_3 (streamed) (132 frames, 9.7s signing; trimmed 13 lead-in + 0 still frames; 118 already through MediaPipe)[worker] Translating clip_3 (streamed) ...
+
+[worker] drained perception backlog in 8.8s (145 frames processed, 21.1s inside MediaPipe)
+W0000 00:00:1787330902.730398    6734 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1787330902.792610    6741 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+>>> RECORDING <<<
+Queued clip_4 (streamed) (20 frames, 1.7s signing; trimmed 0 lead-in + 0 still frames; 10 already through MediaPipe)
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    7.1s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   21.1s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :   13.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    7.1s
+  total               :    7.1s
+[worker] clip_3 (streamed) translated in 16.1s
+Signer: This is Brian.
+[worker] Translating clip_4 (streamed) ...
+[worker] drained perception backlog in 1.7s (20 frames processed, 2.8s inside MediaPipe)
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    2.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.7s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.9s
+  total               :    1.9s
+[worker] clip_4 (streamed) translated in 3.7s
+Signer: (shows sign).
+W0000 00:00:1787330912.092103    6781 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1787330912.118877    6788 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+>>> RECORDING <<<
+Queued clip_5 (streamed) (34 frames, 2.3s signing; trimmed 0 lead-in + 0 still frames; 19 already through MediaPipe)[worker] Translating clip_5 (streamed) ...
+
+[worker] drained perception backlog in 3.9s (34 frames processed, 3.8s inside MediaPipe)
+W0000 00:00:1787330920.880320    6832 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1787330920.948145    6839 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+>>> RECORDING <<<
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    3.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.7s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.9s
+  total               :    3.9s
+[worker] clip_5 (streamed) translated in 7.9s
+Signer: My name is (signs name).
+Queued clip_6 (streamed) (40 frames, 3.0s signing; trimmed 4 lead-in + 0 still frames; 32 already through MediaPipe)[worker] Translating clip_6 (streamed) ...
+
+[worker] drained perception backlog in 3.9s (44 frames processed, 4.8s inside MediaPipe)
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.2s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    4.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.2s
+  total               :    1.2s
+[worker] clip_6 (streamed) translated in 5.1s
+Signer: Brian
+W0000 00:00:1787330939.471997    6882 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1787330939.534065    6889 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+>>> RECORDING <<<
+>>> FORCED CUT at 15.0s (MAX_CLIP_SECONDS=15.0) <<<
+Queued clip_7 (streamed) (221 frames, 15.0s signing; trimmed 0 lead-in + 0 still frames; 180 already through MediaPipe)
+[worker] Translating clip_7 (streamed) ...W0000 00:00:1787330954.498917    6932 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+W0000 00:00:1787330954.566448    6939 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+Trim skipped — would leave 0.3s (< MIN_CLIP_DURATION_SECONDS)
+Queued clip_8 (streamed) (60 frames, 5.0s signing; trimmed 0 lead-in + 0 still frames; 33 already through MediaPipe)
+[worker] drained perception backlog in 15.1s (221 frames processed, 36.4s inside MediaPipe)
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    5.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   36.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :   25.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.7s
+  total               :    5.7s
+[worker] clip_7 (streamed) translated in 21.3s
+Signer: This is my sign name.
+[worker] Translating clip_8 (streamed) ...
+[worker] drained perception backlog in 2.0s (60 frames processed, 11.2s inside MediaPipe)
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.8s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   11.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    6.2s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.8s
+  total               :    2.8s
+[worker] clip_8 (streamed) translated in 4.9s
+Signer: I'm fluent in Spain
+All clips finished (0.0s).

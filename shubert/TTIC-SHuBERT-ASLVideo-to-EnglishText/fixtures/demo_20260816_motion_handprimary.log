@@ -1,0 +1,133 @@
+Wav2Vec2Config is imported from: fairseq.models.wav2vec.wav2vec2
+Full path: /home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/fairseq/models/wav2vec/wav2vec2.py
+Starting persistent translation worker...
+Using cache found in /home/sllu/.cache/torch/hub/facebookresearch_dinov2_main
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:51: UserWarning: xFormers is not available (SwiGLU)
+  warnings.warn("xFormers is not available (SwiGLU)")
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:33: UserWarning: xFormers is not available (Attention)
+  warnings.warn("xFormers is not available (Attention)")
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:40: UserWarning: xFormers is not available (Block)
+  warnings.warn("xFormers is not available (Block)")
+2026-08-16 15:43:27 | INFO | dinov2 | using MLP layer as FFN
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+Landmark trigger ON — a start also requires hands to be visible.
+Calibrating to this room and signer (~28s) — follow the prompts.
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/google/protobuf/symbol_database.py:55: UserWarning: SymbolDatabase.GetPrototype() is deprecated. Please use message_factory.GetMessageClass() instead. SymbolDatabase.GetPrototype() will be removed soon.
+  warnings.warn('SymbolDatabase.GetPrototype() is deprecated. Please '
+DINOEmbedder initialized on device: cuda dtype: torch.float16
+Using cache found in /home/sllu/.cache/torch/hub/facebookresearch_dinov2_main
+2026-08-16 15:43:29 | INFO | dinov2 | using MLP layer as FFN
+DINOEmbedder initialized on device: cuda dtype: torch.float16
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert.py:132: FutureWarning: Positional args are being deprecated, use kwargs instead. Refer to https://pytorch.org/docs/main/generated/torch.nn.Module.html#torch.nn.Module.state_dict for details.
+  state = super().state_dict(destination, prefix, keep_vars)
+non-signing: max 0.605  median 0.300
+    STAND STILL                        max 0.405
+    MOVE (NO SIGNING)                  max 0.605
+    SIGN                                0 events: (none above non-signing max)
+DEGRADED (hand-gated): signing never cleared ordinary movement — this metric cannot separate them at this distance; thresholds fitted to stillness instead and ONLY valid with the hand-presence veto on
+    signing peaked at 0.595, non-signing movement at 0.605, stillness at 0.405
+    at start 0.491: 0.0% of STILL frames and 6.6% of all non-signing frames are above it (the hand veto has to reject those)
+    at stop 0.190: longest quiet run is 112 frames (3.7s) when still, 39 frames (1.3s) while signing — a clip ends after 2.5s (75 frames) of quiet, so this should cut cleanly
+=> start 0.491  stop 0.190
+
+*** This room/distance cannot be segmented on pixel motion alone. ***
+Thresholds are fitted to STILLNESS only and ordinary movement will cross them; hand presence is what has to reject it, so LANDMARK_TRIGGER must stay on. Expect occasional false starts.
+Standing closer to the camera, or framing it tighter on your upper body, restores the normal fit — signing moves a larger share of the frame.
+
+[gate] HAND-PRIMARY start: pixel motion does not separate signing at this distance, so a clip starts on hand presence alone (3 of 5 detector verdicts). The detector now runs continuously while idle (~1 core); the pixel stop threshold still ends the clip. HAND_TRIGGER_PRIMARY=0 restores the pre-gated veto.
+[gate] calibrated 2026-08-16T15:43:55 — start 0.49, stop 0.19 (separation 0.98x)
+[gate] WARNING: calibration could not cleanly separate signing from ordinary movement — expect occasional false starts; the hand veto and the empty-clip test cover some of them.
+[byt5] device: cuda dtype: bfloat16
+[worker] Models loaded in 30.8s
+Streaming perception ON (stride 2) — landmarks are extracted during recording, not after the cut.
+Auto-segmentation active. Sign naturally, pause briefly between sentences.
+Press 'q' to quit.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+W0000 00:00:1786920240.034087    7272 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1786920240.142294    7279 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+>>> RECORDING STARTED — backdated 44 frames (1.43s) to motion onset <<<
+Queued clip_1 (streamed) (88 frames, 5.7s signing; trimmed 0 lead-in + 35 still frames; 88 already through MediaPipe)[worker] Translating clip_1 (streamed) ...
+
+W0000 00:00:1786920247.135062    7322 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1786920247.168052    7329 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+>>> RECORDING STARTED — backdated 8 frames (0.24s) to motion onset <<<
+Ignored — only 48% of frames moving (4.5s signing, 86 frames).
+[gate] room floor 0.174 vs no reference at calibration — drift x1.00, start 0.49, stop 0.19
+W0000 00:00:1786920260.443219    7372 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1786920260.507662    7379 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+>>> RECORDING STARTED — backdated 28 frames (0.90s) to motion onset <<<
+[worker] drained perception backlog in 15.9s (123 frames processed, 21.5s inside MediaPipe)
+Queued clip_2 (streamed) (85 frames, 5.4s signing; trimmed 0 lead-in + 30 still frames; 82 already through MediaPipe)
+>>> RECORDING STARTED (deferred — 2 streams already live) — backdated 8 frames (0.21s) to motion onset <<<
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    7.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   21.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :   18.2s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    7.5s
+  total               :    7.5s
+[worker] clip_1 (streamed) translated in 23.5s
+Signer: Hi, my name is Bryan.
+[worker] Translating clip_2 (streamed) ...
+Queued clip_3 (deferred) (31 frames, 1.7s signing; trimmed 0 lead-in + 34 still frames; perception not started)
+[worker] drained perception backlog in 8.5s (115 frames processed, 17.6s inside MediaPipe)
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.1s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   17.6s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :   13.7s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.2s
+  total               :    3.2s
+[worker] clip_2 (streamed) translated in 12.0s
+Signer: I am studying ASL.
+[worker] Translating clip_3 (deferred) ...
+W0000 00:00:1786920282.476313    7244 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- Perception per-frame timing (MediaPipe, 31 frames) ---
+  pose  :    2.3s total,   73.6ms/frame avg
+  face  :    1.0s total,   33.1ms/frame avg
+  hand  :    4.1s total,  133.9ms/frame avg
+  wall  :    4.3s total,  139.5ms/frame avg (critical path: max(pose,face,hand) + thread overhead)
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    0.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    4.5s
+  hand_crop           :    0.0s
+  dinov2_hands        :    1.8s
+  face_crop           :    0.0s
+  dinov2_face         :    0.7s
+  pose_features       :    0.0s
+  byt5_inference      :    0.5s
+  total               :    7.5s
+[worker] clip_3 (deferred) translated in 7.5s
+Signer: L.
+All clips finished (1.0s).
