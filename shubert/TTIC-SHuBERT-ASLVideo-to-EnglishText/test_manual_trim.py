@@ -203,43 +203,6 @@ def main():
     report("pause mid-sentence", times, head, keep, f"[{how}]")
     assert head <= len(reach) + len(settle), "onset jumped past a mid-sentence pause"
 
-    print("\nF. enqueue_onset agrees with the post-cut search (live vs after-the-fact)")
-    # The enqueue-time trim decides the onset from only the frames seen SO FAR. If it can
-    # disagree with find_signing_onset on the same series, the two trims would fight: one
-    # drops frames the other still expects. Drive both over the same clips.
-    for label, segs in (("sign + still tail", [reach, settle, body, quiet_tail]),
-                        ("fingerspell",       [reach, settle, fs_body, quiet_tail]),
-                        ("pause mid-sentence", [reach, settle, body[:30], settle,
-                                                body[30:], quiet_tail])):
-        times, scores = make_clip(segs)
-        live = None
-        for i in range(1, len(times) + 1):        # replay frame by frame, as capture does
-            # Same window for both, so this tests the RULE. In the app the live window is
-            # tighter (MANUAL_ENQUEUE_WINDOW) than the post-cut one on purpose: holding
-            # frames costs latency, so the live side gives up sooner and leaves the rest to
-            # the post-cut trim.
-            live = v5.enqueue_onset(times[:i], scores[:i], stop_threshold,
-                                    v5.MANUAL_TRIM_MAX_SECONDS)
-            if live is not None:
-                break
-        after = v5.find_signing_onset(times, scores, stop_threshold,
-                                      v5.MANUAL_TRIM_MAX_SECONDS)
-        print(f"  {label:22s} live {live}  post-cut {after}")
-        assert live == after, f"{label}: live onset {live} != post-cut {after}"
-
-    # And the case it must NOT decide: continuous motion has no quiet stretch to resume
-    # from, so it holds forever and the caller's window is what releases it.
-    times, scores = make_clip([reach, body, moving[:10]])
-    assert v5.enqueue_onset(times, scores, stop_threshold,
-                            v5.MANUAL_TRIM_MAX_SECONDS) is None, \
-        "decided an onset on a clip with no quiet stretch"
-    # And a quiet stretch INSIDE the sentence, past the window, must not be taken as an
-    # onset -- that would trim away everything before it.
-    times, scores = make_clip([reach, body, settle, body, quiet_tail])
-    assert v5.enqueue_onset(times, scores, stop_threshold, 1.5) is None, \
-        "took a mid-sentence pause as the onset"
-    print("  continuous motion       live None (holds; the window releases it)")
-
     print("\nE. FORCED cut in manual mode (head trimmed, tail kept whole)")
     # A clip that hit MAX_CLIP_SECONDS mid-sentence: reach, settle, then signing that never
     # stops. The head is the same key-press dead air any manual clip has and must go; the

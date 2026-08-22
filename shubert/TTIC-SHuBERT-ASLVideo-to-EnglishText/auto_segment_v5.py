@@ -276,30 +276,6 @@ MANUAL_TRIM = os.environ.get("MANUAL_TRIM", "1") not in ("0", "false", "False")
 # sentence as a pause, and only the tail has a positive motion detection (last_motion_time)
 # to anchor against. Press SPACE close to when you start signing and this never applies.
 MANUAL_TRIM_MAX_SECONDS = float(os.environ.get("MANUAL_TRIM_MAX_SECONDS", "2.5"))
-# Trim the head at ENQUEUE time instead of at the cut: hold the opening frames back and
-# never submit the ones before the onset, so MediaPipe never pays for them.
-#
-# DEFAULT OFF, and the reason is arithmetic rather than caution. Deciding the onset means
-# waiting for the settle to END, so perception starts late by the head's own duration.
-# Perception runs at ~12fps against capture's ~15 (run 5: 60 frames through MediaPipe in
-# 4.9s of a 71-frame clip), so the backlog at the cut -- which IS the post-cut wait --
-# shrinks only by (1 - perception_rate/capture_rate) x head, about 16% of the head, or
-# ~1.3s on the longest head yet measured (27 frames). Worse, a clip with NO pause never
-# produces an onset, so it holds for the whole window and then submits everything: no work
-# removed and perception started MANUAL_ENQUEUE_WINDOW late, which GROWS the backlog. Runs
-# 3 and 5 had several such clips.
-#
-# The 200-clip A/B that cleared this change measured 12% less perception work, but it
-# measured WALL CLOCK in a batch harness with no concurrent capture, where a frame not
-# submitted is simply a frame not processed. That number does not transfer to the live
-# path, and this flag exists so the live effect can be MEASURED (compare "N already
-# through MediaPipe" at the cut, on and off) rather than argued about.
-MANUAL_ENQUEUE_TRIM = os.environ.get("MANUAL_ENQUEUE_TRIM", "0") not in ("0", "false",
-                                                                        "False")
-# How long the opening frames may be held while waiting for an onset. Shorter than
-# MANUAL_TRIM_MAX_SECONDS on purpose: this is a LATENCY risk, not just a lost trim, so the
-# no-onset case is bounded tighter than the post-cut search window.
-MANUAL_ENQUEUE_WINDOW = float(os.environ.get("MANUAL_ENQUEUE_WINDOW", "1.5"))
 # A quiet stretch this long separates "settling into position" from signing. Same 0.3s the
 # pre-roll onset search uses, but expressed in TIME rather than frames: these frames are
 # strided (~15fps) while the pre-roll ring is not (30fps).
@@ -805,42 +781,6 @@ def find_signing_onset(times, raw_scores, stop_threshold, window_seconds):
     return onset
 
 
-def enqueue_onset(times, raw_scores, stop_threshold, window_seconds):
-    """Index where signing begins in a buffer still being filled, or None if undecided.
-
-    The live half of `find_signing_onset`: same rule -- the onset is where motion RESUMES
-    after the first sustained quiet stretch -- but answered incrementally, from only the
-    frames seen so far, so the capture loop can decide whether to submit them. Pure and
-    total, so a test can drive it with real scores and check it lands where the post-cut
-    search lands on the same series.
-
-    None means "keep holding": no quiet stretch has been followed by motion YET.
-
-    `window_seconds` bounds the search exactly as it does in find_signing_onset, and it is
-    load-bearing rather than an optimisation: signing is full of sub-threshold holds, so a
-    quiet stretch INSIDE the sentence, followed by more signing, looks identical to a settle
-    followed by an onset. Without the bound this returns that index and the caller trims
-    away the first half of a sentence. Caught by test_manual_trim.py case F.
-    """
-    if not times:
-        return None
-    deadline = times[0] + window_seconds
-    quiet_start = None
-    for i, (t, raw) in enumerate(zip(times, raw_scores)):
-        if t > deadline:
-            return None
-        if raw is None:
-            continue
-        if raw <= stop_threshold:
-            if quiet_start is None:
-                quiet_start = t
-        else:
-            if quiet_start is not None and t - quiet_start >= HEAD_QUIET_SECONDS:
-                return i
-            quiet_start = None
-    return None
-
-
 def manual_head_trim(times, raw_scores, gate):
     """Frames to drop from the front of a push-to-record clip, or 0 to keep them all.
 
@@ -1006,12 +946,6 @@ def main():
     # The pre-roll ring exists only to back-date an automatic trigger that fires late.
     # Manual mode has nothing to back-date, and the ring is not free: 2.5s of 640x480 BGR
     # is ~66MB held permanently on an 8GB box that OOMs under memory pressure.
-    # Enqueue-trim state. Defined here, not only where a manual clip starts, because
-    # motion mode and the post-forced-cut restart also enter RECORDING and would otherwise
-    # read an undefined name. Both leave it False: motion mode back-dates to onset already,
-    # and a forced cut lands mid-sentence, so neither has a head to drop.
-    pending = []
-    enqueue_open = False
     pre_roll = deque(maxlen=0 if MANUAL_RECORD else int(PRE_ROLL_MAX_SECONDS * 30))
     above_start = 0        # consecutive frames over the start threshold (the debounce)
     # SPACE, read at the bottom of the previous iteration. waitKey has to follow imshow to
@@ -1019,40 +953,9 @@ def main():
     # translation, and it keeps all the key handling in one place.
     toggle_pressed = False
     stride = stride_from_env()
-
-    def submit_frame(f, t, smoothed, raw, count=True):
-        """Hand one ALREADY-STRIDED frame to perception (or the buffer) and record it.
-
-        Shared by the normal RECORDING path and the enqueue-trim flush so the two cannot
-        drift: a frame counted in frame_times but never added to the stream, or the
-        reverse, misaligns landmarks against frames and decodes to garbage silently.
-
-        `count=False` for frames that were already charged to the retained-frame budget
-        while they sat in the enqueue-trim buffer -- charging them twice would make the
-        budget refuse clips it has the memory for.
-        """
-        nonlocal retained_this_clip
-        if stream is not None:
-            stream.add_frame(cv2.cvtColor(f, cv2.COLOR_BGR2RGB))
-        elif STREAM_PERCEPTION:
-            recorded_frames.append(cv2.cvtColor(f, cv2.COLOR_BGR2RGB))
-        else:
-            recorded_frames.append(f)
-        frame_times.append(t)
-        frame_scores.append(smoothed)
-        frame_raw_scores.append(raw)
-        if count:
-            _retain_frame()
-            retained_this_clip += 1
-
     if STREAM_PERCEPTION:
         print(f"Streaming perception ON (stride {stride}) — landmarks are extracted "
               f"during recording, not after the cut.")
-    if MANUAL_ENQUEUE_TRIM and MANUAL_RECORD:
-        print(f"Enqueue-time head trim ON (window {MANUAL_ENQUEUE_WINDOW}s) — opening "
-              f"frames are held until the onset is known and the dead air is never sent "
-              f"to MediaPipe. Compare 'already through MediaPipe' at the cut against a "
-              f"run with MANUAL_ENQUEUE_TRIM=0 to see what it is worth.")
 
     if MANUAL_RECORD:
         print("Ready. SPACE starts and ends each clip; 'q' quits.")
@@ -1145,10 +1048,6 @@ def main():
                 frame_times = []
                 frame_scores = []
                 frame_raw_scores = []
-                # (frame, time, raw) held back while the onset is still undecided. Empty
-                # unless MANUAL_ENQUEUE_TRIM is on; see its comment for why it is off.
-                pending = []
-                enqueue_open = MANUAL_ENQUEUE_TRIM and gate.floor is not None
                 stream, deferred = _begin_perception()
                 extra = (f" (deferred — {MAX_LIVE_STREAMS} streams already live)"
                          if deferred else "")
@@ -1283,45 +1182,7 @@ def main():
             # The stride is applied here for both streamed and deferred clips: features.py
             # only strides at video read, which neither of them goes through. Without this
             # the model would get 30fps instead of the ~15fps SHuBERT expects.
-            if enqueue_open:
-                # Hold the opening frames instead of submitting them, and decide the onset
-                # with the same rule find_signing_onset uses after the cut: it is where
-                # motion RESUMES after the first sustained quiet stretch. Frames before it
-                # are dropped and MediaPipe never sees them. This sits INSIDE the RECORDING
-                # branch, not beside it, because the cut check below has to keep running --
-                # holding frames must never mean a SPACE press goes unnoticed.
-                if raw_frame_index % stride == 0:
-                    pending.append((frame, now, motion_score, raw_motion))
-                    _retain_frame()
-                    retained_this_clip += 1
-                    onset = enqueue_onset([p[1] for p in pending],
-                                          [p[3] for p in pending],
-                                          gate.stop_threshold,
-                                          MANUAL_ENQUEUE_WINDOW)
-                    if onset is not None:
-                        # Back off by the same lead pad the post-cut trim uses, so the
-                        # first handshape survives.
-                        cutoff = pending[onset][1] - LEAD_PAD_SECONDS
-                        while onset > 0 and pending[onset - 1][1] >= cutoff:
-                            onset -= 1
-                        if onset:
-                            _release_frames(onset)
-                            retained_this_clip -= onset
-                            print(f"Enqueue trim — dropped {onset} lead-in frames before "
-                                  f"MediaPipe saw them")
-                        pending = pending[onset:]
-                        enqueue_open = False
-                raw_frame_index += 1
-                if enqueue_open and now - record_start_time >= MANUAL_ENQUEUE_WINDOW:
-                    # No onset inside the window. Submit everything, which is exactly what
-                    # a run with this flag off would have done -- the failure mode is "no
-                    # saving", never a lost sentence start.
-                    enqueue_open = False
-                if not enqueue_open:
-                    for held in pending:      # already charged to the budget when buffered
-                        submit_frame(*held, count=False)
-                    pending = []
-            elif stream is not None:
+            if stream is not None:
                 if raw_frame_index % stride == 0:
                     stream.add_frame(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                     frame_times.append(now)
@@ -1375,15 +1236,6 @@ def main():
                 toggle_pressed = False
             if manual_stop or force_cut or (
                     not MANUAL_RECORD and still_duration >= STILL_DURATION_SECONDS):
-                if enqueue_open:
-                    # The clip ended while frames were still being held -- a press inside
-                    # MANUAL_ENQUEUE_WINDOW. Submit them: without this the clip would be
-                    # cut with an EMPTY frame list, which is the one way this feature could
-                    # destroy a sentence rather than merely fail to speed one up.
-                    for held in pending:      # already charged to the budget when buffered
-                        submit_frame(*held, count=False)
-                    pending = []
-                    enqueue_open = False
                 head = 0
                 empty_note = None
                 if force_cut:
