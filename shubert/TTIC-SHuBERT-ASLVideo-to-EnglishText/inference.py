@@ -684,6 +684,18 @@ def _get_cached_model(model_checkpoint: str, tokenizer_checkpoint: str, output_d
     # T5 overflows in fp16. Override with BYT5_DTYPE=float32 to compare.
     _dtype_name = os.environ.get("BYT5_DTYPE", "bfloat16")
     _dtype = getattr(torch, _dtype_name)
+    # BYT5_CKPT overrides the checkpoint path for every entry point at once, which is
+    # otherwise eight hardcoded literals. Six of them (the MODELS_BASE ones) now point at
+    # `checkpoint-11625-bf16`, a bf16 re-save that is BITWISE IDENTICAL to the fp32
+    # checkpoint this code already casts to bf16 at load -- proven by hashing every loaded
+    # parameter, benchmarks/load_peak.py. It loads ~1.6x faster and leaves ~850MB more
+    # headroom, which matters because the fp32 load repeatedly OOM'd at .to("cuda").
+    # The other two literals stay on fp32 deliberately: app.py resolves its path via
+    # huggingface_hub.snapshot_download() and a fresh snapshot has no bf16 directory, and
+    # features.py's is upstream demo code under __main__. Set BYT5_CKPT to the fp32
+    # checkpoint to put everything back without editing code.
+    # See the 2026-08-24 bf16-checkpoint block in PROJECT_CONTEXT.md.
+    model_checkpoint = os.environ.get("BYT5_CKPT") or model_checkpoint
     model = SignLanguageByT5ForConditionalGeneration.from_pretrained(
         model_checkpoint,
         cache_dir=os.path.join(output_dir, "cache"),

@@ -12,7 +12,7 @@ config = {
     'mediapipe_hands_model_path': os.path.join(MODELS_BASE, 'hand_landmarker.task'),
     'shubert_model_path': os.path.join(MODELS_BASE, 'checkpoint_836_400000.pt'),
     'slt_model_config': os.path.join(MODELS_BASE, 'byt5_base', 'config.json'),
-    'slt_model_checkpoint': os.path.join(MODELS_BASE, 'checkpoint-11625'),
+    'slt_model_checkpoint': os.path.join(MODELS_BASE, 'checkpoint-11625-bf16'),
     'slt_tokenizer_checkpoint': os.path.join(MODELS_BASE, 'byt5_base'),
     'temp_dir': 'temp',
 }

@@ -36,3 +36,10 @@ Inductor experiment (2026-08-24 night block):
 - `inductor_e2e.py`  — the one that matters: end-to-end generate() eager vs decoder
   compiled with inductor, asserting decoded ids are identical. Set
   TORCHINDUCTOR_CACHE_DIR to a persistent path (NOT /tmp, which clears on reboot).
+
+bf16 checkpoint re-save (2026-08-24 bf16 block):
+- `load_peak.py <ckpt_dir> <label>` — measures checkpoint load time, GPU transfer, and the
+  host-RAM peak, and prints a sha256 over every loaded parameter. The hash is the point: it
+  proves the bf16 re-save is bitwise identical to the fp32 checkpoint cast at load, which is
+  stronger evidence than comparing decoded text. Run it once per checkpoint and compare.
+  Make the bf16 checkpoint with `convert_bf16.py <outdir>`.
