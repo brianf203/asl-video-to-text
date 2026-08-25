@@ -465,6 +465,11 @@ def main():
         "frame_stride": os.environ.get("FRAME_STRIDE", "2"),
         "use_onnx_perception": os.environ.get("USE_ONNX_PERCEPTION", "0"),
         "mediapipe_video_mode": os.environ.get("MEDIAPIPE_VIDEO_MODE", "1"),
+        # Hand-detector knobs. All three move the landmarks that drive the hand and
+        # face crops, so they change output and must not vary across a resume.
+        "mediapipe_num_hands": os.environ.get("MEDIAPIPE_NUM_HANDS", "2"),
+        "mediapipe_hand_presence": os.environ.get("MEDIAPIPE_HAND_PRESENCE", "0.5"),
+        "mediapipe_hand_tracking": os.environ.get("MEDIAPIPE_HAND_TRACKING", "0.5"),
         "streaming": args.streaming,
         # Only affects output when --streaming: the sequential path uses one detector.
         "perception_workers": (os.environ.get("PERCEPTION_WORKERS", "2")

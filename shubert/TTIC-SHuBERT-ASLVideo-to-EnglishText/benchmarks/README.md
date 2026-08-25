@@ -1,5 +1,6 @@
-Benchmarks behind the 2026-08-24 (later) PROJECT_CONTEXT.md block — "ByT5 quantization
-is dead on arrival". Run from this directory with `shubert_venv` active.
+Benchmarks behind the PROJECT_CONTEXT.md blocks that closed the ByT5 speed levers
+(2026-08-24) and diagnosed the perception wall (2026-08-25). Run from this directory
+with `shubert_venv` active.
 
 - `convert_bf16.py <MODELS_BASE>` — re-save checkpoint-11625 at bf16 (1.34GB vs 2.68GB
   fp32), writing `checkpoint-11625-bf16` beside it. This is a SETUP STEP, not just a
@@ -47,3 +48,18 @@ bf16 checkpoint re-save (2026-08-24 bf16 block):
   proves the bf16 re-save is bitwise identical to the fp32 checkpoint cast at load, which is
   stronger evidence than comparing decoded text. Run it once per checkpoint and compare.
   Make the bf16 checkpoint with `convert_bf16.py <MODELS_BASE>`.
+
+MediaPipe hand detection — the perception wall (2026-08-25 block):
+- `hand_detect_bound.py` — times the hand landmarker ALONE (no pose/face contention) and
+  splits the cost by how many hands came back. That split is the diagnostic: one-hand
+  frames cost MORE than two-hand frames, because below `num_hands` MediaPipe re-runs the
+  palm detector hunting for the hand it is missing, and against ASL's frequent one-handed
+  frames it does that on ~40% of them. Sweeps the two knobs that had never been tuned
+  (`min_hand_presence_confidence`, `min_tracking_confidence`) and includes `num_hands=1`
+  as a diagnostic ceiling — 1.88-2.05x, but it discards the second hand, so it is not a
+  shipping candidate without the 200-clip gate.
+  Runs baseline first AND last as a closing control, which is load-bearing here: on one
+  run the two identical baselines differed by 9.4%, which is larger than every confidence-
+  knob effect measured. Read no single-run ranking from this script without that control.
+  Standalone per-detector numbers only — see the docstring, and this project's five
+  recorded cases of exactly such numbers evaporating on the live path.

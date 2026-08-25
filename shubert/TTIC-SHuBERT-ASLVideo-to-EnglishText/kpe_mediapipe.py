@@ -33,6 +33,34 @@ from mediapipe.tasks.python.vision import RunningMode
 # Set MEDIAPIPE_VIDEO_MODE=0 to go back to per-frame detection.
 VIDEO_MODE = os.environ.get("MEDIAPIPE_VIDEO_MODE", "1") not in ("0", "false", "False")
 
+# Hand-detector knobs, exposed for measurement. Defaults reproduce the shipping
+# behaviour exactly, so setting none of these changes nothing.
+#
+# WHY THESE EXIST (measured 2026-08-25, benchmarks/hand_detect_bound.py):
+# hand detection is the per-frame wall, and the wall is the PALM DETECTOR re-firing.
+# MediaPipe re-runs it whenever it is tracking fewer than num_hands hands, so with
+# num_hands=2 against ASL's frequent one-handed frames it hunts for an absent second
+# hand on ~40% of frames. That is visible directly in the cost split: one-hand frames
+# cost MORE than two-hand frames (169.7 vs 125.8 ms on eval clip 004, 159.8 vs 137.3
+# on OpenASL uZwKNtHx9FE_01).
+#
+#   MEDIAPIPE_NUM_HANDS=1 removes the hunt and is worth 1.88-2.05x on three runs
+#   across two clips -- but detection falls to 0.84-0.93 hands/frame, and crop_hands
+#   falls back to the PREVIOUS frame's crop for a missing hand, so one of SHuBERT's
+#   four input streams would freeze rather than blank. NOT a shipping candidate
+#   without the 200-clip gate; ASL is two-handed.
+#
+#   MEDIAPIPE_HAND_PRESENCE / MEDIAPIPE_HAND_TRACKING control when MediaPipe decides
+#   the hand is lost. Both were left at MediaPipe's 0.5 default and never tuned. As a
+#   SPEED lever they are noise (0.94-1.14x across runs, inside a control drift that
+#   reached 9.4%). As an ACCURACY lever they look real: at 0.01 the detection rate
+#   rises consistently (1.53/1.53/1.79 vs 1.51/1.51/1.52 baseline), which means fewer
+#   frames falling back to a stale frozen crop -- and crop temporal inconsistency is
+#   what the crop-jitter work found most damaging (-2.95 BLEU for shimmer).
+NUM_HANDS = int(os.environ.get("MEDIAPIPE_NUM_HANDS", "2"))
+HAND_PRESENCE_CONF = float(os.environ.get("MEDIAPIPE_HAND_PRESENCE", "0.5"))
+HAND_TRACKING_CONF = float(os.environ.get("MEDIAPIPE_HAND_TRACKING", "0.5"))
+
 
 class HolisticDetector:
     """
@@ -42,7 +70,7 @@ class HolisticDetector:
     def __init__(self, face_model_path: str, hand_model_path: str,
                  min_detection_confidence: float = 0.1,
                  min_hand_detection_confidence: float = 0.05,
-                 max_faces: int = 6, max_hands: int = 2):
+                 max_faces: int = 6, max_hands: int = None):
         """
         Initialize the HolisticDetector with model paths and configuration.
         
@@ -52,18 +80,21 @@ class HolisticDetector:
             min_detection_confidence: Minimum confidence for pose detection
             min_hand_detection_confidence: Minimum confidence for hand detection
             max_faces: Maximum number of faces to detect
-            max_hands: Maximum number of hands to detect. Defaults to 2 (one
-                signer's two hands) rather than MediaPipe's default of larger
-                values meant for multi-person scenes; the hand detector's
-                search cost scales with this, so lowering it materially cuts
-                per-frame latency.
+            max_hands: Maximum number of hands to detect. None (the default)
+                takes MEDIAPIPE_NUM_HANDS, itself 2 -- one signer's two hands,
+                rather than the larger values meant for multi-person scenes.
+                The hand detector's cost scales with this, and not only through
+                the obvious search: below num_hands MediaPipe re-runs the palm
+                detector hunting for the hands it is missing. See the block at
+                the top of this file.
         """
         self.face_model_path = face_model_path
         self.hand_model_path = hand_model_path
         self.min_detection_confidence = min_detection_confidence
         self.min_hand_detection_confidence = min_hand_detection_confidence
         self.max_faces = max_faces
-        self.max_hands = max_hands
+        # None means "take the env-backed default"; an explicit argument still wins.
+        self.max_hands = NUM_HANDS if max_hands is None else max_hands
         # Opt-in, not default. The ONNX backend is ~1.5x faster on the perception stage
         # (~13% end to end) but degraded translation on the one A/B clip with verifiable
         # ground truth -- see onnx_perception.py. Not worth a factual-accuracy risk by
@@ -162,6 +193,10 @@ class HolisticDetector:
             base_options=base_options_hand,
             num_hands=self.max_hands,
             min_hand_detection_confidence=self.min_hand_detection_confidence,
+            # Left at MediaPipe's 0.5 default until 2026-08-25; see the block at the
+            # top of this file for what moving them does and does not buy.
+            min_hand_presence_confidence=HAND_PRESENCE_CONF,
+            min_tracking_confidence=HAND_TRACKING_CONF,
         )
         if VIDEO_MODE:
             hand_kwargs["running_mode"] = RunningMode.VIDEO
