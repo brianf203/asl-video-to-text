@@ -16,7 +16,7 @@ from transformers import ByT5Tokenizer
 
 MB = ("/home/sllu/.cache/huggingface/hub/models--ShesterG--SHuBERT/"
       "snapshots/578a0233e770c8ce4dc75d859b91fdea7c34f5aa/models")
-BF16 = os.environ.get("BYT5_BF16_CKPT", "/home/sllu/byt5_ckpt_bf16")
+BF16 = os.environ.get("BYT5_BF16_CKPT", os.path.join(MB, "checkpoint-11625-bf16"))
 model = inference.SignLanguageByT5ForConditionalGeneration.from_pretrained(
     BF16, torch_dtype=torch.bfloat16)
 tok = ByT5Tokenizer.from_pretrained(os.path.join(MB, "byt5_base"))

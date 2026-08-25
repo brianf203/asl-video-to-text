@@ -16,7 +16,7 @@ TOK  = os.path.join(MODELS_BASE, "byt5_base")
 import gc, inference
 from transformers import ByT5Tokenizer
 def avail(): return int(open("/proc/meminfo").read().split("MemAvailable:")[1].split()[0])/1048576
-BF16 = os.environ.get("BYT5_BF16_CKPT", "/home/sllu/byt5_ckpt_bf16")
+BF16 = os.environ.get("BYT5_BF16_CKPT", os.path.join(MODELS_BASE, "checkpoint-11625-bf16"))
 print(f"avail before load: {avail():.2f} Gi")
 model = inference.SignLanguageByT5ForConditionalGeneration.from_pretrained(
     BF16, torch_dtype=torch.bfloat16)

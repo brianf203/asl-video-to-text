@@ -1,9 +1,12 @@
 Benchmarks behind the 2026-08-24 (later) PROJECT_CONTEXT.md block — "ByT5 quantization
 is dead on arrival". Run from this directory with `shubert_venv` active.
 
-- `convert_bf16.py <outdir>` — re-save checkpoint-11625 at bf16 (1.34GB vs 2.68GB fp32).
-  Halves the host-RAM load peak, which is what lets the two benchmarks below load onto the
-  GPU at all on a busy desktop. Writes with safe_serialization=False (tied lm_head).
+- `convert_bf16.py <MODELS_BASE>` — re-save checkpoint-11625 at bf16 (1.34GB vs 2.68GB
+  fp32), writing `checkpoint-11625-bf16` beside it. This is a SETUP STEP, not just a
+  benchmark: the pipeline loads that path (see the repo README, step 6). Halves the
+  host-RAM load peak, which is also what lets the benchmarks below load onto the GPU at
+  all on a busy desktop. Writes via a temp dir + os.replace so an interrupted run cannot
+  leave a half-written checkpoint, and with safe_serialization=False (tied lm_head).
 - `byt5_split.py` — splits generate() into SHuBERT adapter / ByT5 encoder / decode, and
   prints the parameter distribution. Result: decode is 97-99% of the stage; the 18-block
   encoder is 62% of the weights and ~2% of the time.
@@ -11,9 +14,10 @@ is dead on arrival". Run from this directory with `shubert_venv` active.
   8x the compute costs 1.27x the time => the step is overhead-bound, not weight-bound,
   so weight quantization cannot help.
 
-Both benchmarks read the bf16 checkpoint from $BYT5_BF16_CKPT (default
-/home/sllu/byt5_ckpt_bf16). Create it first:
-    python3 convert_bf16.py /home/sllu/byt5_ckpt_bf16
+Both benchmarks read the bf16 checkpoint from $BYT5_BF16_CKPT, defaulting to
+<MODELS_BASE>/checkpoint-11625-bf16 — the same one the pipeline itself loads, so if setup
+step 6 has been done there is nothing to create. Otherwise:
+    python3 convert_bf16.py <MODELS_BASE>
 They use SYNTHETIC features — fine here because per-step decode cost is architecture-
 determined and content-independent, and the step count is pinned explicitly. They are not
 valid for anything quality-related.
@@ -42,4 +46,4 @@ bf16 checkpoint re-save (2026-08-24 bf16 block):
   host-RAM peak, and prints a sha256 over every loaded parameter. The hash is the point: it
   proves the bf16 re-save is bitwise identical to the fp32 checkpoint cast at load, which is
   stronger evidence than comparing decoded text. Run it once per checkpoint and compare.
-  Make the bf16 checkpoint with `convert_bf16.py <outdir>`.
+  Make the bf16 checkpoint with `convert_bf16.py <MODELS_BASE>`.

@@ -71,9 +71,45 @@ path = huggingface_hub.snapshot_download(repo_id='ShesterG/SHuBERT', allow_patte
 print(path)
 "
 ```
-Note the printed path, it's needed in the next step.
+Note the printed path, it's needed in the next two steps.
 
-## 6. Configure and run
+## 6. Convert the ByT5 checkpoint to bf16 (required)
+
+The pipeline loads the ByT5 decoder from `checkpoint-11625-bf16`, which is **not** part of
+the Hugging Face download — it is generated locally from the checkpoint you just fetched:
+
+```bash
+python3 benchmarks/convert_bf16.py /path/from/step/5
+```
+
+Pass the same path Step 5 printed. This reads `checkpoint-11625` and writes
+`checkpoint-11625-bf16` beside it (2.68GB -> 1.34GB), and takes a couple of minutes.
+
+**Skipping this step makes Step 7 fail** with a missing-checkpoint error from
+`from_pretrained`.
+
+Why it exists: `from_pretrained` materialises the whole fp32 file before casting it to
+bf16, leaving ~3.58GB resident for what becomes a 1.34GB model. On a Jetson's unified
+memory that repeatedly ran out of memory at `.to("cuda")`. Loading the bf16 copy is about
+1.6x faster (22-24s -> 13-15s) and leaves ~850MB more headroom.
+
+The result is **bitwise identical** to what the fp32 checkpoint becomes at load, since the
+cast happens either way — not an approximation, and nothing to re-validate. To confirm:
+
+```bash
+python3 benchmarks/load_peak.py /path/from/step/5/checkpoint-11625      fp32
+python3 benchmarks/load_peak.py /path/from/step/5/checkpoint-11625-bf16 bf16
+```
+
+Both print the same `sha256`, computed over every loaded parameter.
+
+To use the fp32 checkpoint instead, without editing any code:
+
+```bash
+export BYT5_CKPT=/path/from/step/5/checkpoint-11625
+```
+
+## 7. Configure and run
 
 Edit `run_shubert.py` and set `MODELS_BASE` to the path printed in Step 5, e.g.:
 ```python
@@ -90,7 +126,7 @@ Run on a specific video file:
 python3 run_shubert.py path/to/your_video.mp4
 ```
 
-## 7. Recording and testing your own videos
+## 8. Recording and testing your own videos
 
 Use `record_clip.py` to record a clip from your camera:
 ```bash

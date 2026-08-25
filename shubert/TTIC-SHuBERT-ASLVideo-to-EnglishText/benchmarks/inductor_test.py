@@ -21,7 +21,7 @@ from transformers import ByT5Tokenizer
 MB = ("/home/sllu/.cache/huggingface/hub/models--ShesterG--SHuBERT/"
       "snapshots/578a0233e770c8ce4dc75d859b91fdea7c34f5aa/models")
 model = inference.SignLanguageByT5ForConditionalGeneration.from_pretrained(
-    os.environ.get("BYT5_BF16_CKPT", "/home/sllu/byt5_ckpt_bf16"), torch_dtype=torch.bfloat16)
+    os.environ.get("BYT5_BF16_CKPT", os.path.join(MB, "checkpoint-11625-bf16")), torch_dtype=torch.bfloat16)
 tok = ByT5Tokenizer.from_pretrained(os.path.join(MB, "byt5_base"))
 dev, dt = torch.device("cuda"), torch.bfloat16
 model.to(dev); model.eval()
