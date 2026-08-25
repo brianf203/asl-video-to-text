@@ -17,3 +17,22 @@ Both benchmarks read the bf16 checkpoint from $BYT5_BF16_CKPT (default
 They use SYNTHETIC features — fine here because per-step decode cost is architecture-
 determined and content-independent, and the step count is pinned explicitly. They are not
 valid for anything quality-related.
+
+Profiling of the ~40ms decode step (2026-08-24 evening block):
+- `profile_decode.py`  — full generate() vs a raw decoder loop; CPU-side op table.
+  NOTE: its GPU columns read zero because CUPTI is unavailable to a non-root user on
+  this box (CUPTI_ERROR_INSUFFICIENT_PRIVILEGES). Ignore them; they are not a
+  measurement. The two scripts below were written to get the answer without CUPTI.
+- `profile_decode2.py` — the decisive one. The raw loop keeps everything on-device so it
+  enqueues asynchronously; comparing CPU-enqueue time against post-synchronize wall time
+  shows the GPU tail is 0.0%. Also attempts torch.compile.
+- `profile_decode3.py` — beam sweep 1..64 with a linear fit separating the constant
+  dispatch floor from per-beam GPU compute, plus the cudagraphs-backend attempt.
+
+Inductor experiment (2026-08-24 night block):
+- `inductor_test.py` — validates triton codegen on sm_87, then compiles the raw decoder
+  loop. Its "[0] numerics match: False" is a BAD TEST (atol too tight for a bf16 sum over
+  512 elements); `inductor_e2e.py` re-checks it properly and it passes.
+- `inductor_e2e.py`  — the one that matters: end-to-end generate() eager vs decoder
+  compiled with inductor, asserting decoded ids are identical. Set
+  TORCHINDUCTOR_CACHE_DIR to a persistent path (NOT /tmp, which clears on reboot).
