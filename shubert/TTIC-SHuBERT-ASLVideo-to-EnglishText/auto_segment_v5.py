@@ -18,6 +18,7 @@ Measured on my_please.mp4: ~57s cold -> ~41s warm per clip.
 """
 import json
 import os
+import sys
 os.environ.setdefault("PYTORCH_NO_CUDA_MEMORY_CACHING", "1")
 
 import cv2
@@ -174,6 +175,49 @@ def _available_mb():
     except OSError:
         pass
     return None
+
+
+def _is_cuda_oom(exc):
+    """True for both shapes a CUDA OOM arrives in, without importing torch to ask.
+
+    torch raises torch.cuda.OutOfMemoryError when its own allocator gives up, but the
+    failures this box actually hits come through as a plain RuntimeError reading
+    "CUDA error: out of memory" (the OOM notes in PROJECT_CONTEXT.md are all of that
+    second kind). Matching on the type alone would miss the common one.
+    """
+    if type(exc).__name__ == "OutOfMemoryError":
+        return True
+    text = str(exc).lower()
+    return "out of memory" in text and "cuda" in text
+
+
+def _release_cuda_cache():
+    """Hand cached-but-free CUDA blocks back after an OOM. Returns a short status string.
+
+    torch is read out of sys.modules rather than imported: by the time a clip can OOM the
+    worker has long since imported it, and if it somehow has not then no allocator is
+    holding anything, so importing here would cost seconds to free nothing. Same reason
+    for is_initialized() over is_available() -- the latter would initialize CUDA to
+    answer, which is the opposite of what a memory-pressure path should do.
+
+    NOTE: this is a NO-OP in the configuration that ships. The top of this file sets
+    PYTORCH_NO_CUDA_MEMORY_CACHING=1 by default, which makes torch return every block to
+    the driver as it is freed -- there is then no cache for empty_cache() to empty, and
+    the fragmentation an OOM leaves behind is the driver's, out of our reach. It is kept
+    because it is correct and near-free for runs that set that var to 0 (the benchmarks
+    do), and so the recovery is already here if that default ever flips.
+    """
+    torch = sys.modules.get("torch")
+    if torch is None:
+        return "torch not loaded"
+    try:
+        if not torch.cuda.is_initialized():
+            return "cuda not initialized"
+        torch.cuda.empty_cache()
+        return "cache released"
+    except Exception as e:
+        # Cleanup must never mask the failure it is cleaning up after.
+        return f"failed: {type(e).__name__}: {e}"
 
 
 def _capture_budget():
@@ -644,6 +688,8 @@ def translation_worker(processor):
         label = item[1] if isinstance(item, tuple) else item
         streamed = kind == "stream"
         stream = None
+        # Set by the except, acted on by the finally -- see the comment at each.
+        oom = False
         # Frames this clip is keeping alive, released in the finally once they are no
         # longer referenced -- that release is what lets the camera thread start again.
         retained = item[-1] if isinstance(item, tuple) else 0
@@ -706,6 +752,11 @@ def translation_worker(processor):
                 # A failure is status, not a translation, so it does belong on screen --
                 # showing "Ready to sign." after a clip died would hide it.
                 worker_status[0] = f"[translation failed: {type(e).__name__}]"
+            # Reclaiming the allocator is deferred to the finally, which runs after this
+            # clip's frames and its MediaPipe stream are released. Emptying the cache
+            # here would run while this clip still held its own memory and reclaim
+            # correspondingly less.
+            oom = _is_cuda_oom(e)
             # A gap in the transcript should say why it is there.
             transcript.record_error(label, f"{type(e).__name__}: {e}")
         finally:
@@ -719,6 +770,12 @@ def translation_worker(processor):
             # `label` still holds the mp4 path for the legacy branch below.
             item = None
             _release_frames(retained)
+            if oom:
+                # Whatever this clip could not fit, the next one should not start behind
+                # it. Reported rather than silent so a run of OOMs shows whether the
+                # reclaim is achieving anything.
+                print(f"[worker] CUDA OOM cleanup: {_release_cuda_cache()}, "
+                      f"available={_available_mb()}MB")
             clip_queue.task_done()
             if kind == "path":
                 try:
