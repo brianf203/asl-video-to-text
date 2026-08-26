@@ -1,9 +1,13 @@
 """Live ASL auto-segmentation with a persistent in-process translation worker.
 
-Supersedes auto_segment_v3.py (subprocess per clip) and
-auto_segment_shubert_threaded.py (in-process worker, frame-count thresholds).
+THIS IS THE LIVE PATH. The "v5" is history, not a choice between versions: v2, v3, v4,
+auto_segment_shubert.py and auto_segment_shubert_threaded.py were all superseded by this
+file and were deleted on 2026-08-26 (recoverable from git before that commit if a
+measurement ever needs them). The name is kept because the notes, the docs and a year of
+commit messages all say `auto_segment_v5.py`.
 
-v3 shelled out to `python3 run_shubert.py` for every clip, so each translation
+What it replaced, and why the design is the way it is: v3 shelled out to
+`python3 run_shubert.py` for every clip, so each translation
 paid the full cold-start cost — the ~13s ByT5 checkpoint load, both DINOv2 loads
 and the torch import — on top of the actual work. Here the models are loaded once
 at startup (SHuBERTProcessor.warmup) and reused by a background worker thread, so
@@ -27,6 +31,7 @@ from features import SHuBERTProcessor
 from hand_trigger import HAND_NEEDED, HAND_WINDOW, HandPresenceTrigger
 from motion_gate import MotionGate, PROFILE_PATH, load_profile
 from streaming_perception import StreamingPerception, stride_from_env
+from transcript_log import TranscriptLog
 
 # Scale the start/stop thresholds to the room's measured noise floor instead of using the
 # absolute constants below. Those constants are raw pixel-difference units fitted to one
@@ -234,11 +239,20 @@ PRE_ROLL_MAX_SECONDS = 2.5
 LEAD_PAD_SECONDS = 0.25
 
 # The STILL_DURATION_SECONDS of stillness that *triggers* the cut also gets recorded,
-# so every clip used to carry ~45 dead frames at 30fps. Latency is ~0.41s/frame end to
-# end (measured across 105/87/149/181-frame clips), so that tail cost ~18s per clip and
-# gave ByT5 nothing to translate — a tail-only clip once produced a fluent hallucination.
-# Trim back to the last motion, keeping a short pad so a final handshape hold (which
-# carries meaning in ASL) isn't clipped off.
+# so every clip used to carry ~45 dead frames at 30fps that gave ByT5 nothing to translate
+# — a tail-only clip once produced a fluent hallucination. Trim back to the last motion,
+# keeping a short pad so a final handshape hold (which carries meaning in ASL) isn't
+# clipped off.
+#
+# The reason is QUALITY, and on the live path that is the only one. This comment used to
+# cost the tail at "~0.41s/frame end to end (measured across 105/87/149/181-frame clips),
+# so ~18s per clip". That per-frame figure is an EVAL-path number — perception after the
+# cut over exactly the kept frames — and it does not describe the live streamed path,
+# where StreamingPerception.finish() drains every queue before it slices [start:end]. The
+# ~45 tail frames have already been through MediaPipe and DINOv2 by the time they are
+# dropped, so removing them from the OUTPUT removes no work and no wall clock. Same
+# correction, same reason, as the MANUAL_TRIM block below; see the 2026-08-21 section of
+# PROJECT_CONTEXT.md. If post-cut latency is the goal the target is the DRAIN.
 TAIL_PAD_SECONDS = 0.25
 
 # Push-to-record gets the same trim, for the same two reasons. A key press cannot be
@@ -575,6 +589,11 @@ def _begin_perception():
 clip_queue = queue.Queue()
 models_ready = threading.Event()
 state_lock = threading.Lock()
+# Every translation is also appended to a file, durably, at the moment it is printed.
+# The terminal is not storage: this board dies silently (2026-08-24, a power-delivery
+# fault no software change prevents) and takes the scrollback with it. Written only by
+# the worker thread. TRANSCRIPT=0 disables it. See transcript_log.py.
+transcript = TranscriptLog()
 # What the camera window shows about the worker. Deliberately NOT the translated text:
 # translations go to the TERMINAL, one "Signer: ..." line per clip, so the video window
 # stays clean enough to record. This only ever holds short status strings.
@@ -670,6 +689,9 @@ def translation_worker(processor):
             # anywhere else is invisible exactly where it matters most, on a demo screen.
             marker = f"[{suspect} — likely invented] " if suspect else ""
             print(f"Signer: {marker}{result}", flush=True)
+            # Saved here rather than at exit: a power cut has no exit, and what is only
+            # queued for later is exactly what it takes.
+            transcript.record(label, result, seconds=elapsed, note=suspect)
         except Exception as e:
             # Report rather than swallow — v2 discarded stderr and made failures invisible.
             print(f"[worker] Error translating {label}: {type(e).__name__}: {e}")
@@ -684,6 +706,8 @@ def translation_worker(processor):
                 # A failure is status, not a translation, so it does belong on screen --
                 # showing "Ready to sign." after a clip died would hide it.
                 worker_status[0] = f"[translation failed: {type(e).__name__}]"
+            # A gap in the transcript should say why it is there.
+            transcript.record_error(label, f"{type(e).__name__}: {e}")
         finally:
             # MediaPipe native objects must be released per clip or they exhaust the
             # Jetson's shared pool after a few clips.
@@ -1506,6 +1530,12 @@ def main():
             print(f"All clips finished ({time.time() - t0:.1f}s).")
     except KeyboardInterrupt:
         print("Abandoning queued clips at user request.")
+
+    # Every translation is already on disk by now; this only adds the footer, and only on
+    # the exits we actually get to run.
+    transcript.close()
+    if transcript.lines:
+        print(f"Transcript saved: {transcript.path} ({transcript.lines} translation(s)).")
 
 
 if __name__ == "__main__":

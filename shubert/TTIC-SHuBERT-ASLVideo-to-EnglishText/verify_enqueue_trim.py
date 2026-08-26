@@ -1,10 +1,24 @@
 """Would trimming the head at ENQUEUE time change the translation?
 
-The head trim currently runs at the CUT: StreamingPerception.finish() drains every queue,
+>>> OUTCOME: THE IDEA IS DEAD. This harness is kept for its method, not its premise. <<<
+The enqueue trim was built (`0c492a3`), measured live, and REVERTED (`88031fb`) on
+2026-08-21. In a matched live A/B it fired on 0 of 4 clips and COST latency: on the one
+matched pair, 50% of frames were through MediaPipe at the cut with it on against 96% off,
+and 4.3s of drain against 2.2s. Deciding an onset means holding frames until the settle
+ENDS, so perception starts late by the head's own duration, and a clip with no pause holds
+for the whole window and then submits everything anyway -- no work removed, backlog grown.
+The ceiling was only ~16% of the head to begin with (perception ~12fps against capture's
+~15). **Do not re-derive this from the offline number below.** See the "LIVE A/B" part of
+the 2026-08-21 section of PROJECT_CONTEXT.md.
+
+The premise, and where it breaks: the head trim runs at the CUT.
+StreamingPerception.finish() drains every queue,
 then slices [start:end], so head frames are fully processed by MediaPipe and DINOv2 before
 being discarded. Measured 2026-08-21, that is 4-27 frames per clip of hand detection
 (~135ms each) done for nothing -- and since post-cut latency IS the drained backlog, work
-removed there is latency removed.
+removed there looks like latency removed. It is not, on the live path: this harness is a
+BATCH one, where an unsubmitted frame is simply an unprocessed frame and the hold that
+buys the decision costs nothing. Live, that hold is the whole effect.
 
 Moving the decision earlier (never submit those frames) is only free if it does not change
 the OUTPUT. It might: dropped head frames still feed MediaPipe's temporal tracking and the
