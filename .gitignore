@@ -37,3 +37,7 @@ shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/demo_full_log.txt
 shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/transcripts/
 # Working note, same as QLORA_SCOPING.md / PROJECT_CONTEXT.md — local, not public docs.
 POSE_SWAP_SCOPING.md
+# Documentation set (reference, Q&A bank, paper kit + LaTeX draft) -- working material
+# like PROJECT_CONTEXT.md, and the paper draft is unverified: 7 citations unchecked and
+# the LaTeX has never been compiled. Rooted so an upstream docs/ elsewhere is unaffected.
+/docs/
