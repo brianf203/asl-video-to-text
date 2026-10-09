@@ -1,0 +1,296 @@
+ANALYSIS -- measured values only, nothing smoothed or extrapolated.
+sequential.csv rows: 120   overlap.csv rows: 120
+
+==============================================================================
+CONDITION: sequential
+==============================================================================
+  utterances attempted      : 120
+  measurements (text out)   : 91
+  failures / drops          : 0
+  declined by backlog guard : 29
+      DECLINED oP2WdYlaflE_02 pass2: 316MB free (queue depth 0)
+      DECLINED LT0-h4P_xBY_06 pass2: 316MB free (queue depth 0)
+      DECLINED uZwKNtHx9FE_01 pass2: 316MB free (queue depth 0)
+      DECLINED fNT8a6e1gx8_08 pass2: 316MB free (queue depth 0)
+      DECLINED f75G_hZMSHs_04 pass2: 316MB free (queue depth 0)
+      DECLINED TXyNxVRRPt8_01 pass2: 316MB free (queue depth 0)
+      DECLINED wPJ_InXF_I8_06 pass2: 316MB free (queue depth 0)
+      DECLINED z3jAMn3xpoM_02 pass2: 316MB free (queue depth 0)
+      DECLINED fNT8a6e1gx8_06 pass2: 316MB free (queue depth 0)
+      DECLINED f75G_hZMSHs_02 pass2: 317MB free (queue depth 0)
+      DECLINED LT0-h4P_xBY_04 pass2: 317MB free (queue depth 0)
+      DECLINED WMoeSSvCyTU_03 pass2: 317MB free (queue depth 0)
+      DECLINED I976oI3s1jQ_02 pass2: 317MB free (queue depth 0)
+      DECLINED mNF1kg9azQw_03 pass2: 317MB free (queue depth 0)
+      DECLINED I976oI3s1jQ_01 pass2: 317MB free (queue depth 0)
+      DECLINED iMJ9CjBX7eo_02 pass2: 317MB free (queue depth 0)
+      DECLINED k5Gxbifw8s8_05 pass2: 317MB free (queue depth 0)
+      DECLINED J-0KHhPS_m4_03 pass2: 317MB free (queue depth 0)
+      DECLINED mNF1kg9azQw_07 pass2: 317MB free (queue depth 0)
+      DECLINED MJijm9kbdHA_01 pass2: 317MB free (queue depth 0)
+      DECLINED jsOSzFyx8RA_03 pass2: 317MB free (queue depth 0)
+      DECLINED oP2WdYlaflE_02 pass3: 292MB free (queue depth 0)
+      DECLINED MJijm9kbdHA_01 pass3: 292MB free (queue depth 0)
+      DECLINED 5iRIeHAK9b0_02 pass3: 292MB free (queue depth 0)
+      DECLINED sP6B4dlSOoc_05 pass3: 292MB free (queue depth 0)
+      DECLINED J-0KHhPS_m4_03 pass3: 292MB free (queue depth 0)
+      DECLINED LT0-h4P_xBY_06 pass3: 292MB free (queue depth 0)
+      DECLINED oP2WdYlaflE_03 pass3: 292MB free (queue depth 0)
+      DECLINED YR7BS6l_95E_05 pass3: 292MB free (queue depth 0)
+  deferred (over stream cap): 0
+
+-- post-cut latency, seconds (p99 at this n is effectively the max) --
+  all: n=91  mean 10.23  median 9.33  p90 14.05  p95 14.50  p99 19.33  min 5.11  max 19.40
+
+-- post-cut latency by utterance-duration bucket (s) --
+   2-4 s: n=21  mean 7.65  median 7.44  p90 11.75  p95 11.87  p99 11.88  min 5.11  max 11.88
+   4-6 s: n=19  mean 8.01  median 7.96  p90 9.23  p95 9.64  p99 9.86  min 6.43  max 9.92
+   6-9 s: n=16  mean 10.77  median 10.12  p90 13.71  p95 13.98  p99 14.04  min 9.03  max 14.05
+   9-12s: n=17  mean 11.89  median 12.62  p90 13.89  p95 14.07  p99 14.33  min 7.83  max 14.39
+  12-15s: n=18  mean 13.56  median 13.04  p90 18.32  p95 19.33  p99 19.39  min 8.79  max 19.40
+
+-- latency vs utterance duration: latency = 0.554 * duration + 5.993   R^2 0.498   Pearson r 0.706
+-- latency vs retained frames : latency = 0.0455 * frames + 5.420   R^2 0.607   Pearson r 0.779
+
+-- fraction of measurements at or below a threshold --
+  <= 12s :  65/91 = 71.4%
+  <= 24s :  91/91 = 100.0%
+  <= 30s :  91/91 = 100.0%
+
+-- stage shares of post-cut latency (share computed per utterance) --
+  queue wait          mean   0.0%  median   0.0%   (mean  0.00s, median  0.00s, n=91)
+  drain               mean  40.6%  median  38.5%   (mean  3.85s, median  3.93s, n=91)
+  SHuBERT             mean   0.9%  median   0.8%   (mean  0.09s, median  0.08s, n=91)
+  ByT5 encoder        mean   2.6%  median   2.4%   (mean  0.26s, median  0.21s, n=91)
+  ByT5 decode         mean  54.5%  median  56.0%   (mean  5.87s, median  5.66s, n=91)
+  ByT5 stage (total)  mean  58.2%  median  59.8%   (mean  6.25s, median  6.03s, n=91)
+  unattributed        mean   1.2%  median   1.3%   (mean  0.13s, median  0.13s, n=91)
+
+-- 5 worst utterances by post-cut latency --
+  jsOSzFyx8RA_03       pass3 dur 12.71s frames 191 bytes 153 steps 155 lat  19.40s | wait 0.0 drain 5.3 shubert 0.1 enc 0.4 decode 13.4 other 0.2 | dominated by decode
+  jsOSzFyx8RA_03       pass1 dur 12.71s frames 191 bytes 153 steps 155 lat  19.32s | wait 0.0 drain 5.2 shubert 0.1 enc 0.4 decode 13.3 other 0.2 | dominated by decode
+  oP2WdYlaflE_03       pass1 dur 13.93s frames 209 bytes 148 steps 150 lat  17.89s | wait 0.0 drain 5.3 shubert 0.1 enc 0.5 decode 11.7 other 0.2 | dominated by decode
+  oP2WdYlaflE_03       pass2 dur 13.93s frames 209 bytes 148 steps 150 lat  16.89s | wait 0.0 drain 4.2 shubert 0.1 enc 0.4 decode 11.8 other 0.2 | dominated by decode
+  uZwKNtHx9FE_01       pass1 dur 14.47s frames 174 bytes 125 steps 127 lat  14.60s | wait 0.0 drain 2.6 shubert 0.3 enc 0.7 decode 10.8 other 0.1 | dominated by decode
+
+-- per-pass median latency (drift / throttling check) --
+  pass 1: n=40 median 9.96s mean 10.47s
+  pass 2: n=19 median 9.03s mean 10.17s
+  pass 3: n=32 median 9.30s mean 9.98s
+
+-- cold start (D) --
+  pass 1 first utterance after warmup: uZwKNtHx9FE_01 dur 14.47s latency 14.60s (warmup itself 18.4s)
+  pass 2 first utterance after warmup: sP6B4dlSOoc_04 dur 5.57s latency 9.13s (warmup itself 18.7s)
+  pass 3 first utterance after warmup: mNF1kg9azQw_03 dur 11.39s latency 10.94s (warmup itself 18.3s)
+  steady state (excluding those): n=88 median 9.30s
+
+-- output size --
+  output bytes: mean 75.5  max 153  at/over the 768-byte cap: 0
+  decode steps: mean 77.5  max 155  (ByT5 is byte-level, so steps ~ bytes + specials)
+
+-- perception real-time factor (B), per utterance --
+  sustained perception fps DURING capture: mean 11.75  median 12.32  min 4.50  max 14.38  (n=91)
+  shortfall vs the 15 fps needed for a zero drain: mean 1.35x  median 1.22x  min 1.04x  max 3.33x
+  same figure against the raw 30 fps camera rate: mean 2.70x
+  aggregate perception CPU seconds / utterance duration: mean 1.64  median 1.65  min 1.25  max 2.17   [AGGREGATE across PERCEPTION_WORKERS=2, so divide by 2 for per-worker: mean 0.82]
+
+==============================================================================
+CONDITION: overlap
+==============================================================================
+  utterances attempted      : 120
+  measurements (text out)   : 35
+  failures / drops          : 3
+  declined by backlog guard : 82
+      FAIL YR7BS6l_95E_05 pass2: AcceleratorError: CUDA error: out of memory
+Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/
+      FAIL ZgvLTS2zJdo_01 pass2: AcceleratorError: CUDA error: out of memory
+Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/
+      FAIL sP6B4dlSOoc_05 pass2: AcceleratorError: CUDA error: out of memory
+Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/
+      DECLINED wPJ_InXF_I8_06 pass1: backlog 608 frames (queue depth 5)
+      DECLINED I976oI3s1jQ_01 pass1: backlog 608 frames (queue depth 5)
+      DECLINED jsOSzFyx8RA_03 pass1: backlog 608 frames (queue depth 5)
+      DECLINED fNT8a6e1gx8_06 pass1: backlog 608 frames (queue depth 5)
+      DECLINED J-0KHhPS_m4_03 pass1: backlog 608 frames (queue depth 5)
+      DECLINED FND2JfzngVY_06 pass1: backlog 608 frames (queue depth 5)
+      DECLINED I976oI3s1jQ_02 pass1: backlog 608 frames (queue depth 5)
+      DECLINED ZgvLTS2zJdo_02 pass1: backlog 608 frames (queue depth 5)
+      DECLINED YR7BS6l_95E_05 pass1: backlog 608 frames (queue depth 5)
+      DECLINED NBpYolVo5WQ_06 pass1: backlog 608 frames (queue depth 5)
+      DECLINED TXyNxVRRPt8_01 pass1: backlog 608 frames (queue depth 5)
+      DECLINED 5iRIeHAK9b0_02 pass1: backlog 608 frames (queue depth 5)
+      DECLINED sP6B4dlSOoc_04 pass1: backlog 484 frames (queue depth 4)
+      DECLINED z3jAMn3xpoM_02 pass1: backlog 484 frames (queue depth 4)
+      DECLINED uZwKNtHx9FE_07 pass1: backlog 484 frames (queue depth 4)
+      DECLINED D9HR4q0vbwE_05 pass1: backlog 484 frames (queue depth 4)
+      DECLINED f75G_hZMSHs_04 pass1: backlog 484 frames (queue depth 4)
+      DECLINED f75G_hZMSHs_02 pass1: backlog 484 frames (queue depth 4)
+      DECLINED ZgvLTS2zJdo_01 pass1: backlog 484 frames (queue depth 4)
+      DECLINED LT0-h4P_xBY_04 pass1: backlog 484 frames (queue depth 4)
+      DECLINED oP2WdYlaflE_02 pass1: backlog 629 frames (queue depth 4)
+      DECLINED LT0-h4P_xBY_06 pass1: backlog 629 frames (queue depth 4)
+      DECLINED mNF1kg9azQw_07 pass1: backlog 629 frames (queue depth 4)
+      DECLINED TXyNxVRRPt8_03 pass1: backlog 629 frames (queue depth 4)
+      DECLINED wH3lJm0Typ0_03 pass1: backlog 629 frames (queue depth 4)
+      DECLINED oP2WdYlaflE_03 pass1: backlog 629 frames (queue depth 4)
+      DECLINED I976oI3s1jQ_05 pass1: backlog 629 frames (queue depth 4)
+      DECLINED k5Gxbifw8s8_03 pass1: backlog 629 frames (queue depth 4)
+      DECLINED rSiciLyYOyI_07 pass1: backlog 629 frames (queue depth 4)
+      DECLINED uZwKNtHx9FE_07 pass2: backlog 489 frames (queue depth 3)
+      DECLINED wPJ_InXF_I8_02 pass2: backlog 489 frames (queue depth 3)
+      DECLINED 5iRIeHAK9b0_03 pass2: backlog 489 frames (queue depth 3)
+      DECLINED TXyNxVRRPt8_03 pass2: backlog 489 frames (queue depth 3)
+      DECLINED k5Gxbifw8s8_03 pass2: backlog 489 frames (queue depth 3)
+      DECLINED FND2JfzngVY_06 pass2: backlog 489 frames (queue depth 3)
+      DECLINED wH3lJm0Typ0_03 pass2: backlog 489 frames (queue depth 3)
+      DECLINED I976oI3s1jQ_05 pass2: backlog 489 frames (queue depth 3)
+      DECLINED NBpYolVo5WQ_06 pass2: backlog 489 frames (queue depth 3)
+      DECLINED ZgvLTS2zJdo_02 pass2: backlog 489 frames (queue depth 3)
+      DECLINED D9HR4q0vbwE_05 pass2: 275MB free (queue depth 2)
+      DECLINED oP2WdYlaflE_02 pass2: 273MB free (queue depth 2)
+      DECLINED uZwKNtHx9FE_01 pass2: backlog 491 frames (queue depth 3)
+      DECLINED wPJ_InXF_I8_06 pass2: 244MB free (queue depth 4)
+      DECLINED z3jAMn3xpoM_02 pass2: 244MB free (queue depth 4)
+      DECLINED fNT8a6e1gx8_06 pass2: 244MB free (queue depth 4)
+      DECLINED f75G_hZMSHs_02 pass2: 243MB free (queue depth 4)
+      DECLINED LT0-h4P_xBY_04 pass2: 243MB free (queue depth 4)
+      DECLINED WMoeSSvCyTU_03 pass2: 243MB free (queue depth 4)
+      DECLINED I976oI3s1jQ_02 pass2: 243MB free (queue depth 4)
+      DECLINED I976oI3s1jQ_01 pass2: 242MB free (queue depth 5)
+      DECLINED iMJ9CjBX7eo_02 pass2: 275MB free (queue depth 5)
+      DECLINED k5Gxbifw8s8_05 pass2: 274MB free (queue depth 5)
+      DECLINED J-0KHhPS_m4_03 pass2: 296MB free (queue depth 5)
+      DECLINED mNF1kg9azQw_07 pass2: 322MB free (queue depth 5)
+      DECLINED MJijm9kbdHA_01 pass2: 322MB free (queue depth 5)
+      DECLINED jsOSzFyx8RA_03 pass2: 322MB free (queue depth 5)
+      DECLINED uZwKNtHx9FE_01 pass3: backlog 460 frames (queue depth 6)
+      DECLINED D9HR4q0vbwE_05 pass3: backlog 460 frames (queue depth 6)
+      DECLINED k5Gxbifw8s8_03 pass3: backlog 460 frames (queue depth 6)
+      DECLINED iMJ9CjBX7eo_02 pass3: backlog 460 frames (queue depth 6)
+      DECLINED WMoeSSvCyTU_03 pass3: backlog 472 frames (queue depth 7)
+      DECLINED fNT8a6e1gx8_08 pass3: backlog 472 frames (queue depth 7)
+      DECLINED ZgvLTS2zJdo_02 pass3: backlog 472 frames (queue depth 7)
+      DECLINED wH3lJm0Typ0_03 pass3: backlog 472 frames (queue depth 7)
+      DECLINED jsOSzFyx8RA_03 pass3: backlog 552 frames (queue depth 7)
+      DECLINED k5Gxbifw8s8_05 pass3: backlog 552 frames (queue depth 7)
+      DECLINED I976oI3s1jQ_02 pass3: backlog 552 frames (queue depth 7)
+      DECLINED mNF1kg9azQw_07 pass3: backlog 552 frames (queue depth 7)
+      DECLINED wPJ_InXF_I8_02 pass3: backlog 552 frames (queue depth 7)
+      DECLINED TXyNxVRRPt8_01 pass3: backlog 552 frames (queue depth 7)
+      DECLINED sP6B4dlSOoc_04 pass3: backlog 552 frames (queue depth 7)
+      DECLINED fNT8a6e1gx8_06 pass3: backlog 478 frames (queue depth 6)
+      DECLINED TXyNxVRRPt8_03 pass3: backlog 478 frames (queue depth 6)
+      DECLINED z3jAMn3xpoM_02 pass3: backlog 478 frames (queue depth 6)
+      DECLINED f75G_hZMSHs_04 pass3: backlog 478 frames (queue depth 6)
+      DECLINED oP2WdYlaflE_02 pass3: backlog 478 frames (queue depth 6)
+      DECLINED MJijm9kbdHA_01 pass3: backlog 478 frames (queue depth 6)
+      DECLINED 5iRIeHAK9b0_02 pass3: backlog 478 frames (queue depth 6)
+      DECLINED sP6B4dlSOoc_05 pass3: backlog 478 frames (queue depth 6)
+      DECLINED LT0-h4P_xBY_06 pass3: backlog 512 frames (queue depth 6)
+      DECLINED oP2WdYlaflE_03 pass3: backlog 512 frames (queue depth 6)
+      DECLINED YR7BS6l_95E_05 pass3: backlog 512 frames (queue depth 6)
+  deferred (over stream cap): 17
+
+-- post-cut latency, seconds (p99 at this n is effectively the max) --
+  all: n=35  mean 56.83  median 56.78  p90 91.32  p95 94.34  p99 97.18  min 9.52  max 97.61
+
+-- post-cut latency by utterance-duration bucket (s) --
+   2-4 s: n=8  mean 57.25  median 57.71  p90 83.73  p95 85.02  p99 86.06  min 9.52  max 86.32
+   4-6 s: n=7  mean 49.87  median 56.78  p90 76.35  p95 82.45  p99 87.32  min 10.28  max 88.54
+   6-9 s: n=7  mean 66.62  median 79.69  p90 94.95  p95 96.28  p99 97.34  min 19.66  max 97.61
+   9-12s: n=8  mean 56.34  median 57.76  p90 81.58  p95 88.96  p99 94.86  min 13.01  max 96.34
+  12-15s: n=5  mean 53.00  median 43.03  p90 86.38  p95 89.93  p99 92.77  min 15.99  max 93.48
+
+-- latency vs utterance duration: latency = -0.053 * duration + 57.241   R^2 0.000   Pearson r -0.008
+-- latency vs retained frames : latency = 0.0101 * frames + 55.780   R^2 0.000   Pearson r 0.019
+
+-- fraction of measurements at or below a threshold --
+  <= 12s :   2/35 = 5.7%
+  <= 24s :   6/35 = 17.1%
+  <= 30s :   6/35 = 17.1%
+
+-- stage shares of post-cut latency (share computed per utterance) --
+  queue wait          mean  60.9%  median  68.2%   (mean 39.48s, median 47.29s, n=35)
+  drain               mean  11.2%  median   4.2%   (mean  2.30s, median  1.88s, n=18)
+  SHuBERT             mean   0.4%  median   0.1%   (mean  0.12s, median  0.09s, n=35)
+  ByT5 encoder        mean   1.0%  median   0.5%   (mean  0.29s, median  0.22s, n=35)
+  ByT5 decode         mean  16.2%  median   9.9%   (mean  6.15s, median  6.27s, n=35)
+  ByT5 stage (total)  mean  17.9%  median  11.4%   (mean  6.66s, median  6.72s, n=35)
+  unattributed        mean  15.4%  median   1.1%   (mean  9.52s, median  0.27s, n=35)
+
+-- latency vs queue depth at cut --
+  depth 1: n=3  mean 13.09  median 13.01  p90 15.39  p95 15.69  p99 15.93  min 10.28  max 15.99
+  depth 2: n=4  mean 22.52  median 18.76  p90 36.02  p95 39.52  p99 42.33  min 9.52  max 43.03
+  depth 3: n=8  mean 44.70  median 42.12  p90 54.39  p95 54.81  p99 55.14  min 34.43  max 55.22
+  depth 4: n=6  mean 58.67  median 58.54  p90 68.42  p95 72.07  p99 75.00  min 43.77  max 75.73
+  depth 5: n=7  mean 80.59  median 80.23  p90 94.62  p95 95.48  p99 96.17  min 64.48  max 96.34
+  depth 6: n=4  mean 81.53  median 81.17  p90 87.87  p95 88.21  p99 88.47  min 75.26  max 88.54
+  depth 7: n=3  mean 86.64  median 82.62  p90 94.61  p95 96.11  p99 97.31  min 79.69  max 97.61
+
+-- 5 worst utterances by post-cut latency --
+  LT0-h4P_xBY_04       pass3 dur  7.77s frames 117 bytes 96 steps 98 lat  97.61s | wait 64.5 drain -- shubert 0.1 enc 0.2 decode 7.9 other 24.9 | dominated by queue wait  [DEFERRED: perception not started during capture]
+  mNF1kg9azQw_05       pass1 dur 10.30s frames 124 bytes 87 steps 89 lat  96.34s | wait 63.6 drain -- shubert 0.1 enc 0.2 decode 6.4 other 26.0 | dominated by queue wait  [DEFERRED: perception not started during capture]
+  MJijm9kbdHA_01       pass1 dur 14.50s frames 174 bytes 100 steps 102 lat  93.48s | wait 52.2 drain -- shubert 0.1 enc 0.4 decode 8.2 other 32.5 | dominated by queue wait  [DEFERRED: perception not started during capture]
+  WMoeSSvCyTU_03       pass1 dur  7.91s frames 119 bytes 60 steps 62 lat  93.17s | wait 86.7 drain 1.6 shubert 0.1 enc 0.2 decode 4.4 other 0.2 | dominated by queue wait
+  J-0KHhPS_m4_03       pass3 dur  5.00s frames  75 bytes 58 steps 60 lat  88.54s | wait 68.5 drain -- shubert 0.1 enc 0.2 decode 4.2 other 15.5 | dominated by queue wait  [DEFERRED: perception not started during capture]
+
+-- per-pass median latency (drift / throttling check) --
+  pass 1: n=11 median 60.30s mean 60.68s
+  pass 2: n=10 median 48.73s mean 46.25s
+  pass 3: n=14 median 71.75s mean 61.37s
+
+-- cold start (D) --
+  pass 1 first utterance after warmup: uZwKNtHx9FE_01 dur 14.47s latency 15.99s (warmup itself 18.8s)
+  pass 2 first utterance after warmup: sP6B4dlSOoc_04 dur 5.57s latency 10.28s (warmup itself 23.3s)
+  pass 3 first utterance after warmup: mNF1kg9azQw_03 dur 11.39s latency 13.01s (warmup itself 23.1s)
+  steady state (excluding those): n=32 median 60.70s
+
+-- output size --
+  output bytes: mean 74.7  max 148  at/over the 768-byte cap: 0
+  decode steps: mean 76.7  max 150  (ByT5 is byte-level, so steps ~ bytes + specials)
+
+-- perception real-time factor (B), per utterance --
+  sustained perception fps DURING capture: mean 12.00  median 11.62  min 7.72  max 13.97  (n=18)
+  shortfall vs the 15 fps needed for a zero drain: mean 1.27x  median 1.29x  min 1.07x  max 1.94x
+  same figure against the raw 30 fps camera rate: mean 2.54x
+  aggregate perception CPU seconds / utterance duration: mean 1.67  median 1.63  min 1.34  max 2.09   [AGGREGATE across PERCEPTION_WORKERS=2, so divide by 2 for per-worker: mean 0.84]
+
+==============================================================================
+DECODE-LENGTH DEPENDENCE (F)
+==============================================================================
+  decode_s vs output_bytes : slope 77.81 ms/byte  intercept 0.096s  R^2 0.940  Pearson r 0.969  (n=126)
+  decode_s vs decode_steps : slope 77.81 ms/step  intercept -0.060s  R^2 0.940  Pearson r 0.969
+  naive decode_s/steps     : mean 76.93 ms/step  median 73.22  min 68.08  max 114.00
+
+==============================================================================
+DETERMINISM (STEP 5)
+==============================================================================
+  sequential: 36 clips measured in more than one pass; 0 differ across passes
+  overlap vs sequential: 28 clips in both; 9 differ
+    DIFFERS J-0KHhPS_m4_03:
+       sequential: Here's a quick question: How can I help?
+       overlap   : Here's a question from the next question: How did it stop?
+    DIFFERS LT0-h4P_xBY_04:
+       sequential: Of course, I want to make sure that the police officers and the police officers are shared with the 
+       overlap   : Of course, I want to clearly warn you that I just shared with the people who are self-esteeming.
+    DIFFERS TXyNxVRRPt8_01:
+       sequential: We brought them to the Deaf Community Forum to bring their concerns to South Carolina.
+       overlap   : We bring them to the deaf community forum to bring their concerns to South Carolina.
+    DIFFERS ZgvLTS2zJdo_01:
+       sequential: The first thing we want to do is to open and ensure that some students have access to sign language 
+       overlap   : The first is to open and provide resources for deaf and hard of hearing people.
+    DIFFERS f75G_hZMSHs_04:
+       sequential: The company will likely start their wedding this weekend.
+       overlap   : The tourist wedding is scheduled for this weekend.
+    DIFFERS fNT8a6e1gx8_08:
+       sequential: It's just that we have problems with expressing ourselves.
+       overlap   : It's just about our problems of expressing ourselves.
+    DIFFERS k5Gxbifw8s8_05:
+       sequential: And more young people wear rabbits.
+       overlap   : And more young people use rabbit.
+    DIFFERS mNF1kg9azQw_05:
+       sequential: I'm wondering how to send it to another person who sent it to me.
+       overlap   : I wonder how do you recommend people respond to someone who has been vlogging about it?
+    DIFFERS sP6B4dlSOoc_05:
+       sequential: On Wednesday President Trump signed an executive order about trade reform and high kidney care.
+       overlap   : On Wednesday President Trump signed an executive order about trade reform and life kidney care.

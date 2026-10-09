@@ -1,0 +1,332 @@
+Using cache found in /home/sllu/.cache/torch/hub/facebookresearch_dinov2_main
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:51: UserWarning: xFormers is not available (SwiGLU)
+  warnings.warn("xFormers is not available (SwiGLU)")
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:33: UserWarning: xFormers is not available (Attention)
+  warnings.warn("xFormers is not available (Attention)")
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:40: UserWarning: xFormers is not available (Block)
+  warnings.warn("xFormers is not available (Block)")
+2026-10-08 21:22:07 | INFO | dinov2 | using MLP layer as FFN
+Using cache found in /home/sllu/.cache/torch/hub/facebookresearch_dinov2_main
+2026-10-08 21:22:08 | INFO | dinov2 | using MLP layer as FFN
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert.py:132: FutureWarning: Positional args are being deprecated, use kwargs instead. Refer to https://pytorch.org/docs/main/generated/torch.nn.Module.html#torch.nn.Module.state_dict for details.
+  state = super().state_dict(destination, prefix, keep_vars)
+Wav2Vec2Config is imported from: fairseq.models.wav2vec.wav2vec2
+Full path: /home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/fairseq/models/wav2vec/wav2vec2.py
+DINOEmbedder initialized on device: cuda dtype: torch.float16
+DINOEmbedder initialized on device: cuda dtype: torch.float16
+[byt5] device: cuda dtype: bfloat16
+[lat] warmup 23.3s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+W0000 00:00:1791519744.679930   16725 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+W0000 00:00:1791519744.761186   16732 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/google/protobuf/symbol_database.py:55: UserWarning: SymbolDatabase.GetPrototype() is deprecated. Please use message_factory.GetMessageClass() instead. SymbolDatabase.GetPrototype() will be removed soon.
+  warnings.warn('SymbolDatabase.GetPrototype() is deprecated. Please '
+W0000 00:00:1791519751.921437   16782 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1791519751.997501   16789 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    5.2s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    8.7s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    7.1s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.3s
+  total               :    5.3s
+[lat] sP6B4dlSOoc_04: post-cut 10.3s (wait 0.0 drain 4.9 byt5 5.3) -> Sometimes simple sidewalks can be dangerous.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    4.9s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    6.6s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.6s
+  total               :    1.6s
+[lat] rSiciLyYOyI_07: post-cut 9.5s (wait 5.8 drain 2.1 byt5 1.6) -> That was amazing.
+W0000 00:00:1791519768.146885   16718 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1791519769.538614   16865 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1791519769.608668   16872 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1791519774.598812   16921 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1791519774.671450   16928 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+NvMapMemAllocInternalTagged: 1075072515 error 12
+NvMapMemHandleAlloc: error 0
+[stream] embedding stage failed: AcceleratorError: CUDA error: out of memory
+Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+[stream] at failure: MemAvailable=1230988 kB frames_queued=41 embedded=0
+[stream] embedding stage failed: AcceleratorError: CUDA error: out of memory
+Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+[stream] at failure: MemAvailable=1060812 kB frames_queued=58 embedded=0
+
+--- Perception per-frame timing (MediaPipe, 174 frames) ---
+  pose  :   12.9s total,   73.9ms/frame avg
+  face  :    6.6s total,   37.8ms/frame avg
+  hand  :   18.7s total,  107.3ms/frame avg
+  wall  :   19.3s total,  111.1ms/frame avg (critical path: max(pose,face,hand) + thread overhead)
+[lat] YR7BS6l_95E_05 FAILED: AcceleratorError: CUDA error: out of memory
+Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+[lat] YR7BS6l_95E_05: post-cut 20.3s (wait 0.0 drain None byt5 0.0) -> 
+[lat] ZgvLTS2zJdo_01 FAILED: AcceleratorError: CUDA error: out of memory
+Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+[lat] ZgvLTS2zJdo_01: post-cut 15.2s (wait 15.2 drain None byt5 0.0) -> 
+[lat] sP6B4dlSOoc_05 FAILED: AcceleratorError: CUDA error: out of memory
+Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+[lat] sP6B4dlSOoc_05: post-cut 2.6s (wait 2.6 drain None byt5 0.0) -> 
+W0000 00:00:1791519797.525132   16718 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1791519798.989592   17010 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1791519799.013893   17017 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1791519814.545001   17068 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1791519814.629131   17076 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- Perception per-frame timing (MediaPipe, 124 frames) ---
+  pose  :   10.9s total,   87.6ms/frame avg
+  face  :    5.4s total,   43.9ms/frame avg
+  hand  :   16.6s total,  133.9ms/frame avg
+  wall  :   17.1s total,  138.0ms/frame avg (critical path: max(pose,face,hand) + thread overhead)
+[lat] uZwKNtHx9FE_07 DECLINED — backlog 489 frames
+[lat] wPJ_InXF_I8_02 DECLINED — backlog 489 frames
+[lat] 5iRIeHAK9b0_03 DECLINED — backlog 489 frames
+[lat] TXyNxVRRPt8_03 DECLINED — backlog 489 frames
+[lat] k5Gxbifw8s8_03 DECLINED — backlog 489 frames
+[lat] FND2JfzngVY_06 DECLINED — backlog 489 frames
+[lat] wH3lJm0Typ0_03 DECLINED — backlog 489 frames
+[lat] I976oI3s1jQ_05 DECLINED — backlog 489 frames
+[lat] NBpYolVo5WQ_06 DECLINED — backlog 489 frames
+[lat] ZgvLTS2zJdo_02 DECLINED — backlog 489 frames
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    7.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :   17.8s
+  hand_crop           :    0.2s
+  dinov2_hands        :   13.7s
+  face_crop           :    0.1s
+  dinov2_face         :    4.3s
+  pose_features       :    0.1s
+  byt5_inference      :    7.4s
+  total               :   43.7s
+[lat] mNF1kg9azQw_05: post-cut 43.8s (wait 0.0 drain None byt5 7.4) -> I wonder how do you recommend people respond to so
+[lat] D9HR4q0vbwE_05 DECLINED — 275MB free
+[lat] oP2WdYlaflE_02 DECLINED — 273MB free
+[lat] uZwKNtHx9FE_01 DECLINED — backlog 491 frames
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :   12.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   29.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :   28.1s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :   12.4s
+  total               :   12.5s
+[lat] oP2WdYlaflE_03: post-cut 43.0s (wait 28.2 drain 2.2 byt5 12.4) -> And a limited number of Deaf and hard of hearing s
+W0000 00:00:1791519856.109527   17133 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1791519856.192997   17146 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    9.0s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   16.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :   26.7s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.1s
+  byt5_inference      :    9.0s
+  total               :    9.1s
+[lat] 5iRIeHAK9b0_02: post-cut 42.3s (wait 31.0 drain 2.1 byt5 9.0) -> On Friday two men in California warned of child ab
+W0000 00:00:1791519867.541733   16718 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+[lat] wPJ_InXF_I8_06 DECLINED — 244MB free
+[lat] z3jAMn3xpoM_02 DECLINED — 244MB free
+[lat] fNT8a6e1gx8_06 DECLINED — 244MB free
+[lat] f75G_hZMSHs_02 DECLINED — 243MB free
+[lat] LT0-h4P_xBY_04 DECLINED — 243MB free
+[lat] WMoeSSvCyTU_03 DECLINED — 243MB free
+[lat] I976oI3s1jQ_02 DECLINED — 243MB free
+W0000 00:00:1791519883.626186   17223 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1791519883.666257   17230 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- Perception per-frame timing (MediaPipe, 126 frames) ---
+  pose  :   10.3s total,   81.5ms/frame avg
+  face  :    1.1s total,    9.0ms/frame avg
+  hand  :   18.3s total,  145.2ms/frame avg
+  wall  :   18.6s total,  147.6ms/frame avg (critical path: max(pose,face,hand) + thread overhead)
+[lat] I976oI3s1jQ_01 DECLINED — 242MB free
+[lat] iMJ9CjBX7eo_02 DECLINED — 275MB free
+[lat] k5Gxbifw8s8_05 DECLINED — 274MB free
+[lat] J-0KHhPS_m4_03 DECLINED — 296MB free
+[lat] mNF1kg9azQw_07 DECLINED — 322MB free
+[lat] MJijm9kbdHA_01 DECLINED — 322MB free
+[lat] jsOSzFyx8RA_03 DECLINED — 322MB free
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    6.2s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :   18.8s
+  hand_crop           :    0.2s
+  dinov2_hands        :    9.9s
+  face_crop           :    0.0s
+  dinov2_face         :    4.4s
+  pose_features       :    0.0s
+  byt5_inference      :    6.2s
+  total               :   39.6s
+[lat] LT0-h4P_xBY_06: post-cut 54.0s (wait 14.4 drain None byt5 6.2) -> Do you have a race on the owner of the Ioniar Knox
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    5.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :   11.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.4s
+  total               :    4.4s
+[lat] fNT8a6e1gx8_08: post-cut 53.7s (wait 47.3 drain 2.0 byt5 4.4) -> It's just that we have problems with expressing ou
+W0000 00:00:1791519913.587916   16718 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- Perception per-frame timing (MediaPipe, 36 frames) ---
+  pose  :    3.0s total,   83.6ms/frame avg
+  face  :    1.5s total,   42.3ms/frame avg
+  hand  :    4.7s total,  131.5ms/frame avg
+  wall  :    4.8s total,  133.8ms/frame avg (critical path: max(pose,face,hand) + thread overhead)
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.8s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    5.0s
+  hand_crop           :    0.1s
+  dinov2_hands        :    1.7s
+  face_crop           :    0.0s
+  dinov2_face         :    0.7s
+  pose_features       :    0.0s
+  byt5_inference      :    3.8s
+  total               :   11.3s
+[lat] f75G_hZMSHs_04: post-cut 61.1s (wait 49.8 drain None byt5 3.8) -> The tourist wedding is scheduled for this weekend.
+W0000 00:00:1791519924.916507   16718 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- Perception per-frame timing (MediaPipe, 94 frames) ---
+  pose  :    8.2s total,   87.1ms/frame avg
+  face  :    4.1s total,   43.9ms/frame avg
+  hand  :   12.5s total,  132.8ms/frame avg
+  wall  :   12.6s total,  134.5ms/frame avg (critical path: max(pose,face,hand) + thread overhead)
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    7.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :   12.9s
+  hand_crop           :    0.2s
+  dinov2_hands        :    4.0s
+  face_crop           :    0.1s
+  dinov2_face         :    1.9s
+  pose_features       :    0.0s
+  byt5_inference      :    7.8s
+  total               :   26.8s
+[lat] TXyNxVRRPt8_01: post-cut 80.2s (wait 53.4 drain None byt5 7.8) -> We bring them to the deaf community forum to bring
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    6.8s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :   20.5s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    6.9s
+  total               :    6.9s
+[lat] mNF1kg9azQw_03: post-cut 64.5s (wait 56.6 drain 0.8 byt5 6.9) -> Jennifer shared her experience with a woman who wa
+[lat] done: camera 15.0fps  peak_used 7398MB  min_available 221MB  warmup 23.3s

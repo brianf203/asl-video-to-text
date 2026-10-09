@@ -1,0 +1,113 @@
+################ TEST 1: decode, standalone, both flag cells ################
+--- nocache_ab.py with PYTORCH_NO_CUDA_MEMORY_CACHING=0 ---
+Full path: /home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/fairseq/models/wav2vec/wav2vec2.py
+PYTORCH_NO_CUDA_MEMORY_CACHING=0        min   37.02 ms/step   median   37.07   text='When you find out what you want to do, y'
+--- nocache_ab.py with PYTORCH_NO_CUDA_MEMORY_CACHING=1 ---
+Full path: /home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/fairseq/models/wav2vec/wav2vec2.py
+PYTORCH_NO_CUDA_MEMORY_CACHING=1        min   60.02 ms/step   median   60.04   text='When you find out what you want to do, y'
+--- nocache_ab.py with the flag UNSET (as the 31.3 ms figure was measured) ---
+Full path: /home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/fairseq/models/wav2vec/wav2vec2.py
+PYTORCH_NO_CUDA_MEMORY_CACHING=<unset>  min   38.92 ms/step   median   40.01   text='When you find out what you want to do, y'
+--- decode_bound.py, shipping flag=1, beam sweep ---
+     2    5.87s     91.7       1.08x
+     4    6.17s     96.4       1.14x
+     8    6.06s     94.7       1.12x
+
+num_beams=4, varying steps
+ steps    total   ms/step
+    16    1.98s    124.0
+    32    2.97s     92.8
+    64    6.04s     94.4
+   128    8.58s     67.0
+################ TEST 2 + the 2.53x check ################
+=== defer (MAX_LIVE_STREAMS=0 ) -> latency_runs/confirm_defer.csv ===
+=== defer exit 134 ===
+=== w1 (PERCEPTION_WORKERS=1 ) -> latency_runs/confirm_w1.csv ===
+[lat] warmup 28.4s
+[lat] uZwKNtHx9FE_01: post-cut 19.4s (wait 0.0 drain 8.0 byt5 11.3) -> Most of the outbreaks are that children who do not
+[lat] 5iRIeHAK9b0_03: post-cut 10.3s (wait 0.0 drain 5.6 byt5 4.6) -> Children between the ages of three and twenty-nine
+[lat] fNT8a6e1gx8_08: post-cut 9.5s (wait 0.0 drain 4.4 byt5 5.1) -> It's just about our problems of expressing ourselv
+[lat] sP6B4dlSOoc_05: post-cut 18.4s (wait 0.0 drain 10.6 byt5 7.6) -> On Wednesday President Trump signed an executive o
+[lat] mNF1kg9azQw_03: post-cut 16.7s (wait 0.0 drain 9.9 byt5 6.6) -> Next we will talk about the next step, the next st
+[lat] iMJ9CjBX7eo_02: post-cut 12.8s (wait 0.0 drain 6.6 byt5 6.0) -> Thank you for joining us at the Community Forum an
+[lat] k5Gxbifw8s8_05: post-cut 9.2s (wait 0.0 drain 5.2 byt5 4.0) -> And more young people use rabbit.
+[lat] MJijm9kbdHA_01: post-cut 14.2s (wait 0.0 drain 5.5 byt5 8.5) -> Biden said Bernie had a vote multiple times agains
+[lat] wPJ_InXF_I8_06: post-cut 11.8s (wait 0.0 drain 7.8 byt5 3.9) -> the students storytelling comprehension abilities.
+[lat] I976oI3s1jQ_01: post-cut 11.6s (wait 0.0 drain 5.2 byt5 6.3) -> I feel like it's a chill and I've been very patien
+[lat] jsOSzFyx8RA_03: post-cut 25.4s (wait 0.0 drain 11.3 byt5 13.9) -> Or the show isn't a lot about the experience, but 
+[lat] fNT8a6e1gx8_06: post-cut 11.1s (wait 0.0 drain 4.9 byt5 6.1) -> I feel like again, the students have been asking m
+[lat] J-0KHhPS_m4_03: post-cut 10.6s (wait 0.0 drain 6.0 byt5 4.5) -> Here's a question from the next question: How did 
+[lat] FND2JfzngVY_06: post-cut 12.6s (wait 0.0 drain 7.6 byt5 4.8) -> The daylight savings will be back on March 8 at 2 
+[lat] I976oI3s1jQ_02: post-cut 15.4s (wait 0.0 drain 6.3 byt5 8.9) -> He said he was still working for two days, but on 
+[lat] ZgvLTS2zJdo_02: post-cut 14.9s (wait 0.0 drain 7.6 byt5 7.1) -> I want to share a little bit of a story with you a
+[lat] YR7BS6l_95E_05: post-cut 18.1s (wait 0.0 drain 9.7 byt5 8.2) -> The helicopter travels to the area and flies to a 
+[lat] NBpYolVo5WQ_06: post-cut 8.0s (wait 0.0 drain 4.7 byt5 3.2) -> See you tomorrow and stay with the light!
+[lat] TXyNxVRRPt8_01: post-cut 14.4s (wait 0.0 drain 6.5 byt5 7.8) -> We bring them to the deaf community forum to bring
+[lat] 5iRIeHAK9b0_02: post-cut 17.4s (wait 0.0 drain 8.4 byt5 8.7) -> A California male couple called for child abuse Fr
+[lat] mNF1kg9azQw_05: post-cut 14.7s (wait 0.0 drain 8.0 byt5 6.6) -> I wonder how do you recommend people respond to so
+[lat] WMoeSSvCyTU_03: post-cut 14.4s (wait 0.0 drain 9.7 byt5 4.6) -> The drug hydrogen is still going on and it is cont
+[lat] sP6B4dlSOoc_04: post-cut 10.2s (wait 0.0 drain 5.2 byt5 4.8) -> Sometimes simple sidewalks can be dangerous.
+[lat] z3jAMn3xpoM_02: post-cut 14.8s (wait 0.0 drain 8.4 byt5 6.2) -> One of them filmed on Facebook LIVE showing office
+[lat] uZwKNtHx9FE_07: post-cut 17.7s (wait 0.0 drain 8.2 byt5 9.4) -> They said the words were added without delays, wer
+[lat] D9HR4q0vbwE_05: post-cut 5.9s (wait 0.0 drain 4.1 byt5 1.7) -> How are you doing?
+[lat] f75G_hZMSHs_04: post-cut 8.9s (wait 0.0 drain 5.0 byt5 3.9) -> The tourist wedding is scheduled for this weekend.
+[lat] f75G_hZMSHs_02: post-cut 15.5s (wait 0.0 drain 6.1 byt5 9.2) -> The similar conversations between the police offic
+[lat] ZgvLTS2zJdo_01: post-cut 10.8s (wait 0.0 drain 4.8 byt5 6.0) -> The first is to open and provide resources for dea
+[lat] LT0-h4P_xBY_04: post-cut 17.8s (wait 0.0 drain 9.5 byt5 8.2) -> Of course, I want to clearly warn you that I just 
+[lat] wPJ_InXF_I8_02: post-cut 21.5s (wait 0.0 drain 12.8 byt5 8.5) -> AP also said Barack Obama has declared to endorse 
+[lat] oP2WdYlaflE_02: post-cut 20.6s (wait 0.0 drain 11.1 byt5 9.3) -> The expected percentage of a person from the Insti
+[lat] LT0-h4P_xBY_06: post-cut 17.6s (wait 0.0 drain 12.0 byt5 5.4) -> Do you have a race on the owner of the Ioniar Knox
+[lat] mNF1kg9azQw_07: post-cut 15.3s (wait 0.0 drain 6.2 byt5 8.9) -> If you are interested in food or money, there is a
+[lat] TXyNxVRRPt8_03: post-cut 10.9s (wait 0.0 drain 6.6 byt5 4.2) -> Most people don't know about the same NAD programs
+[lat] wH3lJm0Typ0_03: post-cut 18.9s (wait 0.0 drain 9.1 byt5 9.7) -> At the end of the game, there were also people who
+[lat] oP2WdYlaflE_03: post-cut 25.9s (wait 0.0 drain 14.4 byt5 11.3) -> The study also limits the number of community memb
+[lat] I976oI3s1jQ_05: post-cut 9.3s (wait 0.0 drain 5.4 byt5 3.9) -> I want to make sure that everyone understands me.
+[lat] k5Gxbifw8s8_03: post-cut 9.5s (wait 0.0 drain 5.2 byt5 4.2) -> This job opportunity for Deaf people is growing.
+[lat] rSiciLyYOyI_07: post-cut 8.3s (wait 0.0 drain 4.9 byt5 3.4) -> It was an amazing and never experienced that.
+[lat] done: camera 15.0fps  peak_used 7148MB  min_available 471MB  warmup 28.4s
+=== w1 exit 0 ===
+=== control (FRAME_STRIDE=2 ) -> latency_runs/confirm_control.csv ===
+[lat] warmup 18.7s
+[lat] uZwKNtHx9FE_01: post-cut 14.7s (wait 0.0 drain 2.9 byt5 11.6) -> Most of the outbreaks are that children who do not
+[lat] 5iRIeHAK9b0_03: post-cut 7.7s (wait 0.0 drain 3.9 byt5 3.7) -> Children ranging in age from 3 to 29 years old.
+[lat] fNT8a6e1gx8_08: post-cut 7.9s (wait 0.0 drain 3.4 byt5 4.4) -> It's just that we have problems with expressing ou
+[lat] sP6B4dlSOoc_05: post-cut 12.8s (wait 0.0 drain 4.7 byt5 7.8) -> On Wednesday President Trump signed an executive o
+[lat] mNF1kg9azQw_03: post-cut 9.9s (wait 0.0 drain 2.9 byt5 6.8) -> Jennifer shared her experience with a woman who wa
+[lat] iMJ9CjBX7eo_02: post-cut 9.8s (wait 0.0 drain 3.8 byt5 6.0) -> Thank you for joining us at the Community Forum an
+[lat] k5Gxbifw8s8_05: post-cut 6.3s (wait 0.0 drain 3.3 byt5 2.9) -> And more young people wear rabbits.
+[lat] MJijm9kbdHA_01: post-cut 10.8s (wait 0.0 drain 2.1 byt5 8.6) -> Biden said Bernie had a vote multiple times agains
+[lat] wPJ_InXF_I8_06: post-cut 9.0s (wait 0.0 drain 5.1 byt5 3.8) -> the students storytelling comprehension abilities.
+[lat] I976oI3s1jQ_01: post-cut 9.2s (wait 0.0 drain 2.6 byt5 6.4) -> My strategy on the chill was a little bit patient 
+[lat] jsOSzFyx8RA_03: post-cut 19.1s (wait 0.0 drain 5.1 byt5 13.8) -> Or the show isn't a lot about the experience, but 
+[lat] fNT8a6e1gx8_06: post-cut 7.4s (wait 0.0 drain 4.3 byt5 3.0) -> Tend to ask your students to graduate.
+[lat] J-0KHhPS_m4_03: post-cut 7.1s (wait 0.0 drain 3.5 byt5 3.5) -> Here's a quick question: How can I help?
+[lat] FND2JfzngVY_06: post-cut 9.3s (wait 0.0 drain 4.3 byt5 4.9) -> The daylight savings will be back on March 8 at 2 
+[lat] I976oI3s1jQ_02: post-cut 11.8s (wait 0.0 drain 2.3 byt5 9.2) -> She said she was still working for two days, but s
+[lat] ZgvLTS2zJdo_02: post-cut 9.1s (wait 0.0 drain 2.7 byt5 6.2) -> I want to share a little bit of an opportunity wit
+[lat] YR7BS6l_95E_05: post-cut 13.8s (wait 0.0 drain 5.1 byt5 8.6) -> The helicopter travels to the area and flies to a 
+[lat] NBpYolVo5WQ_06: post-cut 7.3s (wait 0.0 drain 4.0 byt5 3.2) -> See you tomorrow and stay with the light!
+[lat] TXyNxVRRPt8_01: post-cut 10.6s (wait 0.0 drain 4.1 byt5 6.4) -> We brought them to the Deaf Community Forum to bri
+[lat] 5iRIeHAK9b0_02: post-cut 12.6s (wait 0.0 drain 4.5 byt5 8.0) -> On Friday two men in California warned of child ab
+[lat] mNF1kg9azQw_05: post-cut 7.7s (wait 0.0 drain 2.5 byt5 5.0) -> I'm wondering how to send it to another person who
+[lat] WMoeSSvCyTU_03: post-cut 9.7s (wait 0.0 drain 4.9 byt5 4.6) -> The drug hydrogen is still going on and it is cont
+[lat] sP6B4dlSOoc_04: post-cut 8.0s (wait 0.0 drain 3.5 byt5 4.3) -> Sometimes simple sidewalks can be dangerous.
+[lat] z3jAMn3xpoM_02: post-cut 10.8s (wait 0.0 drain 4.4 byt5 6.3) -> One of them filmed on Facebook LIVE showing office
+[lat] uZwKNtHx9FE_07: post-cut 12.9s (wait 0.0 drain 3.0 byt5 9.7) -> They said the words were added without delay, were
+[lat] D9HR4q0vbwE_05: post-cut 5.3s (wait 0.0 drain 3.6 byt5 1.7) -> How are you doing?
+[lat] f75G_hZMSHs_04: post-cut 9.2s (wait 0.0 drain 4.4 byt5 4.8) -> The company will likely start their wedding this w
+[lat] f75G_hZMSHs_02 DECLINED — 281MB free
+[lat] ZgvLTS2zJdo_01 DECLINED — 281MB free
+[lat] LT0-h4P_xBY_04 DECLINED — 281MB free
+[lat] wPJ_InXF_I8_02 DECLINED — 281MB free
+[lat] oP2WdYlaflE_02 DECLINED — 281MB free
+[lat] LT0-h4P_xBY_06 DECLINED — 281MB free
+[lat] mNF1kg9azQw_07 DECLINED — 281MB free
+[lat] TXyNxVRRPt8_03 DECLINED — 281MB free
+[lat] wH3lJm0Typ0_03 DECLINED — 281MB free
+[lat] oP2WdYlaflE_03 DECLINED — 281MB free
+[lat] I976oI3s1jQ_05 DECLINED — 281MB free
+[lat] k5Gxbifw8s8_03 DECLINED — 281MB free
+[lat] rSiciLyYOyI_07 DECLINED — 281MB free
+[lat] done: camera 15.0fps  peak_used 7405MB  min_available 214MB  warmup 18.7s
+=== control exit 0 ===
+ALL CONFIRM RUNS DONE

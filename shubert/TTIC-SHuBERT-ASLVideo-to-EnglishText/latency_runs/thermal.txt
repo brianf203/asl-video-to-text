@@ -1,0 +1,60 @@
+tegrastats_overlap_pass1.log  samples=170
+   RAM used MB      : max 7220  median 6744.0  (MemTotal 7620)
+   free MB (7620-)  : min available-by-this-gauge 400
+   lfb largest-free : min 1MB  median 23.5MB   <- Jetson contiguous-carveout gauge
+   swap used MB     : max 456
+   CPU core MHz     : min 729  median 1510.0  max 1510
+   Tj C             : max 56.1  median 53.8
+   VDD_IN mW        : max 10419  median 6745.0
+   NOTE: tegrastats has no throttle flag. A CPU clock below the pass max may be the governor idling between utterances, not throttling.
+
+tegrastats_overlap_pass2.log  samples=163
+   RAM used MB      : max 7238  median 6463  (MemTotal 7620)
+   free MB (7620-)  : min available-by-this-gauge 382
+   lfb largest-free : min 1MB  median 14MB   <- Jetson contiguous-carveout gauge
+   swap used MB     : max 824
+   CPU core MHz     : min 729  median 1510.0  max 1510
+   Tj C             : max 55.8  median 53.8
+   VDD_IN mW        : max 10498  median 6785
+   NOTE: tegrastats has no throttle flag. A CPU clock below the pass max may be the governor idling between utterances, not throttling.
+
+tegrastats_overlap_pass3.log  samples=205
+   RAM used MB      : max 7210  median 6621  (MemTotal 7620)
+   free MB (7620-)  : min available-by-this-gauge 410
+   lfb largest-free : min 1MB  median 8MB   <- Jetson contiguous-carveout gauge
+   swap used MB     : max 608
+   CPU core MHz     : min 729  median 1510.0  max 1510
+   Tj C             : max 55.7  median 53.8
+   VDD_IN mW        : max 10435  median 6745
+   NOTE: tegrastats has no throttle flag. A CPU clock below the pass max may be the governor idling between utterances, not throttling.
+
+tegrastats_sequential_pass1.log  samples=462
+   RAM used MB      : max 7231  median 6902.5  (MemTotal 7620)
+   free MB (7620-)  : min available-by-this-gauge 389
+   lfb largest-free : min 1MB  median 4.0MB   <- Jetson contiguous-carveout gauge
+   swap used MB     : max 956
+   CPU core MHz     : min 729  median 1510.0  max 1510
+   Tj C             : max 56.1  median 54.4
+   VDD_IN mW        : max 10300  median 6745.0
+   NOTE: tegrastats has no throttle flag. A CPU clock below the pass max may be the governor idling between utterances, not throttling.
+
+tegrastats_sequential_pass2.log  samples=272
+   RAM used MB      : max 7211  median 6367.5  (MemTotal 7620)
+   free MB (7620-)  : min available-by-this-gauge 409
+   lfb largest-free : min 1MB  median 10.0MB   <- Jetson contiguous-carveout gauge
+   swap used MB     : max 475
+   CPU core MHz     : min 729  median 1510.0  max 1510
+   Tj C             : max 55.8  median 54.2
+   VDD_IN mW        : max 10237  median 6785.0
+   NOTE: tegrastats has no throttle flag. A CPU clock below the pass max may be the governor idling between utterances, not throttling.
+
+tegrastats_sequential_pass3.log  samples=419
+   RAM used MB      : max 7199  median 6697  (MemTotal 7620)
+   free MB (7620-)  : min available-by-this-gauge 421
+   lfb largest-free : min 1MB  median 6MB   <- Jetson contiguous-carveout gauge
+   swap used MB     : max 675
+   CPU core MHz     : min 729  median 1510.0  max 1510
+   Tj C             : max 55.6  median 54.1
+   VDD_IN mW        : max 10260  median 6745
+   NOTE: tegrastats has no throttle flag. A CPU clock below the pass max may be the governor idling between utterances, not throttling.
+

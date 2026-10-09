@@ -1,0 +1,136 @@
+condition,pass,order_index,clip_id,duration_s,capture_seconds,raw_frames,retained_frames_after_trim,post_cut_latency_s,worker_s,queue_wait_s,capture_end_to_perception_done_s,shubert_s,byt5_encoder_s,byt5_decode_s,byt5_stage_s,generate_s,other_s,decode_steps,output_bytes,output_text,oom_or_error,error,declined,decline_reason,deferred,queue_depth_at_cut,perception_frames_at_cut,perception_busy_seconds_cpu,embed_busy_seconds,embedded_frames,min_available_mb_during_utterance,min_available_mb_during_run,avail_mb_at_cut,first_after_warmup,warmup_seconds,cut_ts,done_ts
+overlap,1,0,uZwKNtHx9FE_01,14.473,14.43,347,174,15.99,15.99,0.0,2.67,0.35,0.86,11.89,13.16,13.11,0.16,127,125,Most of the outbreaks are that children who do not have a vaccine who live in an ultra-orthodox Jewish community in New York.,False,,False,,False,1,169,19.91,13.24,174,1505,1505,1958,True,18.8,1791519081.5567055,1791519097.543
+overlap,1,1,5iRIeHAK9b0_03,4.700,4.67,141,71,17.85,8.21,9.64,4.41,0.08,0.2,3.44,3.74,3.72,0.06,49,47,Children ranging in age from 3 to 29 years old.,False,,False,,False,2,62,7.38,15.4,71,1232,1232,1537,False,18.8,1791519087.9403975,1791519105.786
+overlap,1,2,fNT8a6e1gx8_08,3.604,3.57,108,54,34.43,21.63,12.8,,0.15,0.23,6.27,7.44,6.65,14.19,55,53,It's just about our problems of expressing ourselves.,False,,False,,True,3,,,,,871,871,1533,False,18.8,1791519093.02522,1791519127.455
+overlap,1,8,wPJ_InXF_I8_06,4.939,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,853,,18.8,,
+overlap,1,9,I976oI3s1jQ_01,7.000,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,721,,18.8,,
+overlap,1,10,jsOSzFyx8RA_03,12.713,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,545,,18.8,,
+overlap,1,11,fNT8a6e1gx8_06,2.770,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,581,,18.8,,
+overlap,1,12,J-0KHhPS_m4_03,5.000,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,581,,18.8,,
+overlap,1,13,FND2JfzngVY_06,8.008,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,581,,18.8,,
+overlap,1,14,I976oI3s1jQ_02,13.500,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,583,,18.8,,
+overlap,1,15,ZgvLTS2zJdo_02,14.724,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,692,,18.8,,
+overlap,1,16,YR7BS6l_95E_05,11.600,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,692,,18.8,,
+overlap,1,17,NBpYolVo5WQ_06,3.042,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,692,,18.8,,
+overlap,1,18,TXyNxVRRPt8_01,6.273,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,692,,18.8,,
+overlap,1,19,5iRIeHAK9b0_02,10.400,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,692,,18.8,,
+overlap,1,3,sP6B4dlSOoc_05,10.978,10.95,329,165,60.3,38.33,21.97,,0.1,0.35,7.02,7.5,7.47,30.82,97,95,On Wednesday President Trump signed an executive order about trade reform and life kidney care.,False,,False,,True,4,,,,,545,545,1530,False,18.8,1791519105.4889882,1791519165.786
+overlap,1,4,mNF1kg9azQw_03,11.387,11.35,273,137,55.22,7.93,47.29,0.77,0.08,0.32,6.58,7.0,6.97,0.16,92,90,Jennifer shared her experience with a woman who was currently in the photography of Floyd.,False,,False,,False,3,130,18.18,21.38,137,545,545,884,False,18.8,1791519118.5031722,1791519173.723
+overlap,1,5,iMJ9CjBX7eo_02,4.305,4.28,129,65,56.78,7.48,49.31,0.17,0.07,0.18,6.94,7.24,7.19,0.07,79,77,Thank you for joining us at the Community Forum and we will host it together.,False,,False,,False,4,49,7.66,10.41,65,545,545,1031,False,18.8,1791519124.4475105,1791519181.232
+overlap,1,22,sP6B4dlSOoc_04,5.573,,,,,,,,,,,,,,,,,False,,True,backlog 484 frames,,4,,,,,,,348,,18.8,,
+overlap,1,23,z3jAMn3xpoM_02,8.142,,,,,,,,,,,,,,,,,False,,True,backlog 484 frames,,4,,,,,,,347,,18.8,,
+overlap,1,24,uZwKNtHx9FE_07,12.471,,,,,,,,,,,,,,,,,False,,True,backlog 484 frames,,4,,,,,,,331,,18.8,,
+overlap,1,25,D9HR4q0vbwE_05,2.044,,,,,,,,,,,,,,,,,False,,True,backlog 484 frames,,4,,,,,,,330,,18.8,,
+overlap,1,26,f75G_hZMSHs_04,2.403,,,,,,,,,,,,,,,,,False,,True,backlog 484 frames,,4,,,,,,,330,,18.8,,
+overlap,1,27,f75G_hZMSHs_02,7.775,,,,,,,,,,,,,,,,,False,,True,backlog 484 frames,,4,,,,,,,372,,18.8,,
+overlap,1,28,ZgvLTS2zJdo_01,3.421,,,,,,,,,,,,,,,,,False,,True,backlog 484 frames,,4,,,,,,,372,,18.8,,
+overlap,1,29,LT0-h4P_xBY_04,7.767,,,,,,,,,,,,,,,,,False,,True,backlog 484 frames,,4,,,,,,,372,,18.8,,
+overlap,1,6,k5Gxbifw8s8_05,4.434,4.4,133,67,68.2,17.29,50.91,,0.07,0.19,3.65,3.93,3.91,13.36,35,33,And more young people use rabbit.,False,,False,,True,5,,,,,330,330,650,False,18.8,1791519130.3755708,1791519198.574
+overlap,1,31,oP2WdYlaflE_02,9.100,,,,,,,,,,,,,,,,,False,,True,backlog 629 frames,,4,,,,,,,404,,18.8,,
+overlap,1,32,LT0-h4P_xBY_06,8.400,,,,,,,,,,,,,,,,,False,,True,backlog 629 frames,,4,,,,,,,335,,18.8,,
+overlap,1,33,mNF1kg9azQw_07,9.385,,,,,,,,,,,,,,,,,False,,True,backlog 629 frames,,4,,,,,,,356,,18.8,,
+overlap,1,34,TXyNxVRRPt8_03,4.505,,,,,,,,,,,,,,,,,False,,True,backlog 629 frames,,4,,,,,,,337,,18.8,,
+overlap,1,35,wH3lJm0Typ0_03,9.009,,,,,,,,,,,,,,,,,False,,True,backlog 629 frames,,4,,,,,,,335,,18.8,,
+overlap,1,36,oP2WdYlaflE_03,13.934,,,,,,,,,,,,,,,,,False,,True,backlog 629 frames,,4,,,,,,,335,,18.8,,
+overlap,1,37,I976oI3s1jQ_05,3.417,,,,,,,,,,,,,,,,,False,,True,backlog 629 frames,,4,,,,,,,383,,18.8,,
+overlap,1,38,k5Gxbifw8s8_03,4.700,,,,,,,,,,,,,,,,,False,,True,backlog 629 frames,,4,,,,,,,363,,18.8,,
+overlap,1,39,rSiciLyYOyI_07,2.878,,,,,,,,,,,,,,,,,False,,True,backlog 629 frames,,4,,,,,,,363,,18.8,,
+overlap,1,7,MJijm9kbdHA_01,14.500,14.46,348,174,93.48,41.25,52.23,,0.11,0.44,8.15,8.73,8.69,32.52,102,100,Biden said Bernie had a vote multiple times against a brady bill that required stricter gun control.,False,,False,,True,5,,,,,254,254,841,False,18.8,1791519146.3533084,1791519239.833
+overlap,1,20,mNF1kg9azQw_05,10.302,10.26,247,124,96.34,32.72,63.62,,0.09,0.23,6.37,6.72,6.69,26.0,89,87,I wonder how do you recommend people respond to someone who has been vlogging about it?,False,,False,,True,5,,,,,254,254,790,False,18.8,1791519176.214564,1791519272.558
+overlap,1,21,WMoeSSvCyTU_03,7.908,7.98,237,119,93.17,6.47,86.7,1.62,0.09,0.2,4.36,4.67,4.64,0.19,62,60,The drug hydrogen is still going on and it is controversial.,False,,False,,False,5,92,16.5,11.14,119,254,254,427,False,18.8,1791519185.8613286,1791519279.036
+overlap,1,30,wPJ_InXF_I8_02,14.148,14.12,424,212,75.73,10.37,65.36,1.5,0.09,0.5,7.98,8.6,8.57,0.27,106,104,"AP also said Barack Obama has declared to endorse him, but Biden said he asked Obama to not endorse him.",False,,False,,False,4,196,27.12,21.41,212,254,254,404,False,18.8,1791519213.7289283,1791519289.457
+overlap,2,0,sP6B4dlSOoc_04,5.573,5.54,167,84,10.28,10.28,0.0,4.91,0.31,0.48,4.46,5.28,5.25,0.09,46,44,Sometimes simple sidewalks can be dangerous.,False,,False,,False,1,73,8.71,7.14,84,1712,1712,2744,True,23.3,1791519750.406984,1791519760.685
+overlap,2,1,rSiciLyYOyI_07,2.878,2.85,69,35,9.52,3.74,5.78,2.11,0.09,0.16,1.34,1.6,1.58,0.03,19,17,That was amazing.,False,,False,,False,2,22,4.9,6.56,35,1678,1678,2038,False,23.3,1791519754.9337134,1791519764.456
+overlap,2,2,YR7BS6l_95E_05,11.600,11.57,348,174,20.29,20.29,0.0,,,,,,,20.29,,,,True,"AcceleratorError: CUDA error: out of memory
+Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+",False,,True,3,,,,,1068,1068,1911,False,23.3,1791519768.0167289,1791519788.311
+overlap,2,3,ZgvLTS2zJdo_01,3.421,3.38,82,41,15.24,0.0,15.24,,,,,,,0.0,,,,True,"AcceleratorError: CUDA error: out of memory
+Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+",False,,False,2,34,5.11,0.0,0,1068,1068,1420,False,23.3,1791519773.0780156,1791519788.316
+overlap,2,4,sP6B4dlSOoc_05,10.978,10.95,329,165,2.65,0.0,2.64,,,,,,,0.01,,,,True,"AcceleratorError: CUDA error: out of memory
+Search for `cudaErrorMemoryAllocation' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+",False,,False,3,150,20.24,0.0,0,1068,1063,1086,False,23.3,1791519785.6974635,1791519788.343
+overlap,2,8,uZwKNtHx9FE_07,12.471,,,,,,,,,,,,,,,,,False,,True,backlog 489 frames,,3,,,,,,,506,,23.3,,
+overlap,2,9,wPJ_InXF_I8_02,14.148,,,,,,,,,,,,,,,,,False,,True,backlog 489 frames,,3,,,,,,,279,,23.3,,
+overlap,2,10,5iRIeHAK9b0_03,4.700,,,,,,,,,,,,,,,,,False,,True,backlog 489 frames,,3,,,,,,,277,,23.3,,
+overlap,2,11,TXyNxVRRPt8_03,4.505,,,,,,,,,,,,,,,,,False,,True,backlog 489 frames,,3,,,,,,,271,,23.3,,
+overlap,2,12,k5Gxbifw8s8_03,4.700,,,,,,,,,,,,,,,,,False,,True,backlog 489 frames,,3,,,,,,,271,,23.3,,
+overlap,2,13,FND2JfzngVY_06,8.008,,,,,,,,,,,,,,,,,False,,True,backlog 489 frames,,3,,,,,,,308,,23.3,,
+overlap,2,14,wH3lJm0Typ0_03,9.009,,,,,,,,,,,,,,,,,False,,True,backlog 489 frames,,3,,,,,,,287,,23.3,,
+overlap,2,15,I976oI3s1jQ_05,3.417,,,,,,,,,,,,,,,,,False,,True,backlog 489 frames,,3,,,,,,,287,,23.3,,
+overlap,2,16,NBpYolVo5WQ_06,3.042,,,,,,,,,,,,,,,,,False,,True,backlog 489 frames,,3,,,,,,,287,,23.3,,
+overlap,2,17,ZgvLTS2zJdo_02,14.724,,,,,,,,,,,,,,,,,False,,True,backlog 489 frames,,3,,,,,,,287,,23.3,,
+overlap,2,5,mNF1kg9azQw_05,10.302,10.26,247,124,43.77,43.77,0.0,,0.15,0.24,6.45,7.42,6.84,36.35,89,87,I wonder how do you recommend people respond to someone who has been vlogging about it?,False,,False,,True,4,,,,,270,270,1266,False,23.3,1791519797.4740534,1791519841.245
+overlap,2,18,D9HR4q0vbwE_05,2.044,,,,,,,,,,,,,,,,,False,,True,275MB free,,2,,,,,,,275,,23.3,,
+overlap,2,19,oP2WdYlaflE_02,9.100,,,,,,,,,,,,,,,,,False,,True,273MB free,,2,,,,,,,273,,23.3,,
+overlap,2,21,uZwKNtHx9FE_01,14.473,,,,,,,,,,,,,,,,,False,,True,backlog 491 frames,,3,,,,,,,784,,23.3,,
+overlap,2,6,oP2WdYlaflE_03,13.934,13.9,418,209,43.03,14.81,28.23,2.16,0.1,0.47,11.81,12.43,12.38,0.22,150,148,And a limited number of Deaf and hard of hearing students can be recommended in primary reports such as the Department of Health and Human Services.,False,,False,,False,2,185,29.05,28.11,209,270,270,531,False,23.3,1791519813.0240262,1791519856.058
+overlap,2,7,5iRIeHAK9b0_02,10.400,10.38,312,156,42.31,11.33,30.97,2.13,0.18,0.53,8.3,9.05,9.01,0.15,95,93,On Friday two men in California warned of child abuse in court for confession today (Friday).,False,,False,,False,3,145,16.51,26.74,156,270,270,617,False,23.3,1791519825.1127138,1791519867.418
+overlap,2,25,wPJ_InXF_I8_06,4.939,,,,,,,,,,,,,,,,,False,,True,244MB free,,4,,,,,,,244,,23.3,,
+overlap,2,26,z3jAMn3xpoM_02,8.142,,,,,,,,,,,,,,,,,False,,True,244MB free,,4,,,,,,,244,,23.3,,
+overlap,2,27,fNT8a6e1gx8_06,2.770,,,,,,,,,,,,,,,,,False,,True,244MB free,,4,,,,,,,244,,23.3,,
+overlap,2,28,f75G_hZMSHs_02,7.775,,,,,,,,,,,,,,,,,False,,True,243MB free,,4,,,,,,,243,,23.3,,
+overlap,2,29,LT0-h4P_xBY_04,7.767,,,,,,,,,,,,,,,,,False,,True,243MB free,,4,,,,,,,243,,23.3,,
+overlap,2,30,WMoeSSvCyTU_03,7.908,,,,,,,,,,,,,,,,,False,,True,243MB free,,4,,,,,,,243,,23.3,,
+overlap,2,31,I976oI3s1jQ_02,13.500,,,,,,,,,,,,,,,,,False,,True,243MB free,,4,,,,,,,243,,23.3,,
+overlap,2,33,I976oI3s1jQ_01,7.000,,,,,,,,,,,,,,,,,False,,True,242MB free,,5,,,,,,,242,,23.3,,
+overlap,2,34,iMJ9CjBX7eo_02,4.305,,,,,,,,,,,,,,,,,False,,True,275MB free,,5,,,,,,,275,,23.3,,
+overlap,2,35,k5Gxbifw8s8_05,4.434,,,,,,,,,,,,,,,,,False,,True,274MB free,,5,,,,,,,274,,23.3,,
+overlap,2,36,J-0KHhPS_m4_03,5.000,,,,,,,,,,,,,,,,,False,,True,296MB free,,5,,,,,,,296,,23.3,,
+overlap,2,37,mNF1kg9azQw_07,9.385,,,,,,,,,,,,,,,,,False,,True,322MB free,,5,,,,,,,322,,23.3,,
+overlap,2,38,MJijm9kbdHA_01,14.500,,,,,,,,,,,,,,,,,False,,True,322MB free,,5,,,,,,,322,,23.3,,
+overlap,2,39,jsOSzFyx8RA_03,12.713,,,,,,,,,,,,,,,,,False,,True,322MB free,,5,,,,,,,322,,23.3,,
+overlap,2,20,LT0-h4P_xBY_06,8.400,8.37,252,126,54.04,39.66,14.38,,0.13,0.23,5.22,6.21,5.58,33.46,53,51,Do you have a race on the owner of the Ioniar Knox?,False,,False,,True,3,,,,,221,221,784,False,23.3,1791519853.0815902,1791519907.126
+overlap,2,22,fNT8a6e1gx8_08,3.604,3.57,108,54,53.7,6.42,47.28,1.95,0.06,0.15,4.16,4.39,4.37,0.08,60,58,It's just that we have problems with expressing ourselves.,False,,False,,False,3,44,5.81,11.83,54,221,221,544,False,23.3,1791519859.84837,1791519913.548
+overlap,2,23,f75G_hZMSHs_04,2.403,2.37,72,36,61.1,11.26,49.84,,0.06,0.14,3.62,3.84,3.82,7.43,52,50,The tourist wedding is scheduled for this weekend.,False,,False,,True,4,,,,,221,221,543,False,23.3,1791519863.737231,1791519924.839
+overlap,2,24,TXyNxVRRPt8_01,6.273,6.24,188,94,80.23,26.88,53.35,,0.09,0.2,7.43,7.75,7.72,19.13,86,84,We bring them to the deaf community forum to bring their concerns to South Carolina.,False,,False,,True,5,,,,,221,221,244,False,23.3,1791519871.4926193,1791519951.719
+overlap,2,32,mNF1kg9azQw_03,11.387,11.35,273,137,64.48,7.93,56.56,0.82,0.1,0.33,6.41,6.87,6.84,0.23,92,90,Jennifer shared her experience with a woman who was currently in the photography of Floyd.,False,,False,,False,5,130,18.54,20.46,137,237,221,257,False,23.3,1791519895.1673596,1791519959.65
+overlap,3,0,mNF1kg9azQw_03,11.387,11.35,273,137,13.01,13.01,0.0,3.84,0.51,0.84,7.66,9.04,9.01,0.14,92,90,Jennifer shared her experience with a woman who was currently in the photography of Floyd.,False,,False,,False,1,128,18.48,10.96,137,1774,1774,2340,True,23.1,1791520636.3205132,1791520649.335
+overlap,3,1,I976oI3s1jQ_01,7.000,6.96,168,84,19.66,15.24,4.41,5.51,0.09,0.35,9.17,9.64,9.61,0.09,86,84,My strategy on the chill was a little bit patient and I thought it would be perfect.,False,,False,,False,2,77,9.3,13.37,84,1322,1322,1798,False,23.1,1791520644.9531367,1791520664.61
+overlap,3,2,5iRIeHAK9b0_03,4.700,4.67,141,71,39.18,25.66,13.52,,0.07,0.18,4.3,4.57,4.55,21.09,62,60,Children between the ages of three and twenty-nine are kids.,False,,False,,True,3,,,,,522,522,1616,False,23.1,1791520651.1403277,1791520690.316
+overlap,3,9,uZwKNtHx9FE_01,14.473,,,,,,,,,,,,,,,,,False,,True,backlog 460 frames,,6,,,,,,,618,,23.1,,
+overlap,3,10,D9HR4q0vbwE_05,2.044,,,,,,,,,,,,,,,,,False,,True,backlog 460 frames,,6,,,,,,,618,,23.1,,
+overlap,3,11,k5Gxbifw8s8_03,4.700,,,,,,,,,,,,,,,,,False,,True,backlog 460 frames,,6,,,,,,,618,,23.1,,
+overlap,3,12,iMJ9CjBX7eo_02,4.305,,,,,,,,,,,,,,,,,False,,True,backlog 460 frames,,6,,,,,,,618,,23.1,,
+overlap,3,3,uZwKNtHx9FE_07,12.471,12.43,299,150,36.75,11.67,25.08,1.51,0.09,0.34,9.55,10.01,9.97,0.15,130,128,"They said the words were added without delay, were immediately introduced into the legislation to make sure that the work began.",False,,False,,False,3,138,17.34,26.56,150,513,513,1237,False,23.1,1791520665.2421558,1791520701.991
+overlap,3,4,f75G_hZMSHs_02,7.775,7.74,233,117,41.93,14.57,27.36,1.8,0.1,0.23,12.25,12.62,12.58,0.15,124,122,The similar conversation between the police officers and his hometown includes the former police officer and his hometown.,False,,False,,False,3,95,15.13,16.15,117,513,513,897,False,23.1,1791520674.66129,1791520716.596
+overlap,3,16,WMoeSSvCyTU_03,7.908,,,,,,,,,,,,,,,,,False,,True,backlog 472 frames,,7,,,,,,,542,,23.1,,
+overlap,3,17,fNT8a6e1gx8_08,3.604,,,,,,,,,,,,,,,,,False,,True,backlog 472 frames,,7,,,,,,,378,,23.1,,
+overlap,3,18,ZgvLTS2zJdo_02,14.724,,,,,,,,,,,,,,,,,False,,True,backlog 472 frames,,7,,,,,,,378,,23.1,,
+overlap,3,19,wH3lJm0Typ0_03,9.009,,,,,,,,,,,,,,,,,False,,True,backlog 472 frames,,7,,,,,,,378,,23.1,,
+overlap,3,5,NBpYolVo5WQ_06,3.042,3.0,73,37,54.32,16.86,37.46,,0.11,0.16,2.98,3.8,3.26,13.06,43,41,See you tomorrow and stay with the light!,False,,False,,True,4,,,,,378,378,588,False,23.1,1791520679.1747189,1791520733.495
+overlap,3,21,jsOSzFyx8RA_03,12.713,,,,,,,,,,,,,,,,,False,,True,backlog 552 frames,,7,,,,,,,614,,23.1,,
+overlap,3,22,k5Gxbifw8s8_05,4.434,,,,,,,,,,,,,,,,,False,,True,backlog 552 frames,,7,,,,,,,613,,23.1,,
+overlap,3,23,I976oI3s1jQ_02,13.500,,,,,,,,,,,,,,,,,False,,True,backlog 552 frames,,7,,,,,,,463,,23.1,,
+overlap,3,24,mNF1kg9azQw_07,9.385,,,,,,,,,,,,,,,,,False,,True,backlog 552 frames,,7,,,,,,,379,,23.1,,
+overlap,3,25,wPJ_InXF_I8_02,14.148,,,,,,,,,,,,,,,,,False,,True,backlog 552 frames,,7,,,,,,,420,,23.1,,
+overlap,3,26,TXyNxVRRPt8_01,6.273,,,,,,,,,,,,,,,,,False,,True,backlog 552 frames,,7,,,,,,,421,,23.1,,
+overlap,3,27,sP6B4dlSOoc_04,5.573,,,,,,,,,,,,,,,,,False,,True,backlog 552 frames,,7,,,,,,,420,,23.1,,
+overlap,3,6,wPJ_InXF_I8_06,4.939,4.91,148,74,68.23,20.32,47.9,,0.07,0.21,3.57,3.87,3.85,16.46,52,50,the students storytelling comprehension abilities.,False,,False,,True,5,,,,,243,243,522,False,23.1,1791520685.5964522,1791520753.825
+overlap,3,28,fNT8a6e1gx8_06,2.770,,,,,,,,,,,,,,,,,False,,True,backlog 478 frames,,6,,,,,,,462,,23.1,,
+overlap,3,29,TXyNxVRRPt8_03,4.505,,,,,,,,,,,,,,,,,False,,True,backlog 478 frames,,6,,,,,,,451,,23.1,,
+overlap,3,30,z3jAMn3xpoM_02,8.142,,,,,,,,,,,,,,,,,False,,True,backlog 478 frames,,6,,,,,,,608,,23.1,,
+overlap,3,31,f75G_hZMSHs_04,2.403,,,,,,,,,,,,,,,,,False,,True,backlog 478 frames,,6,,,,,,,603,,23.1,,
+overlap,3,32,oP2WdYlaflE_02,9.100,,,,,,,,,,,,,,,,,False,,True,backlog 478 frames,,6,,,,,,,542,,23.1,,
+overlap,3,33,MJijm9kbdHA_01,14.500,,,,,,,,,,,,,,,,,False,,True,backlog 478 frames,,6,,,,,,,410,,23.1,,
+overlap,3,34,5iRIeHAK9b0_02,10.400,,,,,,,,,,,,,,,,,False,,True,backlog 478 frames,,6,,,,,,,363,,23.1,,
+overlap,3,35,sP6B4dlSOoc_05,10.978,,,,,,,,,,,,,,,,,False,,True,backlog 478 frames,,6,,,,,,,363,,23.1,,
+overlap,3,7,I976oI3s1jQ_05,3.417,3.38,82,41,76.02,12.68,63.34,,0.06,0.14,3.58,3.8,3.78,8.89,51,49,I want to make sure that everyone understands me.,False,,False,,True,6,,,,,243,243,555,False,23.1,1791520690.486291,1791520766.511
+overlap,3,37,LT0-h4P_xBY_06,8.400,,,,,,,,,,,,,,,,,False,,True,backlog 512 frames,,6,,,,,,,750,,23.1,,
+overlap,3,38,oP2WdYlaflE_03,13.934,,,,,,,,,,,,,,,,,False,,True,backlog 512 frames,,6,,,,,,,611,,23.1,,
+overlap,3,39,YR7BS6l_95E_05,11.600,,,,,,,,,,,,,,,,,False,,True,backlog 512 frames,,6,,,,,,,526,,23.1,,
+overlap,3,8,ZgvLTS2zJdo_01,3.421,3.38,82,41,86.32,15.19,71.13,,0.06,0.14,5.71,5.94,5.92,9.25,81,79,The first is to open and provide resources for deaf and hard of hearing people.,False,,False,,True,6,,,,,243,243,618,False,23.1,1791520695.3814273,1791520781.701
+overlap,3,13,mNF1kg9azQw_05,10.302,10.27,247,124,75.26,6.88,68.38,1.78,0.07,0.2,4.67,4.96,4.94,0.13,67,65,I'm wondering how to send it to another person who sent it to me.,False,,False,,False,6,118,14.36,21.06,124,243,243,1486,False,23.1,1791520713.3285844,1791520788.589
+overlap,3,14,rSiciLyYOyI_07,2.878,2.84,69,35,82.62,11.69,70.94,,0.07,0.16,3.22,3.46,3.45,8.22,47,45,It was an amazing and never experienced that.,False,,False,,True,7,,,,,243,243,1168,False,23.1,1791520717.6876452,1791520800.312
+overlap,3,15,FND2JfzngVY_06,8.008,7.98,240,120,79.69,6.73,72.97,1.69,0.08,0.21,4.61,4.91,4.9,0.12,55,53,The daylight savings will be back on March 8 at 2 AM.,False,,False,,False,7,108,14.31,14.46,120,243,243,490,False,23.1,1791520727.3530123,1791520807.046
+overlap,3,20,LT0-h4P_xBY_04,7.767,7.74,233,117,97.61,33.16,64.45,,0.09,0.22,7.93,8.28,8.25,24.88,98,96,"Of course, I want to clearly warn you that I just shared with the people who are self-esteeming.",False,,False,,True,7,,,,,226,226,615,False,23.1,1791520742.629816,1791520840.24
+overlap,3,36,J-0KHhPS_m4_03,5.000,4.97,150,75,88.54,20.0,68.54,,0.07,0.19,4.25,4.54,4.51,15.46,60,58,Here's a question from the next question: How did it stop?,False,,False,,True,6,,,,,226,226,736,False,23.1,1791520771.7143593,1791520860.258
