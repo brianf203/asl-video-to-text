@@ -7,11 +7,33 @@ finish early -- but every second spent signing is a second it can be working, so
 at the first recorded frame rather than at the cut absorbs the whole capture duration.
 For a 14s clip that is ~14s off ~55s.
 
-This is a pure scheduling change: the landmarks are identical, not approximated. MediaPipe
+This is a pure scheduling change AT `PERCEPTION_WORKERS=1` -- and only there. MediaPipe
 holds temporal tracking state across process() calls, so what matters is that a *fresh*
-detector sees the *same frames in the same order* -- exactly what video_holistic() does per
-clip, and exactly what this does. The result for frame i depends only on frames 0..i, so
-discarding a trimmed tail afterwards gives the same landmarks as never having fed it.
+detector sees the *same frames in the same order*, which is what video_holistic() does per
+clip and what this does with ONE worker. Measured 2026-10-09 over the 40-clip latency set:
+one worker here and video_holistic on the non-streamed path are BYTE-IDENTICAL, 40 of 40.
+
+**WITH MORE THAN ONE WORKER THE LANDMARKS ARE NOT IDENTICAL. An earlier version of this
+docstring claimed they were, for every worker count, and that was wrong.** add_frame() hands
+out contiguous chunks, so each detector sees a different SUBSEQUENCE of the clip and
+re-detects at every chunk boundary. Same measurement: the shipping 2-worker default differs
+from one worker on **26 of 40 clips (65%)**, and the non-streamed path differs from the
+2-worker default on exactly those same 26.
+
+That is NOT a statement that the default is wrong. The quality axis was measured separately
+on 200 OpenASL clips and is a wash -- raw BLEU 19.54 at chunk 30 / 2 workers against a
+1-worker control at 19.51 (see the block below). The point is narrower and was undocumented:
+**2-worker perception is not OUTPUT-PRESERVING**, so any A/B whose two arms differ in worker
+count is comparing different landmark streams, and any "the landmarks are identical"
+reasoning holds only at one worker. 65% of clips changing while corpus BLEU moves 0.03 is
+also the sharpest in-house demonstration that corpus BLEU cannot resolve clip-level rewrites.
+
+The reorder buffer below preserves frame ORDER into the embed stage, which the crop
+extractors require. It does not -- and cannot -- restore the landmarks one detector would
+have produced.
+
+Within a worker's own chunk the result for frame i still depends only on earlier frames, so
+discarding a trimmed TAIL afterwards gives the same landmarks as never having fed it.
 
 Memory note: streaming replaces auto_segment_v5's raw-BGR `recorded_frames` list, so it
 also *lowers* peak RAM. Only every FRAME_STRIDE'th frame is retained, already converted to
@@ -47,6 +69,11 @@ from kpe_mediapipe import HolisticDetector
 # spread was 1.3 s/clip while two runs of the SAME config differed by 0.6 s/clip. Eval
 # s/clip had suggested 1.20-1.67x differences; those were artifact, which is exactly why
 # score_streaming's docstring says latency conclusions must come from the probe.
+#
+# "Free" there means free in LATENCY and in corpus BLEU. It does NOT mean output-identical:
+# 2 workers rewrite 26 of 40 clips relative to 1 worker (2026-10-09, see the module
+# docstring). The 2026-08-11 sweep measured the right thing for the decision it was making
+# and nobody then asked whether the text itself moved.
 PERCEPTION_WORKERS = max(1, int(os.environ.get("PERCEPTION_WORKERS", "2")))
 PERCEPTION_CHUNK = max(1, int(os.environ.get("PERCEPTION_CHUNK", "30")))
 
@@ -167,6 +194,11 @@ class StreamingPerception:
         Workers complete out of order; the crop extractors downstream fall back to the
         PREVIOUS frame's crop when a hand or face is missing, so feeding them out of order
         would silently corrupt crops with no error raised.
+
+        Scope, because this is easy to over-read: ordering the frames makes the CROP state
+        correct. It does not make the LANDMARKS equal to what one detector would have
+        produced -- that is lost at the chunk boundaries before this point, and is measured
+        in the module docstring.
         """
         with self._emit_lock:
             self._ready[index] = (frame, self._landmarks[index])

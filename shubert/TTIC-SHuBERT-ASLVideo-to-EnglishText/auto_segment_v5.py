@@ -80,9 +80,16 @@ HAND_TRIGGER_PRIMARY = os.environ.get("HAND_TRIGGER_PRIMARY", "auto").lower()
 
 # Run MediaPipe on each frame as it is captured rather than after the cut. Perception is
 # ~4.5x slower than realtime so it never finishes early, but it absorbs the whole recording
-# duration -- ~14s off a ~55s clip. Landmarks are identical, not approximated: a fresh
-# detector sees the same frames in the same order either way. Set STREAM_PERCEPTION=0 to
-# fall back to writing an mp4 and processing it after the cut.
+# duration -- ~14s off a ~55s clip. Set STREAM_PERCEPTION=0 to fall back to writing an mp4
+# and processing it after the cut.
+#
+# This used to say "landmarks are identical, not approximated: a fresh detector sees the same
+# frames in the same order either way". That is true only at PERCEPTION_WORKERS=1. The
+# shipping default is 2, which splits the clip into contiguous chunks across detectors and
+# rewrites 26 of 40 clips relative to one worker (measured 2026-10-09). Corpus BLEU does not
+# move (19.54 vs a 19.51 1-worker control over 200 clips), so this is not a quality claim --
+# but streamed and non-streamed are NOT interchangeable outputs at the shipping worker count.
+# See streaming_perception.py's module docstring.
 STREAM_PERCEPTION = os.environ.get("STREAM_PERCEPTION", "1") not in ("0", "false", "False")
 
 # Second stage: also crop and run DINOv2 as landmarks land, pipelined behind perception.
