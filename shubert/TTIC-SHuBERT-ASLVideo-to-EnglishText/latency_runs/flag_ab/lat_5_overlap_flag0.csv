@@ -1,0 +1,41 @@
+condition,pass,order_index,clip_id,duration_s,capture_seconds,raw_frames,retained_frames_after_trim,post_cut_latency_s,worker_s,queue_wait_s,capture_end_to_perception_done_s,shubert_s,byt5_encoder_s,byt5_decode_s,byt5_stage_s,generate_s,other_s,decode_steps,output_bytes,output_text,oom_or_error,error,declined,decline_reason,deferred,queue_depth_at_cut,perception_frames_at_cut,perception_busy_seconds_cpu,embed_busy_seconds,embedded_frames,min_available_mb_during_utterance,min_available_mb_during_run,avail_mb_at_cut,first_after_warmup,warmup_seconds,cut_ts,done_ts
+overlap,5,0,uZwKNtHx9FE_01,14.473,14.43,347,174,9.62,9.62,0.0,1.32,0.39,0.35,7.43,8.22,8.17,0.09,127,125,Most of the outbreaks are that children who do not have a vaccine who live in an ultra-orthodox Jewish community in New York.,False,,False,,False,1,167,20.53,5.33,174,1696,1696,2859,True,18.5,1792633729.7758093,1792633739.399
+overlap,5,1,5iRIeHAK9b0_03,4.700,4.67,141,71,7.19,3.89,3.29,1.56,0.05,0.07,2.15,2.29,2.27,0.05,49,47,Children ranging in age from 3 to 29 years old.,False,,False,,False,2,61,7.57,6.08,71,1485,1485,1739,False,18.5,1792633736.1368573,1792633743.326
+overlap,5,2,fNT8a6e1gx8_08,3.604,3.57,108,54,15.48,13.33,2.14,,0.06,0.17,4.07,4.32,4.3,9.02,55,53,It's just about our problems of expressing ourselves.,False,,False,,True,3,,,,,1377,1377,1848,False,18.5,1792633741.2217772,1792633756.698
+overlap,5,3,sP6B4dlSOoc_05,10.978,10.95,329,165,11.42,8.56,2.86,1.73,0.07,0.1,6.29,6.5,6.46,0.33,97,95,On Wednesday President Trump signed an executive order about trade reform and high kidney care.,False,,False,,False,3,154,19.84,9.72,165,1314,1314,1795,False,18.5,1792633753.8479729,1792633765.271
+overlap,5,4,mNF1kg9azQw_03,11.387,11.35,273,137,7.42,7.42,0.0,1.98,0.04,0.08,5.12,5.28,5.24,0.16,92,90,Jennifer shared her experience with a woman who was currently in the photography of Floyd.,False,,False,,False,3,130,18.1,9.23,137,977,977,1397,False,18.5,1792633766.8511043,1792633774.268
+overlap,5,5,iMJ9CjBX7eo_02,4.305,4.28,129,65,7.91,6.41,1.5,1.61,0.03,0.08,4.5,4.63,4.6,0.16,79,77,Thank you for joining us at the Community Forum and we will host it together.,False,,False,,False,2,50,7.83,3.93,65,1136,977,1067,False,18.5,1792633772.8055065,1792633780.713
+overlap,5,6,k5Gxbifw8s8_05,4.434,4.4,133,67,5.0,3.11,1.89,1.5,0.05,0.08,1.42,1.56,1.55,0.04,37,35,And more young people wear rabbits.,False,,False,,False,2,57,6.95,4.55,67,1136,977,1136,False,18.5,1792633778.8680217,1792633783.871
+overlap,5,7,MJijm9kbdHA_01,14.500,14.46,348,174,28.22,28.22,0.0,,0.03,0.07,4.16,4.29,4.25,23.93,102,100,Biden said Bernie had a vote multiple times against a brady bill that required stricter gun control.,False,,False,,True,3,,,,,530,530,1280,False,18.5,1792633794.8492284,1792633823.07
+overlap,5,8,wPJ_InXF_I8_06,4.939,4.91,148,74,24.04,2.38,21.67,0.3,0.03,0.07,1.93,2.04,2.03,0.03,52,50,the students storytelling comprehension abilities.,False,,False,,False,2,51,11.2,2.77,74,530,530,755,False,18.5,1792633801.408554,1792633825.452
+overlap,5,9,I976oI3s1jQ_01,7.000,6.96,168,84,20.98,5.45,15.53,0.7,0.03,0.07,4.21,4.33,4.3,0.42,86,84,My strategy on the chill was a little bit patient and I thought it would be perfect.,False,,False,,False,3,75,10.62,2.8,84,339,339,694,False,18.5,1792633809.9554534,1792633830.935
+overlap,5,15,ZgvLTS2zJdo_02,14.724,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,5,,,,,,,598,,18.5,,
+overlap,5,16,YR7BS6l_95E_05,11.600,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,5,,,,,,,598,,18.5,,
+overlap,5,17,NBpYolVo5WQ_06,3.042,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,5,,,,,,,598,,18.5,,
+overlap,5,18,TXyNxVRRPt8_01,6.273,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,5,,,,,,,598,,18.5,,
+overlap,5,10,jsOSzFyx8RA_03,12.713,12.68,381,191,42.61,35.78,6.83,,0.04,0.07,6.78,6.94,6.89,28.84,168,166,"Or the show isn't a lot about the experience, but it's about who you are as a person and how you through savingstories throughout life, photography, as a Deaf person.",False,,False,,True,4,,,,,339,339,650,False,18.5,1792633824.1545532,1792633866.761
+overlap,5,11,fNT8a6e1gx8_06,2.770,2.74,83,42,40.16,1.94,38.22,0.27,0.03,0.07,1.54,1.65,1.64,0.02,40,38,Tend to ask your students to graduate.,False,,False,,False,3,24,5.27,2.07,42,359,339,385,False,18.5,1792633828.5441813,1792633868.707
+overlap,5,20,mNF1kg9azQw_05,10.302,,,,,,,,,,,,,,,,,False,,True,backlog 513 frames,,4,,,,,,,590,,18.5,,
+overlap,5,21,WMoeSSvCyTU_03,7.908,,,,,,,,,,,,,,,,,False,,True,backlog 513 frames,,4,,,,,,,590,,18.5,,
+overlap,5,22,sP6B4dlSOoc_04,5.573,,,,,,,,,,,,,,,,,False,,True,backlog 513 frames,,4,,,,,,,642,,18.5,,
+overlap,5,12,J-0KHhPS_m4_03,5.000,4.97,150,75,48.11,14.39,33.72,,0.04,0.07,2.32,2.45,2.43,11.93,60,58,Here's a question from the next question: How did it stop?,False,,False,,True,4,,,,,359,339,736,False,18.5,1792633835.029616,1792633883.135
+overlap,5,13,FND2JfzngVY_06,8.008,7.98,240,120,43.59,5.15,38.44,0.84,0.03,0.08,4.08,4.22,4.19,0.09,55,53,The daylight savings will be back on March 8 at 2 AM.,False,,False,,False,4,104,14.87,4.74,120,452,339,629,False,18.5,1792633844.7046616,1792633888.29
+overlap,5,25,D9HR4q0vbwE_05,2.044,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,411,,18.5,,
+overlap,5,26,f75G_hZMSHs_04,2.403,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,409,,18.5,,
+overlap,5,27,f75G_hZMSHs_02,7.775,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,409,,18.5,,
+overlap,5,28,ZgvLTS2zJdo_01,3.421,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,534,,18.5,,
+overlap,5,29,LT0-h4P_xBY_04,7.767,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,534,,18.5,,
+overlap,5,30,wPJ_InXF_I8_02,14.148,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,534,,18.5,,
+overlap,5,14,I976oI3s1jQ_02,13.500,13.46,324,162,55.93,27.24,28.68,,0.03,0.07,4.58,4.71,4.68,22.54,113,111,"He said he was still working for two days, but on a high fever and chills, he decided to stay home and recover.",False,,False,,True,5,,,,,248,248,474,False,18.5,1792633859.677407,1792633915.606
+overlap,5,32,LT0-h4P_xBY_06,8.400,,,,,,,,,,,,,,,,,False,,True,backlog 565 frames,,4,,,,,,,435,,18.5,,
+overlap,5,33,mNF1kg9azQw_07,9.385,,,,,,,,,,,,,,,,,False,,True,backlog 565 frames,,4,,,,,,,428,,18.5,,
+overlap,5,34,TXyNxVRRPt8_03,4.505,,,,,,,,,,,,,,,,,False,,True,backlog 565 frames,,4,,,,,,,427,,18.5,,
+overlap,5,35,wH3lJm0Typ0_03,9.009,,,,,,,,,,,,,,,,,False,,True,backlog 565 frames,,4,,,,,,,423,,18.5,,
+overlap,5,36,oP2WdYlaflE_03,13.934,,,,,,,,,,,,,,,,,False,,True,backlog 565 frames,,4,,,,,,,423,,18.5,,
+overlap,5,37,I976oI3s1jQ_05,3.417,,,,,,,,,,,,,,,,,False,,True,backlog 565 frames,,4,,,,,,,392,,18.5,,
+overlap,5,38,k5Gxbifw8s8_03,4.700,,,,,,,,,,,,,,,,,False,,True,backlog 565 frames,,4,,,,,,,392,,18.5,,
+overlap,5,39,rSiciLyYOyI_07,2.878,,,,,,,,,,,,,,,,,False,,True,backlog 565 frames,,4,,,,,,,494,,18.5,,
+overlap,5,19,5iRIeHAK9b0_02,10.400,10.37,312,156,64.29,26.27,38.02,,0.03,0.07,4.45,4.59,4.55,21.68,117,115,A California male couple called for child abuse Friday in a court called for police to plead guilty to child abuse.,False,,False,,True,5,,,,,248,248,564,False,18.5,1792633877.5919452,1792633941.88
+overlap,5,23,z3jAMn3xpoM_02,8.142,8.13,244,122,54.08,4.08,49.99,0.68,0.03,0.06,3.24,3.36,3.34,0.05,83,81,One of them filmed on Facebook LIVE showing officers lying on the floor on blood.,False,,False,,False,4,108,13.45,4.89,122,248,248,512,False,18.5,1792633891.8920853,1792633945.971
+overlap,5,24,uZwKNtHx9FE_07,12.471,12.43,299,150,45.79,5.78,40.01,0.57,0.03,0.07,5.02,5.15,5.11,0.06,130,128,"They said the words were added without delay, were immediately introduced into the legislation to make sure that the work began.",False,,False,,False,4,135,19.41,5.42,150,392,248,430,False,18.5,1792633906.002204,1792633951.792
+overlap,5,31,oP2WdYlaflE_02,9.100,9.07,273,137,54.01,27.8,26.2,,0.03,0.06,4.73,4.86,4.83,22.94,113,111,The expected percentage of a person from the Institute for Health is falling from the University of Washington.,False,,False,,True,4,,,,,392,248,435,False,18.5,1792633925.6316736,1792633979.64

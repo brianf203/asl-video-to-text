@@ -1,0 +1,2545 @@
+Using cache found in /home/sllu/.cache/torch/hub/facebookresearch_dinov2_main
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:51: UserWarning: xFormers is not available (SwiGLU)
+  warnings.warn("xFormers is not available (SwiGLU)")
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:33: UserWarning: xFormers is not available (Attention)
+  warnings.warn("xFormers is not available (Attention)")
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:40: UserWarning: xFormers is not available (Block)
+  warnings.warn("xFormers is not available (Block)")
+2026-10-21 22:09:02 | INFO | dinov2 | using MLP layer as FFN
+Using cache found in /home/sllu/.cache/torch/hub/facebookresearch_dinov2_main
+2026-10-21 22:09:04 | INFO | dinov2 | using MLP layer as FFN
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert.py:132: FutureWarning: Positional args are being deprecated, use kwargs instead. Refer to https://pytorch.org/docs/main/generated/torch.nn.Module.html#torch.nn.Module.state_dict for details.
+  state = super().state_dict(destination, prefix, keep_vars)
+Wav2Vec2Config is imported from: fairseq.models.wav2vec.wav2vec2
+Full path: /home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/fairseq/models/wav2vec/wav2vec2.py
+DINOEmbedder initialized on device: cuda dtype: torch.float16
+DINOEmbedder initialized on device: cuda dtype: torch.float16
+[byt5] device: cuda dtype: bfloat16
+[lat] warmup 23.1s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+W0000 00:00:1792645760.216172   51404 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+W0000 00:00:1792645760.295330   51411 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/google/protobuf/symbol_database.py:55: UserWarning: SymbolDatabase.GetPrototype() is deprecated. Please use message_factory.GetMessageClass() instead. SymbolDatabase.GetPrototype() will be removed soon.
+  warnings.warn('SymbolDatabase.GetPrototype() is deprecated. Please '
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    7.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   21.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    6.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.1s
+  byt5_inference      :    7.8s
+  total               :    7.8s
+[lat] jsOSzFyx8RA_03: post-cut 9.4s (wait 0.0 drain 1.5 byt5 7.8) -> Or the show isn't a lot about the experience, but 
+W0000 00:00:1792645782.481163   51474 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792645782.536937   51481 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    6.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.5s
+  total               :    2.5s
+[lat] fNT8a6e1gx8_08: post-cut 4.3s (wait 0.0 drain 1.9 byt5 2.5) -> It's just that we have problems with expressing ou
+W0000 00:00:1792645790.579497   51530 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792645790.640187   51537 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   13.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.5s
+  total               :    3.5s
+[lat] z3jAMn3xpoM_02: post-cut 5.6s (wait 0.0 drain 2.0 byt5 3.5) -> One of them filmed on Facebook LIVE showing office
+W0000 00:00:1792645804.483876   51586 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792645804.536988   51593 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   15.1s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.7s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.6s
+  total               :    4.6s
+[lat] wH3lJm0Typ0_03: post-cut 6.0s (wait 0.0 drain 1.3 byt5 4.6) -> At the end of the game, there were also fans who c
+W0000 00:00:1792645819.673554   51652 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792645819.726119   51659 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    6.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   24.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    5.6s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    6.4s
+  total               :    6.4s
+[lat] oP2WdYlaflE_03: post-cut 8.4s (wait 0.0 drain 1.8 byt5 6.4) -> And a limited number of Deaf and hard of hearing s
+W0000 00:00:1792645842.177497   51716 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792645842.235870   51723 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    4.3s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.6s
+  total               :    2.6s
+[lat] f75G_hZMSHs_04: post-cut 4.9s (wait 0.0 drain 2.2 byt5 2.6) -> The company will likely start their wedding this w
+W0000 00:00:1792645849.617648   51772 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792645849.671227   51779 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    5.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.4s
+  total               :    5.4s
+[lat] uZwKNtHx9FE_07: post-cut 7.6s (wait 0.0 drain 2.2 byt5 5.4) -> They said the words were added without delay, were
+W0000 00:00:1792645869.866672   51829 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792645869.928648   51836 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   10.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.5s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.6s
+  total               :    3.6s
+[lat] TXyNxVRRPt8_01: post-cut 5.6s (wait 0.0 drain 1.9 byt5 3.6) -> We brought them to the Deaf Community Forum to bri
+W0000 00:00:1792645881.909278   51890 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792645881.969411   51897 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.0s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.9s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.7s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.0s
+  total               :    4.1s
+[lat] sP6B4dlSOoc_05: post-cut 5.3s (wait 0.0 drain 1.2 byt5 4.0) -> On Wednesday President Trump signed an executive o
+W0000 00:00:1792645898.308341   51949 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792645898.365073   51956 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    0.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    4.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    0.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    0.9s
+  total               :    0.9s
+[lat] rSiciLyYOyI_07: post-cut 3.1s (wait 0.0 drain 2.2 byt5 0.9) -> That was amazing.
+W0000 00:00:1792645904.446781   52010 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792645904.503134   52017 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.8s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   13.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.8s
+  total               :    4.8s
+[lat] mNF1kg9azQw_07: post-cut 6.5s (wait 0.0 drain 1.5 byt5 4.8) -> If you are interested in food or money, there is a
+W0000 00:00:1792645920.455395   52066 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792645920.508948   52073 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   23.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    6.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.4s
+  total               :    4.4s
+[lat] wPJ_InXF_I8_02: post-cut 6.4s (wait 0.0 drain 1.8 byt5 4.4) -> AP also said Barack Obama has declared to endorse 
+W0000 00:00:1792645941.541873   52128 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792645941.603781   52135 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    6.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   23.7s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    5.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    6.4s
+  total               :    6.5s
+[lat] oP2WdYlaflE_03: post-cut 8.6s (wait 0.0 drain 1.9 byt5 6.4) -> And a limited number of Deaf and hard of hearing s
+W0000 00:00:1792645964.242731   52194 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792645964.296574   52201 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    6.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   21.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    5.3s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    7.0s
+  total               :    7.0s
+[lat] jsOSzFyx8RA_03: post-cut 8.7s (wait 0.0 drain 1.5 byt5 7.0) -> Or the show isn't a lot about the experience, but 
+W0000 00:00:1792645985.772201   52250 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792645985.829670   52257 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    0.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    3.6s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    0.6s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    0.9s
+  total               :    0.9s
+[lat] D9HR4q0vbwE_05: post-cut 3.3s (wait 0.0 drain 2.3 byt5 0.9) -> How are you doing?
+W0000 00:00:1792645991.210505   52303 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792645991.267585   52310 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    4.3s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.7s
+  total               :    2.7s
+[lat] f75G_hZMSHs_04: post-cut 4.7s (wait 0.0 drain 2.1 byt5 2.7) -> The company will likely start their wedding this w
+W0000 00:00:1792645998.536078   52364 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792645998.597830   52371 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    5.7s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.5s
+  total               :    4.5s
+[lat] ZgvLTS2zJdo_01: post-cut 6.3s (wait 0.0 drain 1.8 byt5 4.5) -> The first thing we want to do is to open and ensur
+W0000 00:00:1792646008.452170   52423 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646008.514435   52430 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   15.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.5s
+  total               :    2.5s
+[lat] WMoeSSvCyTU_03: post-cut 5.2s (wait 0.0 drain 2.6 byt5 2.5) -> The drug hydrogen is still going on and it is cont
+W0000 00:00:1792646021.707810   52485 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646021.760457   52492 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   15.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.2s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.7s
+  total               :    2.7s
+[lat] mNF1kg9azQw_05: post-cut 4.0s (wait 0.0 drain 1.2 byt5 2.7) -> I'm wondering how to send it to another person who
+W0000 00:00:1792646036.139549   52542 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646036.198686   52549 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    8.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.7s
+  total               :    1.7s
+[lat] TXyNxVRRPt8_03: post-cut 3.5s (wait 0.0 drain 1.7 byt5 1.7) -> Most people don't know about it.
+W0000 00:00:1792646044.273562   52598 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646044.328019   52605 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    5.0s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   14.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.1s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.0s
+  total               :    5.0s
+[lat] LT0-h4P_xBY_04: post-cut 7.6s (wait 0.0 drain 2.5 byt5 5.0) -> Of course, I want to make sure that the police off
+W0000 00:00:1792646059.769818   52660 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646059.822170   52667 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.3s
+  total               :    4.3s
+[lat] YR7BS6l_95E_05: post-cut 6.1s (wait 0.0 drain 1.6 byt5 4.3) -> The helicopter travels to the area and flies to a 
+W0000 00:00:1792646077.599029   52718 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646077.657237   52725 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.1s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   10.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.1s
+  total               :    2.1s
+[lat] wPJ_InXF_I8_06: post-cut 4.0s (wait 0.0 drain 1.9 byt5 2.1) -> the students storytelling comprehension abilities.
+W0000 00:00:1792646086.753439   52780 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646086.786145   52787 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.0s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   20.3s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.5s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.0s
+  total               :    3.1s
+[lat] ZgvLTS2zJdo_02: post-cut 5.3s (wait 0.0 drain 2.1 byt5 3.0) -> I want to share a little bit of an opportunity wit
+W0000 00:00:1792646106.965069   52836 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646106.994571   52843 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    5.0s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   14.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.1s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.1s
+  total               :    5.1s
+[lat] LT0-h4P_xBY_04: post-cut 7.8s (wait 0.0 drain 2.5 byt5 5.1) -> Of course, I want to make sure that the police off
+W0000 00:00:1792646122.747338   52903 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646122.799491   52910 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   13.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.2s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.6s
+  total               :    2.7s
+[lat] FND2JfzngVY_06: post-cut 5.2s (wait 0.0 drain 2.4 byt5 2.6) -> The daylight savings will be back on March 8 at 2 
+W0000 00:00:1792646136.108985   52961 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646136.143138   52968 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.1s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   20.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.5s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.1s
+  total               :    3.1s
+[lat] ZgvLTS2zJdo_02: post-cut 5.5s (wait 0.0 drain 2.3 byt5 3.1) -> I want to share a little bit of an opportunity wit
+W0000 00:00:1792646156.521036   53024 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646156.587690   53031 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.2s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    4.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.1s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.2s
+  total               :    2.2s
+[lat] I976oI3s1jQ_05: post-cut 3.5s (wait 0.0 drain 1.3 byt5 2.2) -> I want to make sure that everyone understands me.
+W0000 00:00:1792646163.610781   53080 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646163.668956   53087 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    8.9s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.3s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.4s
+  total               :    2.4s
+[lat] sP6B4dlSOoc_04: post-cut 4.2s (wait 0.0 drain 1.7 byt5 2.4) -> Sometimes simple sidewalks can be dangerous.
+W0000 00:00:1792646173.494988   53141 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646173.551516   53148 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   15.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.6s
+  total               :    4.6s
+[lat] wH3lJm0Typ0_03: post-cut 6.0s (wait 0.0 drain 1.3 byt5 4.6) -> At the end of the game, there were also fans who c
+W0000 00:00:1792646188.634113   53199 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646188.662517   53206 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    5.2s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.1s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.3s
+  total               :    5.3s
+[lat] uZwKNtHx9FE_07: post-cut 7.8s (wait 0.0 drain 2.4 byt5 5.3) -> They said the words were added without delay, were
+W0000 00:00:1792646209.131723   53262 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646209.196011   53269 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    6.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   23.9s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    5.6s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    6.4s
+  total               :    6.5s
+[lat] oP2WdYlaflE_03: post-cut 8.5s (wait 0.0 drain 1.9 byt5 6.4) -> And a limited number of Deaf and hard of hearing s
+W0000 00:00:1792646231.737382   53327 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646231.797307   53334 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    5.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   20.6s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.6s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.5s
+  total               :    5.5s
+[lat] uZwKNtHx9FE_01: post-cut 6.9s (wait 0.0 drain 1.2 byt5 5.5) -> Most of the outbreaks are that children who do not
+W0000 00:00:1792646253.209264   53387 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646253.233198   53394 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    5.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.5s
+  total               :    4.5s
+[lat] ZgvLTS2zJdo_01: post-cut 6.4s (wait 0.0 drain 1.8 byt5 4.5) -> The first thing we want to do is to open and ensur
+W0000 00:00:1792646263.173354   53449 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646263.235540   53456 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   15.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.6s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.0s
+  total               :    5.0s
+[lat] oP2WdYlaflE_02: post-cut 6.6s (wait 0.0 drain 1.4 byt5 5.0) -> The expected percentage of a person from the Insti
+W0000 00:00:1792646279.076265   53505 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646279.103391   53512 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   15.6s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.5s
+  total               :    2.5s
+[lat] WMoeSSvCyTU_03: post-cut 5.3s (wait 0.0 drain 2.7 byt5 2.5) -> The drug hydrogen is still going on and it is cont
+W0000 00:00:1792646292.430611   53567 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646292.455975   53574 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    5.2s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.1s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.3s
+  total               :    5.3s
+[lat] uZwKNtHx9FE_07: post-cut 7.8s (wait 0.0 drain 2.3 byt5 5.3) -> They said the words were added without delay, were
+W0000 00:00:1792646312.859924   53625 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646312.923060   53632 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   16.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.2s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.3s
+  total               :    4.3s
+[lat] 5iRIeHAK9b0_02: post-cut 6.0s (wait 0.0 drain 1.5 byt5 4.3) -> On Friday two men in California warned of child ab
+W0000 00:00:1792646329.434187   53686 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646329.496402   53693 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   15.9s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.6s
+  total               :    4.6s
+[lat] wH3lJm0Typ0_03: post-cut 6.0s (wait 0.0 drain 1.3 byt5 4.6) -> At the end of the game, there were also fans who c
+W0000 00:00:1792646344.599620   53743 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646344.669180   53750 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   15.6s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.3s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.7s
+  total               :    2.7s
+[lat] LT0-h4P_xBY_06: post-cut 5.4s (wait 0.0 drain 2.4 byt5 2.7) -> Do you have a race on the owner of the Ioniar Knox
+W0000 00:00:1792646358.558774   53805 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646358.626840   53812 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    5.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   12.1s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.2s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.3s
+  total               :    5.3s
+[lat] f75G_hZMSHs_02: post-cut 7.4s (wait 0.0 drain 1.9 byt5 5.3) -> The similar conversation between the police office
+W0000 00:00:1792646373.848354   53863 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646373.910565   53870 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   10.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.2s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.5s
+  total               :    3.5s
+[lat] I976oI3s1jQ_01: post-cut 5.1s (wait 0.0 drain 1.5 byt5 3.5) -> My strategy on the chill was a little bit patient 
+W0000 00:00:1792646386.186020   53924 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646386.244237   53931 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    0.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    5.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    0.9s
+  total               :    0.9s
+[lat] rSiciLyYOyI_07: post-cut 3.4s (wait 0.0 drain 2.5 byt5 0.9) -> That was amazing.
+W0000 00:00:1792646392.576301   53980 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646392.601495   53987 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    8.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.9s
+  total               :    1.9s
+[lat] J-0KHhPS_m4_03: post-cut 3.5s (wait 0.0 drain 1.5 byt5 1.9) -> Here's a quick question: How can I help?
+W0000 00:00:1792646401.235697   54036 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646401.293817   54043 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    0.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    4.9s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    0.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    0.9s
+  total               :    0.9s
+[lat] rSiciLyYOyI_07: post-cut 3.2s (wait 0.0 drain 2.3 byt5 0.9) -> That was amazing.
+W0000 00:00:1792646407.445173   54093 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646407.498854   54100 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    6.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   21.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    5.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    7.0s
+  total               :    7.0s
+[lat] jsOSzFyx8RA_03: post-cut 8.8s (wait 0.0 drain 1.6 byt5 7.0) -> Or the show isn't a lot about the experience, but 
+W0000 00:00:1792646429.087527   54160 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646429.113350   54167 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    5.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   12.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.3s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.3s
+  total               :    5.3s
+[lat] f75G_hZMSHs_02: post-cut 7.1s (wait 0.0 drain 1.7 byt5 5.3) -> The similar conversation between the police office
+W0000 00:00:1792646444.129480   54221 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646444.200620   54229 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    5.0s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   12.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.1s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.0s
+  total               :    5.0s
+[lat] mNF1kg9azQw_07: post-cut 6.3s (wait 0.0 drain 1.3 byt5 5.0) -> If you are interested in food or money, there is a
+W0000 00:00:1792646459.984376   54279 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646460.054725   54286 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   22.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    6.6s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.4s
+  total               :    4.4s
+[lat] wPJ_InXF_I8_02: post-cut 5.9s (wait 0.0 drain 1.4 byt5 4.4) -> AP also said Barack Obama has declared to endorse 
+W0000 00:00:1792646480.206707   54341 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646480.235317   54348 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    9.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.7s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.4s
+  total               :    2.4s
+[lat] sP6B4dlSOoc_04: post-cut 4.0s (wait 0.0 drain 1.6 byt5 2.4) -> Sometimes simple sidewalks can be dangerous.
+W0000 00:00:1792646490.025280   54399 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646490.052140   54406 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.2s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    7.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.2s
+  total               :    2.3s
+[lat] k5Gxbifw8s8_03: post-cut 3.6s (wait 0.0 drain 1.3 byt5 2.2) -> This job opportunity for Deaf people is growing.
+W0000 00:00:1792646498.470880   54455 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646498.529288   54462 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.7s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.4s
+  total               :    4.4s
+[lat] MJijm9kbdHA_01: post-cut 5.4s (wait 0.0 drain 0.8 byt5 4.4) -> Biden said Bernie had a vote multiple times agains
+W0000 00:00:1792646518.534746   54518 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646518.604326   54525 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    0.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    3.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    0.7s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    0.9s
+  total               :    1.0s
+[lat] D9HR4q0vbwE_05: post-cut 3.4s (wait 0.0 drain 2.5 byt5 0.9) -> How are you doing?
+W0000 00:00:1792646524.181791   54571 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646524.243371   54578 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   13.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.5s
+  total               :    3.5s
+[lat] z3jAMn3xpoM_02: post-cut 5.4s (wait 0.0 drain 1.8 byt5 3.5) -> One of them filmed on Facebook LIVE showing office
+W0000 00:00:1792646537.896946   54632 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646537.925359   54639 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    5.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   20.7s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.5s
+  total               :    5.5s
+[lat] uZwKNtHx9FE_01: post-cut 6.8s (wait 0.0 drain 1.2 byt5 5.5) -> Most of the outbreaks are that children who do not
+W0000 00:00:1792646559.278886   54691 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646559.339658   54698 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   16.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.2s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.3s
+  total               :    4.3s
+[lat] 5iRIeHAK9b0_02: post-cut 6.0s (wait 0.0 drain 1.6 byt5 4.3) -> On Friday two men in California warned of child ab
+W0000 00:00:1792646575.792112   54752 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646575.861195   54759 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    7.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.3s
+  total               :    2.3s
+[lat] k5Gxbifw8s8_03: post-cut 3.7s (wait 0.0 drain 1.3 byt5 2.3) -> This job opportunity for Deaf people is growing.
+W0000 00:00:1792646584.337609   54809 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646584.401019   54816 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    7.9s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.5s
+  total               :    1.6s
+[lat] k5Gxbifw8s8_05: post-cut 3.6s (wait 0.0 drain 2.0 byt5 1.5) -> And more young people wear rabbits.
+W0000 00:00:1792646592.570046   54870 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646592.625173   54877 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    5.3s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.7s
+  total               :    1.7s
+[lat] fNT8a6e1gx8_06: post-cut 4.0s (wait 0.0 drain 2.3 byt5 1.7) -> Tend to ask your students to graduate.
+W0000 00:00:1792646599.513714   54927 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646599.585755   54934 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    8.9s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.4s
+  total               :    2.4s
+[lat] sP6B4dlSOoc_04: post-cut 4.1s (wait 0.0 drain 1.7 byt5 2.4) -> Sometimes simple sidewalks can be dangerous.
+W0000 00:00:1792646609.363612   54986 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646609.423336   54993 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   15.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.3s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.7s
+  total               :    2.7s
+[lat] mNF1kg9azQw_05: post-cut 4.7s (wait 0.0 drain 1.9 byt5 2.7) -> I'm wondering how to send it to another person who
+W0000 00:00:1792646624.556462   55048 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646624.626804   55055 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   10.3s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.5s
+  total               :    3.5s
+[lat] TXyNxVRRPt8_01: post-cut 5.4s (wait 0.0 drain 1.9 byt5 3.5) -> We brought them to the Deaf Community Forum to bri
+W0000 00:00:1792646636.474123   55105 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646636.500285   55112 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    8.1s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.9s
+  total               :    1.9s
+[lat] J-0KHhPS_m4_03: post-cut 3.3s (wait 0.0 drain 1.4 byt5 1.9) -> Here's a quick question: How can I help?
+W0000 00:00:1792646644.975024   55161 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646645.030502   55168 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    7.7s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.7s
+  total               :    1.8s
+[lat] TXyNxVRRPt8_03: post-cut 3.3s (wait 0.0 drain 1.5 byt5 1.7) -> Most people don't know about it.
+W0000 00:00:1792646652.903937   55222 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646652.982469   55230 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   14.1s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.0s
+  total               :    5.0s
+[lat] LT0-h4P_xBY_04: post-cut 7.4s (wait 0.0 drain 2.3 byt5 5.0) -> Of course, I want to make sure that the police off
+W0000 00:00:1792646668.294230   55281 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646668.326438   55288 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.1s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   10.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.3s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.2s
+  total               :    2.2s
+[lat] wPJ_InXF_I8_06: post-cut 4.5s (wait 0.0 drain 2.2 byt5 2.2) -> the students storytelling comprehension abilities.
+W0000 00:00:1792646677.848957   55337 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646677.900134   55344 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.6s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.8s
+  total               :    3.8s
+[lat] mNF1kg9azQw_03: post-cut 5.2s (wait 0.0 drain 1.4 byt5 3.8) -> Jennifer shared her experience with a woman who wa
+W0000 00:00:1792646694.587305   55399 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646694.658245   55406 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.8s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    5.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    0.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.8s
+  total               :    1.8s
+[lat] NBpYolVo5WQ_06: post-cut 4.2s (wait 0.0 drain 2.3 byt5 1.8) -> See you tomorrow and stay with the light!
+W0000 00:00:1792646701.963316   55455 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646702.030788   55462 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.0s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    8.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.0s
+  total               :    2.0s
+[lat] 5iRIeHAK9b0_03: post-cut 3.3s (wait 0.0 drain 1.3 byt5 2.0) -> Children ranging in age from 3 to 29 years old.
+W0000 00:00:1792646710.135591   55511 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646710.208985   55518 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.2s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   17.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.2s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.3s
+  total               :    4.3s
+[lat] 5iRIeHAK9b0_02: post-cut 6.3s (wait 0.0 drain 1.9 byt5 4.3) -> On Friday two men in California warned of child ab
+W0000 00:00:1792646726.948952   55579 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646727.013109   55586 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    0.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    3.6s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    0.6s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    0.9s
+  total               :    0.9s
+[lat] D9HR4q0vbwE_05: post-cut 3.2s (wait 0.0 drain 2.2 byt5 0.9) -> How are you doing?
+W0000 00:00:1792646732.331419   55633 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646732.361651   55640 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.8s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   15.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.6s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.9s
+  total               :    4.9s
+[lat] oP2WdYlaflE_02: post-cut 6.6s (wait 0.0 drain 1.6 byt5 4.9) -> The expected percentage of a person from the Insti
+W0000 00:00:1792646748.145154   55694 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646748.216388   55701 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   22.6s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    6.5s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.4s
+  total               :    4.5s
+[lat] wPJ_InXF_I8_02: post-cut 6.2s (wait 0.0 drain 1.6 byt5 4.4) -> AP also said Barack Obama has declared to endorse 
+W0000 00:00:1792646768.670464   55750 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646768.737121   55757 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   19.3s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.3s
+  total               :    4.3s
+[lat] YR7BS6l_95E_05: post-cut 6.0s (wait 0.0 drain 1.6 byt5 4.3) -> The helicopter travels to the area and flies to a 
+W0000 00:00:1792646786.413928   55816 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646786.485541   55823 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   12.9s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.3s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.6s
+  total               :    3.6s
+[lat] z3jAMn3xpoM_02: post-cut 5.4s (wait 0.0 drain 1.6 byt5 3.6) -> One of them filmed on Facebook LIVE showing office
+W0000 00:00:1792646800.104335   55872 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646800.159247   55879 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.2s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   19.3s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.2s
+  total               :    4.3s
+[lat] YR7BS6l_95E_05: post-cut 6.0s (wait 0.0 drain 1.6 byt5 4.2) -> The helicopter travels to the area and flies to a 
+W0000 00:00:1792646817.873143   55935 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646817.956212   55942 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.2s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    4.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.1s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.2s
+  total               :    2.2s
+[lat] I976oI3s1jQ_05: post-cut 3.5s (wait 0.0 drain 1.3 byt5 2.2) -> I want to make sure that everyone understands me.
+W0000 00:00:1792646825.008482   55991 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646825.033476   55998 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   15.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.7s
+  total               :    2.7s
+[lat] LT0-h4P_xBY_06: post-cut 5.3s (wait 0.0 drain 2.6 byt5 2.7) -> Do you have a race on the owner of the Ioniar Knox
+W0000 00:00:1792646838.886271   56052 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646838.966291   56059 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.0s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   20.7s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.0s
+  total               :    3.1s
+[lat] ZgvLTS2zJdo_02: post-cut 5.4s (wait 0.0 drain 2.2 byt5 3.0) -> I want to share a little bit of an opportunity wit
+W0000 00:00:1792646859.158184   56111 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646859.214406   56118 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   10.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.2s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.5s
+  total               :    3.5s
+[lat] I976oI3s1jQ_01: post-cut 5.3s (wait 0.0 drain 1.8 byt5 3.5) -> My strategy on the chill was a little bit patient 
+W0000 00:00:1792646871.657854   56172 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646871.732816   56179 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    9.7s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.3s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.5s
+  total               :    3.5s
+[lat] I976oI3s1jQ_01: post-cut 4.9s (wait 0.0 drain 1.4 byt5 3.5) -> My strategy on the chill was a little bit patient 
+W0000 00:00:1792646883.779206   56228 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646883.803064   56235 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.0s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    7.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.0s
+  total               :    2.0s
+[lat] 5iRIeHAK9b0_03: post-cut 3.3s (wait 0.0 drain 1.3 byt5 2.0) -> Children ranging in age from 3 to 29 years old.
+W0000 00:00:1792646891.933173   56289 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646891.986869   56296 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    5.1s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.6s
+  total               :    1.7s
+[lat] fNT8a6e1gx8_06: post-cut 3.8s (wait 0.0 drain 2.1 byt5 1.6) -> Tend to ask your students to graduate.
+W0000 00:00:1792646898.651860   56346 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646898.705127   56353 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   15.1s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.3s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.8s
+  total               :    2.8s
+[lat] mNF1kg9azQw_05: post-cut 4.0s (wait 0.0 drain 1.2 byt5 2.8) -> I'm wondering how to send it to another person who
+W0000 00:00:1792646913.125524   56404 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646913.199823   56411 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   13.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.5s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.7s
+  total               :    2.7s
+[lat] FND2JfzngVY_06: post-cut 4.9s (wait 0.0 drain 2.2 byt5 2.7) -> The daylight savings will be back on March 8 at 2 
+W0000 00:00:1792646926.271958   56466 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646926.308059   56473 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    8.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.3s
+  total               :    3.3s
+[lat] iMJ9CjBX7eo_02: post-cut 5.7s (wait 0.0 drain 2.4 byt5 3.3) -> Thank you for joining us at the Community Forum an
+W0000 00:00:1792646936.509860   56522 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646936.569389   56529 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    5.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.5s
+  total               :    4.5s
+[lat] ZgvLTS2zJdo_01: post-cut 6.2s (wait 0.0 drain 1.6 byt5 4.5) -> The first thing we want to do is to open and ensur
+W0000 00:00:1792646946.272870   56578 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646946.330990   56585 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    5.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.7s
+  total               :    1.7s
+[lat] fNT8a6e1gx8_06: post-cut 4.0s (wait 0.0 drain 2.2 byt5 1.7) -> Tend to ask your students to graduate.
+W0000 00:00:1792646953.145337   56639 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646953.205315   56646 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    8.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.7s
+  total               :    1.8s
+[lat] TXyNxVRRPt8_03: post-cut 3.5s (wait 0.0 drain 1.7 byt5 1.7) -> Most people don't know about it.
+W0000 00:00:1792646961.338105   56695 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646961.391285   56702 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.1s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    5.1s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.1s
+  total               :    4.1s
+[lat] sP6B4dlSOoc_05: post-cut 5.7s (wait 0.0 drain 1.5 byt5 4.1) -> On Wednesday President Trump signed an executive o
+W0000 00:00:1792646978.174517   56755 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646978.210376   56762 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.2s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    4.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.2s
+  total               :    2.2s
+[lat] I976oI3s1jQ_05: post-cut 3.6s (wait 0.0 drain 1.4 byt5 2.2) -> I want to make sure that everyone understands me.
+W0000 00:00:1792646985.357617   56816 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646985.415735   56823 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    8.3s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.3s
+  total               :    3.3s
+[lat] iMJ9CjBX7eo_02: post-cut 5.8s (wait 0.0 drain 2.5 byt5 3.3) -> Thank you for joining us at the Community Forum an
+W0000 00:00:1792646995.638481   56872 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792646995.666537   56879 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    6.3s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.5s
+  total               :    2.5s
+[lat] fNT8a6e1gx8_08: post-cut 4.3s (wait 0.0 drain 1.8 byt5 2.5) -> It's just that we have problems with expressing ou
+W0000 00:00:1792647003.731789   56931 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647003.797669   56938 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   17.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.5s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.9s
+  total               :    5.0s
+[lat] I976oI3s1jQ_02: post-cut 5.9s (wait 0.0 drain 0.9 byt5 4.9) -> She said she was still working for two days, but s
+W0000 00:00:1792647023.303424   56998 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647023.378691   57005 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.2s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    7.6s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.2s
+  total               :    2.3s
+[lat] k5Gxbifw8s8_03: post-cut 3.7s (wait 0.0 drain 1.4 byt5 2.2) -> This job opportunity for Deaf people is growing.
+W0000 00:00:1792647031.821771   57055 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647031.875546   57062 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    7.6s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.3s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.6s
+  total               :    1.6s
+[lat] k5Gxbifw8s8_05: post-cut 3.6s (wait 0.0 drain 2.0 byt5 1.6) -> And more young people wear rabbits.
+W0000 00:00:1792647040.028359   57111 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647040.086748   57118 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    4.3s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.7s
+  total               :    2.7s
+[lat] f75G_hZMSHs_04: post-cut 4.9s (wait 0.0 drain 2.2 byt5 2.7) -> The company will likely start their wedding this w
+W0000 00:00:1792647047.488566   57174 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647047.551079   57181 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.9s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.3s
+  total               :    4.4s
+[lat] MJijm9kbdHA_01: post-cut 5.8s (wait 0.0 drain 1.4 byt5 4.3) -> Biden said Bernie had a vote multiple times agains
+W0000 00:00:1792647067.938063   57230 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647067.996661   57237 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   17.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.3s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.9s
+  total               :    5.0s
+[lat] I976oI3s1jQ_02: post-cut 5.9s (wait 0.0 drain 0.9 byt5 4.9) -> She said she was still working for two days, but s
+W0000 00:00:1792647087.508529   57297 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647087.575274   57304 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    5.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   20.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.4s
+  total               :    5.5s
+[lat] uZwKNtHx9FE_01: post-cut 6.7s (wait 0.0 drain 1.2 byt5 5.4) -> Most of the outbreaks are that children who do not
+W0000 00:00:1792647108.859153   57359 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647108.891612   57366 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    8.1s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.9s
+  total               :    1.9s
+[lat] J-0KHhPS_m4_03: post-cut 3.5s (wait 0.0 drain 1.6 byt5 1.9) -> Here's a quick question: How can I help?
+W0000 00:00:1792647117.546842   57416 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647117.614233   57423 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   15.7s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.5s
+  total               :    2.6s
+[lat] WMoeSSvCyTU_03: post-cut 5.3s (wait 0.0 drain 2.7 byt5 2.5) -> The drug hydrogen is still going on and it is cont
+W0000 00:00:1792647130.882485   57472 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647130.954369   57479 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    6.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.5s
+  total               :    2.5s
+[lat] fNT8a6e1gx8_08: post-cut 4.4s (wait 0.0 drain 1.9 byt5 2.5) -> It's just that we have problems with expressing ou
+W0000 00:00:1792647139.049921   57534 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647139.077101   57541 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   17.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.1s
+  byt5_inference      :    4.9s
+  total               :    5.0s
+[lat] I976oI3s1jQ_02: post-cut 6.1s (wait 0.0 drain 1.1 byt5 4.9) -> She said she was still working for two days, but s
+W0000 00:00:1792647158.839020   57592 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647158.919085   57599 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.8s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   12.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.8s
+  total               :    4.9s
+[lat] mNF1kg9azQw_07: post-cut 6.3s (wait 0.0 drain 1.4 byt5 4.8) -> If you are interested in food or money, there is a
+W0000 00:00:1792647174.688770   57653 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647174.776811   57660 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   15.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.7s
+  total               :    2.7s
+[lat] LT0-h4P_xBY_06: post-cut 5.4s (wait 0.0 drain 2.7 byt5 2.7) -> Do you have a race on the owner of the Ioniar Knox
+W0000 00:00:1792647188.709499   57710 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647188.777064   57717 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.0s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    8.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.0s
+  total               :    2.0s
+[lat] 5iRIeHAK9b0_03: post-cut 3.6s (wait 0.0 drain 1.6 byt5 2.0) -> Children ranging in age from 3 to 29 years old.
+W0000 00:00:1792647197.171174   57771 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647197.224848   57778 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.5s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.7s
+  total               :    3.8s
+[lat] mNF1kg9azQw_03: post-cut 5.2s (wait 0.0 drain 1.4 byt5 3.7) -> Jennifer shared her experience with a woman who wa
+W0000 00:00:1792647213.867045   57829 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647213.942965   57836 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   13.7s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.7s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.6s
+  total               :    2.7s
+[lat] FND2JfzngVY_06: post-cut 4.8s (wait 0.0 drain 2.1 byt5 2.6) -> The daylight savings will be back on March 8 at 2 
+W0000 00:00:1792647226.905669   57890 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647226.931823   57897 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.8s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    5.3s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.8s
+  total               :    1.8s
+[lat] NBpYolVo5WQ_06: post-cut 4.3s (wait 0.0 drain 2.5 byt5 1.8) -> See you tomorrow and stay with the light!
+W0000 00:00:1792647234.374308   57947 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647234.408300   57954 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    7.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.6s
+  total               :    1.6s
+[lat] k5Gxbifw8s8_05: post-cut 3.2s (wait 0.0 drain 1.6 byt5 1.6) -> And more young people wear rabbits.
+W0000 00:00:1792647242.202999   58003 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647242.266194   58010 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.3s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    5.1s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.4s
+  total               :    4.5s
+[lat] MJijm9kbdHA_01: post-cut 5.4s (wait 0.0 drain 0.9 byt5 4.4) -> Biden said Bernie had a vote multiple times agains
+W0000 00:00:1792647262.229084   58065 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647262.300762   58072 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.0s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    5.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.1s
+  total               :    4.1s
+[lat] sP6B4dlSOoc_05: post-cut 5.5s (wait 0.0 drain 1.3 byt5 4.1) -> On Wednesday President Trump signed an executive o
+W0000 00:00:1792647278.862310   58123 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647278.933176   58130 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.1s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    9.9s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.1s
+  total               :    2.1s
+[lat] wPJ_InXF_I8_06: post-cut 4.0s (wait 0.0 drain 1.9 byt5 2.1) -> the students storytelling comprehension abilities.
+W0000 00:00:1792647288.026510   58185 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647288.053424   58192 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    8.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.3s
+  total               :    3.4s
+[lat] iMJ9CjBX7eo_02: post-cut 6.2s (wait 0.0 drain 2.8 byt5 3.3) -> Thank you for joining us at the Community Forum an
+W0000 00:00:1792647298.728523   58242 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647298.790233   58249 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.8s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.6s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.8s
+  total               :    3.9s
+[lat] mNF1kg9azQw_03: post-cut 5.2s (wait 0.0 drain 1.3 byt5 3.8) -> Jennifer shared her experience with a woman who wa
+W0000 00:00:1792647315.484017   58309 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647315.554921   58316 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   10.3s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.5s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.6s
+  total               :    3.6s
+[lat] TXyNxVRRPt8_01: post-cut 5.5s (wait 0.0 drain 1.8 byt5 3.6) -> We brought them to the Deaf Community Forum to bri
+W0000 00:00:1792647327.399483   58367 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647327.466156   58374 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.8s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    6.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    0.9s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.8s
+  total               :    1.8s
+[lat] NBpYolVo5WQ_06: post-cut 4.5s (wait 0.0 drain 2.7 byt5 1.8) -> See you tomorrow and stay with the light!
+W0000 00:00:1792647335.193607   58424 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647335.249452   58431 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    5.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   12.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.2s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.4s
+  total               :    5.4s
+[lat] f75G_hZMSHs_02: post-cut 7.2s (wait 0.0 drain 1.7 byt5 5.4) -> The similar conversation between the police office
+W0000 00:00:1792647350.326208   58485 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792647350.388386   58492 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   16.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    3.7s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    5.0s
+  total               :    5.0s
+[lat] oP2WdYlaflE_02: post-cut 6.9s (wait 0.0 drain 1.8 byt5 5.0) -> The expected percentage of a person from the Insti
+[lat] done: camera 15.0fps  peak_used 7033MB  min_available 586MB  warmup 23.1s

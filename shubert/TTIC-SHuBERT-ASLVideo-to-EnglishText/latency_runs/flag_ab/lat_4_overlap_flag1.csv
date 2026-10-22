@@ -1,0 +1,41 @@
+condition,pass,order_index,clip_id,duration_s,capture_seconds,raw_frames,retained_frames_after_trim,post_cut_latency_s,worker_s,queue_wait_s,capture_end_to_perception_done_s,shubert_s,byt5_encoder_s,byt5_decode_s,byt5_stage_s,generate_s,other_s,decode_steps,output_bytes,output_text,oom_or_error,error,declined,decline_reason,deferred,queue_depth_at_cut,perception_frames_at_cut,perception_busy_seconds_cpu,embed_busy_seconds,embedded_frames,min_available_mb_during_utterance,min_available_mb_during_run,avail_mb_at_cut,first_after_warmup,warmup_seconds,cut_ts,done_ts
+overlap,4,0,uZwKNtHx9FE_01,14.473,14.43,347,174,16.11,16.11,0.0,2.7,0.33,0.88,11.98,13.25,13.2,0.16,127,125,Most of the outbreaks are that children who do not have a vaccine who live in an ultra-orthodox Jewish community in New York.,False,,False,,False,1,168,20.27,13.38,174,1560,1560,2035,True,18.5,1792633453.9448266,1792633470.051
+overlap,4,1,5iRIeHAK9b0_03,4.700,4.68,141,71,17.97,8.21,9.75,4.49,0.08,0.19,3.4,3.69,3.67,0.04,49,47,Children ranging in age from 3 to 29 years old.,False,,False,,False,2,62,7.44,15.52,71,1362,1362,1730,False,18.5,1792633460.332034,1792633478.298
+overlap,4,2,fNT8a6e1gx8_08,3.604,3.57,108,54,34.69,21.77,12.92,,0.12,0.19,6.18,7.18,6.5,14.59,55,53,It's just about our problems of expressing ourselves.,False,,False,,True,3,,,,,861,861,1711,False,18.5,1792633465.4223075,1792633500.11
+overlap,4,8,wPJ_InXF_I8_06,4.939,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,929,,18.5,,
+overlap,4,9,I976oI3s1jQ_01,7.000,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,837,,18.5,,
+overlap,4,10,jsOSzFyx8RA_03,12.713,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,688,,18.5,,
+overlap,4,11,fNT8a6e1gx8_06,2.770,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,561,,18.5,,
+overlap,4,12,J-0KHhPS_m4_03,5.000,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,384,,18.5,,
+overlap,4,13,FND2JfzngVY_06,8.008,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,397,,18.5,,
+overlap,4,14,I976oI3s1jQ_02,13.500,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,397,,18.5,,
+overlap,4,15,ZgvLTS2zJdo_02,14.724,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,397,,18.5,,
+overlap,4,16,YR7BS6l_95E_05,11.600,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,501,,18.5,,
+overlap,4,17,NBpYolVo5WQ_06,3.042,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,501,,18.5,,
+overlap,4,18,TXyNxVRRPt8_01,6.273,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,501,,18.5,,
+overlap,4,19,5iRIeHAK9b0_02,10.400,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,502,,18.5,,
+overlap,4,20,mNF1kg9azQw_05,10.302,,,,,,,,,,,,,,,,,False,,True,backlog 608 frames,,5,,,,,,,502,,18.5,,
+overlap,4,3,sP6B4dlSOoc_05,10.978,10.95,329,165,60.76,38.53,22.23,,0.11,0.39,6.93,7.47,7.44,31.06,97,95,On Wednesday President Trump signed an executive order about trade reform and life kidney care.,False,,False,,True,4,,,,,384,384,1380,False,18.5,1792633477.8877394,1792633538.643
+overlap,4,4,mNF1kg9azQw_03,11.387,11.35,273,137,55.61,7.84,47.77,0.75,0.08,0.31,6.51,6.93,6.9,0.17,92,90,Jennifer shared her experience with a woman who was currently in the photography of Floyd.,False,,False,,False,3,130,18.42,21.73,137,384,384,932,False,18.5,1792633490.8764794,1792633546.484
+overlap,4,5,iMJ9CjBX7eo_02,4.305,4.27,129,65,57.91,8.24,49.68,0.18,0.07,0.18,7.74,8.02,7.99,0.03,79,77,Thank you for joining us at the Community Forum and we will host it together.,False,,False,,False,4,49,7.67,10.85,65,384,384,1164,False,18.5,1792633496.8375952,1792633554.751
+overlap,4,24,uZwKNtHx9FE_07,12.471,,,,,,,,,,,,,,,,,False,,True,backlog 566 frames,,5,,,,,,,408,,18.5,,
+overlap,4,25,D9HR4q0vbwE_05,2.044,,,,,,,,,,,,,,,,,False,,True,backlog 566 frames,,5,,,,,,,345,,18.5,,
+overlap,4,26,f75G_hZMSHs_04,2.403,,,,,,,,,,,,,,,,,False,,True,backlog 566 frames,,5,,,,,,,317,,18.5,,
+overlap,4,27,f75G_hZMSHs_02,7.775,,,,,,,,,,,,,,,,,False,,True,backlog 566 frames,,5,,,,,,,317,,18.5,,
+overlap,4,28,ZgvLTS2zJdo_01,3.421,,,,,,,,,,,,,,,,,False,,True,backlog 566 frames,,5,,,,,,,360,,18.5,,
+overlap,4,29,LT0-h4P_xBY_04,7.767,,,,,,,,,,,,,,,,,False,,True,backlog 566 frames,,5,,,,,,,361,,18.5,,
+overlap,4,30,wPJ_InXF_I8_02,14.148,,,,,,,,,,,,,,,,,False,,True,backlog 566 frames,,5,,,,,,,360,,18.5,,
+overlap,4,6,k5Gxbifw8s8_05,4.434,4.4,133,67,73.19,21.15,52.03,,0.08,0.2,3.65,3.94,3.93,17.22,35,33,And more young people use rabbit.,False,,False,,True,5,,,,,301,301,664,False,18.5,1792633502.7587402,1792633575.946
+overlap,4,31,oP2WdYlaflE_02,9.100,,,,,,,,,,,,,,,,,False,,True,backlog 499 frames,,4,,,,,,,511,,18.5,,
+overlap,4,32,LT0-h4P_xBY_06,8.400,,,,,,,,,,,,,,,,,False,,True,backlog 499 frames,,4,,,,,,,490,,18.5,,
+overlap,4,33,mNF1kg9azQw_07,9.385,,,,,,,,,,,,,,,,,False,,True,backlog 499 frames,,4,,,,,,,486,,18.5,,
+overlap,4,34,TXyNxVRRPt8_03,4.505,,,,,,,,,,,,,,,,,False,,True,backlog 499 frames,,4,,,,,,,486,,18.5,,
+overlap,4,35,wH3lJm0Typ0_03,9.009,,,,,,,,,,,,,,,,,False,,True,backlog 499 frames,,4,,,,,,,486,,18.5,,
+overlap,4,36,oP2WdYlaflE_03,13.934,,,,,,,,,,,,,,,,,False,,True,backlog 499 frames,,4,,,,,,,485,,18.5,,
+overlap,4,37,I976oI3s1jQ_05,3.417,,,,,,,,,,,,,,,,,False,,True,backlog 499 frames,,4,,,,,,,483,,18.5,,
+overlap,4,38,k5Gxbifw8s8_03,4.700,,,,,,,,,,,,,,,,,False,,True,backlog 499 frames,,4,,,,,,,482,,18.5,,
+overlap,4,39,rSiciLyYOyI_07,2.878,,,,,,,,,,,,,,,,,False,,True,backlog 499 frames,,4,,,,,,,482,,18.5,,
+overlap,4,7,MJijm9kbdHA_01,14.500,14.46,348,174,98.16,40.95,57.21,,0.1,0.41,8.08,8.63,8.6,32.33,102,100,Biden said Bernie had a vote multiple times against a brady bill that required stricter gun control.,False,,False,,True,5,,,,,301,301,947,False,18.5,1792633518.7404592,1792633616.902
+overlap,4,21,WMoeSSvCyTU_03,7.908,7.88,237,119,99.17,29.97,69.19,,0.07,0.2,4.26,4.55,4.53,25.43,62,60,The drug hydrogen is still going on and it is controversial.,False,,False,,True,5,,,,,279,279,616,False,18.5,1792633547.7142026,1792633646.879
+overlap,4,22,sP6B4dlSOoc_04,5.573,5.54,167,84,97.75,5.8,91.95,1.4,0.06,0.18,4.04,4.31,4.29,0.09,46,44,Sometimes simple sidewalks can be dangerous.,False,,False,,False,5,74,8.56,10.91,84,279,279,793,False,18.5,1792633554.9325671,1792633652.685
+overlap,4,23,z3jAMn3xpoM_02,8.142,8.12,244,122,96.33,8.32,88.01,1.78,0.09,0.21,6.04,6.36,6.34,0.17,83,81,One of them filmed on Facebook LIVE showing officers lying on the floor on blood.,False,,False,,False,5,103,15.62,12.42,122,279,279,415,False,18.5,1792633564.7152708,1792633661.041

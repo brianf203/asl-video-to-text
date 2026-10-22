@@ -1,0 +1,41 @@
+condition,pass,order_index,clip_id,duration_s,capture_seconds,raw_frames,retained_frames_after_trim,post_cut_latency_s,worker_s,queue_wait_s,capture_end_to_perception_done_s,shubert_s,byt5_encoder_s,byt5_decode_s,byt5_stage_s,generate_s,other_s,decode_steps,output_bytes,output_text,oom_or_error,error,declined,decline_reason,deferred,queue_depth_at_cut,perception_frames_at_cut,perception_busy_seconds_cpu,embed_busy_seconds,embedded_frames,min_available_mb_during_utterance,min_available_mb_during_run,avail_mb_at_cut,first_after_warmup,warmup_seconds,cut_ts,done_ts
+overlap,1,0,uZwKNtHx9FE_01,14.473,14.44,347,174,21.02,21.02,0.0,4.66,0.54,1.21,14.23,16.06,15.98,0.3,127,125,Most of the outbreaks are that children who do not have a vaccine who live in an ultra-orthodox Jewish community in New York.,False,,False,,False,1,168,20.41,15.33,174,1486,1486,1829,True,18.3,1792625558.7673736,1792625579.789
+overlap,1,1,5iRIeHAK9b0_03,4.700,4.67,141,71,27.28,12.57,14.71,5.38,0.08,0.26,6.74,7.1,7.07,0.09,49,47,Children ranging in age from 3 to 29 years old.,False,,False,,False,2,59,7.75,21.27,71,1210,1210,1787,False,18.3,1792625565.1184878,1792625592.394
+overlap,1,7,MJijm9kbdHA_01,14.500,,,,,,,,,,,,,,,,,False,,True,backlog 488 frames,,5,,,,,,,565,,18.3,,
+overlap,1,8,wPJ_InXF_I8_06,4.939,,,,,,,,,,,,,,,,,False,,True,backlog 488 frames,,5,,,,,,,565,,18.3,,
+overlap,1,9,I976oI3s1jQ_01,7.000,,,,,,,,,,,,,,,,,False,,True,backlog 488 frames,,5,,,,,,,480,,18.3,,
+overlap,1,10,jsOSzFyx8RA_03,12.713,,,,,,,,,,,,,,,,,False,,True,backlog 488 frames,,5,,,,,,,480,,18.3,,
+overlap,1,11,fNT8a6e1gx8_06,2.770,,,,,,,,,,,,,,,,,False,,True,backlog 488 frames,,5,,,,,,,479,,18.3,,
+overlap,1,12,J-0KHhPS_m4_03,5.000,,,,,,,,,,,,,,,,,False,,True,backlog 488 frames,,5,,,,,,,479,,18.3,,
+overlap,1,13,FND2JfzngVY_06,8.008,,,,,,,,,,,,,,,,,False,,True,backlog 488 frames,,5,,,,,,,479,,18.3,,
+overlap,1,2,fNT8a6e1gx8_08,3.604,3.57,108,54,48.64,26.36,22.28,,0.07,0.19,7.08,7.98,7.33,18.38,55,53,It's just about our problems of expressing ourselves.,False,,False,,True,3,,,,,479,479,1550,False,18.3,1792625570.2014556,1792625618.84
+overlap,1,15,ZgvLTS2zJdo_02,14.724,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,682,,18.3,,
+overlap,1,16,YR7BS6l_95E_05,11.600,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,682,,18.3,,
+overlap,1,17,NBpYolVo5WQ_06,3.042,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,680,,18.3,,
+overlap,1,18,TXyNxVRRPt8_01,6.273,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,826,,18.3,,
+overlap,1,19,5iRIeHAK9b0_02,10.400,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,772,,18.3,,
+overlap,1,20,mNF1kg9azQw_05,10.302,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,656,,18.3,,
+overlap,1,21,WMoeSSvCyTU_03,7.908,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,531,,18.3,,
+overlap,1,22,sP6B4dlSOoc_04,5.573,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,465,,18.3,,
+overlap,1,23,z3jAMn3xpoM_02,8.142,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,311,,18.3,,
+overlap,1,24,uZwKNtHx9FE_07,12.471,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,325,,18.3,,
+overlap,1,25,D9HR4q0vbwE_05,2.044,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,325,,18.3,,
+overlap,1,26,f75G_hZMSHs_04,2.403,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,323,,18.3,,
+overlap,1,27,f75G_hZMSHs_02,7.775,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,426,,18.3,,
+overlap,1,28,ZgvLTS2zJdo_01,3.421,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,426,,18.3,,
+overlap,1,29,LT0-h4P_xBY_04,7.767,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,426,,18.3,,
+overlap,1,30,wPJ_InXF_I8_02,14.148,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,426,,18.3,,
+overlap,1,31,oP2WdYlaflE_02,9.100,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,426,,18.3,,
+overlap,1,32,LT0-h4P_xBY_06,8.400,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,426,,18.3,,
+overlap,1,33,mNF1kg9azQw_07,9.385,,,,,,,,,,,,,,,,,False,,True,backlog 596 frames,,5,,,,,,,426,,18.3,,
+overlap,1,3,sP6B4dlSOoc_05,10.978,10.95,329,165,80.5,44.31,36.18,,0.13,0.49,10.59,11.25,11.21,33.07,97,95,On Wednesday President Trump signed an executive order about trade reform and life kidney care.,False,,False,,True,4,,,,,317,317,1345,False,18.3,1792625582.6605537,1792625663.158
+overlap,1,35,wH3lJm0Typ0_03,9.009,,,,,,,,,,,,,,,,,False,,True,backlog 499 frames,,5,,,,,,,447,,18.3,,
+overlap,1,36,oP2WdYlaflE_03,13.934,,,,,,,,,,,,,,,,,False,,True,backlog 499 frames,,5,,,,,,,447,,18.3,,
+overlap,1,37,I976oI3s1jQ_05,3.417,,,,,,,,,,,,,,,,,False,,True,backlog 499 frames,,5,,,,,,,446,,18.3,,
+overlap,1,38,k5Gxbifw8s8_03,4.700,,,,,,,,,,,,,,,,,False,,True,backlog 499 frames,,5,,,,,,,445,,18.3,,
+overlap,1,4,mNF1kg9azQw_03,11.387,11.35,273,137,79.47,11.98,67.49,0.95,0.1,0.44,10.24,10.82,10.78,0.2,92,90,Jennifer shared her experience with a woman who was currently in the photography of Floyd.,False,,False,,False,4,125,19.08,22.45,137,317,317,876,False,18.3,1792625595.6780798,1792625675.148
+overlap,1,5,iMJ9CjBX7eo_02,4.305,4.28,129,65,83.17,9.61,73.56,0.46,0.09,0.27,8.67,9.08,9.03,0.08,79,77,Thank you for joining us at the Community Forum and we will host it together.,False,,False,,False,4,48,8.29,10.69,65,317,317,771,False,18.3,1792625601.6270654,1792625684.801
+overlap,1,6,k5Gxbifw8s8_05,4.434,4.4,133,67,96.12,18.83,77.29,,0.09,0.25,5.93,6.3,6.28,12.53,35,33,And more young people use rabbit.,False,,False,,True,5,,,,,317,317,617,False,18.3,1792625607.560481,1792625703.677
+overlap,1,14,I976oI3s1jQ_02,13.500,13.46,324,162,115.78,45.18,70.6,,0.12,0.46,13.87,14.5,14.45,30.69,113,111,"He said he was still working for two days, but on a high fever and chills, he decided to stay home and recover.",False,,False,,True,5,,,,,317,317,685,False,18.3,1792625633.0794919,1792625748.863
+overlap,1,34,TXyNxVRRPt8_03,4.505,4.47,135,68,101.34,20.17,81.17,,0.08,0.24,5.79,6.15,6.11,14.02,53,51,Most people don't know about the same NAD programs.,False,,False,,True,5,,,,,330,317,448,False,18.3,1792625667.7036755,1792625769.042
+overlap,1,39,rSiciLyYOyI_07,2.878,2.84,69,35,93.62,2.82,90.8,0.41,0.09,0.24,2.04,2.39,2.37,0.02,19,17,That was amazing.,False,,False,,False,5,25,4.46,8.53,35,330,317,333,False,18.3,1792625678.2430623,1792625771.865

@@ -1,0 +1,300 @@
+Using cache found in /home/sllu/.cache/torch/hub/facebookresearch_dinov2_main
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:51: UserWarning: xFormers is not available (SwiGLU)
+  warnings.warn("xFormers is not available (SwiGLU)")
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:33: UserWarning: xFormers is not available (Attention)
+  warnings.warn("xFormers is not available (Attention)")
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:40: UserWarning: xFormers is not available (Block)
+  warnings.warn("xFormers is not available (Block)")
+2026-10-21 18:53:36 | INFO | dinov2 | using MLP layer as FFN
+Using cache found in /home/sllu/.cache/torch/hub/facebookresearch_dinov2_main
+2026-10-21 18:53:37 | INFO | dinov2 | using MLP layer as FFN
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert.py:132: FutureWarning: Positional args are being deprecated, use kwargs instead. Refer to https://pytorch.org/docs/main/generated/torch.nn.Module.html#torch.nn.Module.state_dict for details.
+  state = super().state_dict(destination, prefix, keep_vars)
+Wav2Vec2Config is imported from: fairseq.models.wav2vec.wav2vec2
+Full path: /home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/fairseq/models/wav2vec/wav2vec2.py
+DINOEmbedder initialized on device: cuda dtype: torch.float16
+DINOEmbedder initialized on device: cuda dtype: torch.float16
+[byt5] device: cuda dtype: bfloat16
+[lat] warmup 18.1s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+W0000 00:00:1792634033.480019   24082 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+W0000 00:00:1792634033.557825   24089 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/google/protobuf/symbol_database.py:55: UserWarning: SymbolDatabase.GetPrototype() is deprecated. Please use message_factory.GetMessageClass() instead. SymbolDatabase.GetPrototype() will be removed soon.
+  warnings.warn('SymbolDatabase.GetPrototype() is deprecated. Please '
+W0000 00:00:1792634049.619869   24146 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792634049.652042   24153 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :   13.1s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   19.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :   13.3s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :   13.1s
+  total               :   13.2s
+[lat] uZwKNtHx9FE_01: post-cut 16.1s (wait 0.0 drain 2.7 byt5 13.1) -> Most of the outbreaks are that children who do not
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    7.6s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :   15.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.7s
+  total               :    3.7s
+[lat] 5iRIeHAK9b0_03: post-cut 18.0s (wait 9.8 drain 4.5 byt5 3.7) -> Children ranging in age from 3 to 29 years old.
+W0000 00:00:1792634072.523261   24075 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792634073.473468   24248 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792634073.501288   24255 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792634086.509210   24304 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792634086.537143   24311 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- Perception per-frame timing (MediaPipe, 54 frames) ---
+  pose  :    3.8s total,   70.5ms/frame avg
+  face  :    1.8s total,   33.8ms/frame avg
+  hand  :    5.8s total,  107.3ms/frame avg
+  wall  :    6.0s total,  111.3ms/frame avg (critical path: max(pose,face,hand) + thread overhead)
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    7.1s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    6.1s
+  hand_crop           :    0.2s
+  dinov2_hands        :    5.7s
+  face_crop           :    0.0s
+  dinov2_face         :    2.6s
+  pose_features       :    0.0s
+  byt5_inference      :    7.2s
+  total               :   21.7s
+[lat] fNT8a6e1gx8_08: post-cut 34.8s (wait 13.0 drain None byt5 7.2) -> It's just about our problems of expressing ourselv
+W0000 00:00:1792634094.403872   24075 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+[lat] wPJ_InXF_I8_06 DECLINED — backlog 608 frames
+
+--- Perception per-frame timing (MediaPipe, 165 frames) ---
+  pose  :   12.7s total,   76.7ms/frame avg
+  face  :    6.9s total,   41.6ms/frame avg
+  hand  :   19.6s total,  118.8ms/frame avg
+  wall  :   19.9s total,  120.9ms/frame avg (critical path: max(pose,face,hand) + thread overhead)
+[lat] I976oI3s1jQ_01 DECLINED — backlog 608 frames
+[lat] jsOSzFyx8RA_03 DECLINED — backlog 608 frames
+[lat] fNT8a6e1gx8_06 DECLINED — backlog 608 frames
+[lat] J-0KHhPS_m4_03 DECLINED — backlog 608 frames
+[lat] FND2JfzngVY_06 DECLINED — backlog 608 frames
+[lat] I976oI3s1jQ_02 DECLINED — backlog 608 frames
+[lat] ZgvLTS2zJdo_02 DECLINED — backlog 608 frames
+[lat] YR7BS6l_95E_05 DECLINED — backlog 608 frames
+[lat] NBpYolVo5WQ_06 DECLINED — backlog 608 frames
+[lat] TXyNxVRRPt8_01 DECLINED — backlog 608 frames
+[lat] 5iRIeHAK9b0_02 DECLINED — backlog 608 frames
+[lat] mNF1kg9azQw_05 DECLINED — backlog 608 frames
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    7.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :   20.2s
+  hand_crop           :    0.2s
+  dinov2_hands        :    7.2s
+  face_crop           :    0.1s
+  dinov2_face         :    3.4s
+  pose_features       :    0.0s
+  byt5_inference      :    7.5s
+  total               :   38.6s
+[lat] sP6B4dlSOoc_05: post-cut 61.1s (wait 22.3 drain None byt5 7.5) -> On Wednesday President Trump signed an executive o
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    6.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.8s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :   21.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    6.9s
+  total               :    6.9s
+[lat] mNF1kg9azQw_03: post-cut 55.9s (wait 48.1 drain 0.8 byt5 6.9) -> Jennifer shared her experience with a woman who wa
+W0000 00:00:1792634143.339840   24423 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792634143.368415   24430 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    7.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    7.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :   11.2s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    8.0s
+  total               :    8.0s
+[lat] iMJ9CjBX7eo_02: post-cut 58.2s (wait 50.0 drain 0.2 byt5 8.0) -> Thank you for joining us at the Community Forum an
+W0000 00:00:1792634149.214553   24075 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792634150.537666   24500 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1792634150.591733   24507 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- Perception per-frame timing (MediaPipe, 67 frames) ---
+  pose  :    6.4s total,   96.2ms/frame avg
+  face  :    3.2s total,   47.4ms/frame avg
+  hand  :    8.2s total,  122.2ms/frame avg
+  wall  :    8.7s total,  129.5ms/frame avg (critical path: max(pose,face,hand) + thread overhead)
+[lat] uZwKNtHx9FE_07 DECLINED — backlog 566 frames
+[lat] D9HR4q0vbwE_05 DECLINED — backlog 566 frames
+[lat] f75G_hZMSHs_04 DECLINED — backlog 566 frames
+[lat] f75G_hZMSHs_02 DECLINED — backlog 566 frames
+[lat] ZgvLTS2zJdo_01 DECLINED — backlog 566 frames
+[lat] LT0-h4P_xBY_04 DECLINED — backlog 566 frames
+[lat] wPJ_InXF_I8_02 DECLINED — backlog 566 frames
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    8.9s
+  hand_crop           :    0.3s
+  dinov2_hands        :    5.8s
+  face_crop           :    0.1s
+  dinov2_face         :    2.3s
+  pose_features       :    0.0s
+  byt5_inference      :    3.9s
+  total               :   21.2s
+[lat] k5Gxbifw8s8_05: post-cut 73.6s (wait 52.3 drain None byt5 3.9) -> And more young people use rabbit.
+W0000 00:00:1792634170.613424   24075 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+[lat] oP2WdYlaflE_02 DECLINED — backlog 499 frames
+[lat] LT0-h4P_xBY_06 DECLINED — backlog 499 frames
+[lat] mNF1kg9azQw_07 DECLINED — backlog 499 frames
+[lat] TXyNxVRRPt8_03 DECLINED — backlog 499 frames
+[lat] wH3lJm0Typ0_03 DECLINED — backlog 499 frames
+[lat] oP2WdYlaflE_03 DECLINED — backlog 499 frames
+[lat] I976oI3s1jQ_05 DECLINED — backlog 499 frames
+[lat] k5Gxbifw8s8_03 DECLINED — backlog 499 frames
+[lat] rSiciLyYOyI_07 DECLINED — backlog 499 frames
+
+--- Perception per-frame timing (MediaPipe, 174 frames) ---
+  pose  :   14.4s total,   83.0ms/frame avg
+  face  :    7.9s total,   45.2ms/frame avg
+  hand  :   20.4s total,  117.2ms/frame avg
+  wall  :   20.7s total,  118.9ms/frame avg (critical path: max(pose,face,hand) + thread overhead)
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    8.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :   21.0s
+  hand_crop           :    0.2s
+  dinov2_hands        :    7.1s
+  face_crop           :    0.1s
+  dinov2_face         :    3.5s
+  pose_features       :    0.1s
+  byt5_inference      :    8.5s
+  total               :   40.6s
+[lat] MJijm9kbdHA_01: post-cut 98.3s (wait 57.6 drain None byt5 8.5) -> Biden said Bernie had a vote multiple times agains
+W0000 00:00:1792634211.315814   24075 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+
+--- Perception per-frame timing (MediaPipe, 119 frames) ---
+  pose  :   10.0s total,   83.7ms/frame avg
+  face  :    5.1s total,   43.1ms/frame avg
+  hand  :   16.8s total,  141.4ms/frame avg
+  wall  :   17.1s total,  143.4ms/frame avg (critical path: max(pose,face,hand) + thread overhead)
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :   17.3s
+  hand_crop           :    0.1s
+  dinov2_hands        :    5.2s
+  face_crop           :    0.1s
+  dinov2_face         :    2.4s
+  pose_features       :    0.0s
+  byt5_inference      :    4.6s
+  total               :   29.8s
+[lat] WMoeSSvCyTU_03: post-cut 99.3s (wait 69.4 drain None byt5 4.6) -> The drug hydrogen is still going on and it is cont
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.2s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    8.6s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :   11.0s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.3s
+  total               :    4.3s
+[lat] sP6B4dlSOoc_04: post-cut 97.9s (wait 92.1 drain 1.4 byt5 4.3) -> Sometimes simple sidewalks can be dangerous.
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    6.3s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   16.1s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :   12.6s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    6.3s
+  total               :    6.3s
+[lat] z3jAMn3xpoM_02: post-cut 96.6s (wait 88.2 drain 1.9 byt5 6.3) -> One of them filmed on Facebook LIVE showing office
+[lat] done: camera 14.9fps  peak_used 7398MB  min_available 221MB  warmup 18.1s

@@ -1,0 +1,13 @@
+=== cell 1_sequential_flag1 start 18:11:17 ===
+=== cell 1_sequential_flag1 exit 0 18:24:14 ===
+=== cell 2_sequential_flag0 start 18:24:34 ===
+=== cell 2_sequential_flag0 exit 0 18:33:59 ===
+=== cell 3_sequential_flag1 start 18:34:19 ===
+=== cell 3_sequential_flag1 exit 0 18:43:08 ===
+=== cell 4_overlap_flag1 start 18:43:28 ===
+=== cell 4_overlap_flag1 exit 0 18:47:44 ===
+=== cell 5_overlap_flag0 start 18:48:04 ===
+=== cell 5_overlap_flag0 exit 0 18:53:03 ===
+=== cell 6_overlap_flag1 start 18:53:23 ===
+=== cell 6_overlap_flag1 exit 0 18:57:39 ===
+ALL_DONE

@@ -1,0 +1,31 @@
+=== 01_sequential start 20:28:13
+=== 01_sequential exit 0 20:55:29  nvml=0 failed=0
+=== 02_overlap start 20:55:49
+=== 02_overlap exit 0 21:02:17  nvml=0 failed=0
+=== 03_sequential start 21:02:37
+=== 03_sequential exit 0 21:29:40  nvml=0 failed=0
+=== 04_overlap start 21:30:00
+=== 04_overlap exit 0 21:36:05  nvml=0 failed=0
+=== 05_sequential start 21:36:25
+=== 05_sequential exit 0 22:03:24  nvml=0 failed=0
+=== 06_overlap start 22:03:44
+=== 06_overlap exit 0 22:08:25  nvml=0 failed=0
+=== 07_sequential start 22:08:45
+=== 07_sequential exit 0 22:36:09  nvml=0 failed=0
+=== 08_overlap start 22:36:29
+=== 08_overlap exit 0 22:41:13  nvml=0 failed=0
+=== 09_sequential start 22:41:33
+=== 09_sequential exit 0 23:08:32  nvml=0 failed=0
+=== 10_overlap start 23:08:52
+=== 10_overlap exit 0 23:14:40  nvml=0 failed=0
+=== 11_sequential start 23:15:00
+=== 11_sequential exit 0 23:42:05  nvml=0 failed=0
+=== 12_overlap start 23:42:25
+=== 12_overlap exit 0 23:48:01  nvml=0 failed=0
+=== 13_sequential start 23:48:21
+=== 13_sequential exit 0 00:15:34  nvml=0 failed=0
+=== 14_overlap start 00:15:54
+=== 14_overlap exit 0 00:20:47  nvml=0 failed=0
+=== 15_sequential start 00:21:07
+=== 15_sequential exit 0 00:48:18  nvml=0 failed=0
+SOAK_DONE

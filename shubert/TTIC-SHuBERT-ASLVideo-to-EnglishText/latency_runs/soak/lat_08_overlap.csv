@@ -1,0 +1,41 @@
+condition,pass,order_index,clip_id,duration_s,capture_seconds,raw_frames,retained_frames_after_trim,post_cut_latency_s,worker_s,queue_wait_s,capture_end_to_perception_done_s,shubert_s,byt5_encoder_s,byt5_decode_s,byt5_stage_s,generate_s,other_s,decode_steps,output_bytes,output_text,oom_or_error,error,declined,decline_reason,deferred,queue_depth_at_cut,perception_frames_at_cut,perception_busy_seconds_cpu,embed_busy_seconds,embedded_frames,min_available_mb_during_utterance,min_available_mb_during_run,avail_mb_at_cut,first_after_warmup,warmup_seconds,cut_ts,done_ts
+overlap,8,0,D9HR4q0vbwE_05,2.044,2.0,49,25,5.13,5.13,0.0,2.85,0.29,0.3,1.66,2.27,2.26,0.01,20,18,How are you doing?,False,,False,,False,1,11,3.6,1.2,25,2137,2137,3641,True,17.9,1792647421.508228,1792647426.641
+overlap,8,1,TXyNxVRRPt8_01,6.273,6.24,188,94,6.87,6.87,0.0,1.98,0.04,0.09,4.62,4.78,4.75,0.11,88,86,We brought them to the Deaf Community Forum to bring their concerns to South Carolina.,False,,False,,False,2,82,10.0,2.86,94,1689,1689,2142,False,17.9,1792647429.4293633,1792647436.297
+overlap,8,2,f75G_hZMSHs_04,2.403,2.37,72,36,6.19,3.32,2.86,0.75,0.03,0.07,2.43,2.56,2.54,0.02,59,57,The company will likely start their wedding this weekend.,False,,False,,False,2,18,4.37,2.39,36,1689,1689,1783,False,17.9,1792647433.4713125,1792647439.657
+overlap,8,6,ZgvLTS2zJdo_01,3.421,,,,,,,,,,,,,,,,,False,,True,backlog 502 frames,,3,,,,,,,950,,17.9,,
+overlap,8,7,mNF1kg9azQw_05,10.302,,,,,,,,,,,,,,,,,False,,True,backlog 502 frames,,3,,,,,,,950,,17.9,,
+overlap,8,8,FND2JfzngVY_06,8.008,,,,,,,,,,,,,,,,,False,,True,backlog 502 frames,,3,,,,,,,950,,17.9,,
+overlap,8,3,MJijm9kbdHA_01,14.500,14.46,348,174,30.36,30.36,0.0,,0.06,0.11,4.26,4.46,4.42,25.9,102,100,Biden said Bernie had a vote multiple times against a brady bill that required stricter gun control.,False,,False,,True,3,,,,,822,822,1821,False,17.9,1792647449.4431772,1792647479.802
+overlap,8,4,oP2WdYlaflE_03,13.934,13.9,418,209,21.84,7.04,14.8,0.6,0.03,0.07,6.16,6.3,6.26,0.14,150,148,And a limited number of Deaf and hard of hearing students can be recommended in primary reports such as the Department of Health and Human Services.,False,,False,,False,2,189,26.91,8.47,209,822,822,1341,False,17.9,1792647465.0036254,1792647486.844
+overlap,8,5,WMoeSSvCyTU_03,7.908,7.88,237,119,15.42,3.1,12.31,0.61,0.03,0.06,2.33,2.45,2.43,0.05,62,60,The drug hydrogen is still going on and it is controversial.,False,,False,,False,3,98,15.61,8.42,119,822,822,852,False,17.9,1792647474.5640352,1792647489.98
+overlap,8,9,mNF1kg9azQw_03,11.387,11.35,273,137,26.1,26.1,0.0,,0.04,0.07,3.42,3.55,3.52,22.55,85,83,"Next we will talk about the next step, the next step, the next step, the next step.",False,,False,,True,3,,,,,705,705,1160,False,17.9,1792647491.9442425,1792647518.044
+overlap,8,10,sP6B4dlSOoc_04,5.573,5.54,167,84,21.8,2.9,18.89,0.55,0.03,0.07,2.2,2.32,2.3,0.04,46,44,Sometimes simple sidewalks can be dangerous.,False,,False,,False,2,72,9.23,2.8,84,705,705,1184,False,17.9,1792647499.1567762,1792647520.953
+overlap,8,11,f75G_hZMSHs_02,7.775,7.75,233,117,18.26,5.87,12.4,0.58,0.03,0.06,5.1,5.23,5.19,0.05,124,122,The similar conversation between the police officers and his hometown includes the former police officer and his hometown.,False,,False,,False,3,104,14.06,4.3,117,705,705,775,False,17.9,1792647508.590357,1792647526.853
+overlap,8,12,k5Gxbifw8s8_03,4.700,4.67,141,71,26.1,13.98,12.12,,0.04,0.11,3.74,3.91,3.89,10.07,50,48,This job opportunity for Deaf people is growing.,False,,False,,True,4,,,,,604,604,786,False,17.9,1792647514.7732778,1792647540.873
+overlap,8,20,LT0-h4P_xBY_04,7.767,,,,,,,,,,,,,,,,,False,,True,backlog 598 frames,,7,,,,,,,645,,17.9,,
+overlap,8,21,5iRIeHAK9b0_03,4.700,,,,,,,,,,,,,,,,,False,,True,backlog 598 frames,,7,,,,,,,645,,17.9,,
+overlap,8,13,YR7BS6l_95E_05,11.600,11.57,348,174,42.84,29.82,13.02,,0.03,0.06,3.9,4.03,3.99,25.79,99,97,The helicopter travels to the area and flies to a shelter to help provide supplies with supplies.,False,,False,,True,5,,,,,340,340,719,False,17.9,1792647527.858001,1792647570.7
+overlap,8,14,fNT8a6e1gx8_06,2.770,2.74,83,42,40.39,1.95,38.45,0.29,0.03,0.07,1.53,1.64,1.63,0.01,40,38,Tend to ask your students to graduate.,False,,False,,False,3,26,5.1,1.42,42,340,340,607,False,17.9,1792647532.259243,1792647572.652
+overlap,8,15,wPJ_InXF_I8_06,4.939,4.91,148,74,36.19,2.42,33.76,0.31,0.04,0.08,1.93,2.07,2.05,0.05,52,50,the students storytelling comprehension abilities.,False,,False,,False,4,50,10.63,4.13,74,340,340,636,False,17.9,1792647538.917776,1792647575.107
+overlap,8,16,NBpYolVo5WQ_06,3.042,3.0,73,37,41.49,9.77,31.72,,0.04,0.07,2.5,2.63,2.61,7.14,43,41,See you tomorrow and stay with the light!,False,,False,,True,5,,,,,340,340,386,False,17.9,1792647543.4327545,1792647584.922
+overlap,8,24,z3jAMn3xpoM_02,8.142,,,,,,,,,,,,,,,,,False,,True,backlog 505 frames,,5,,,,,,,913,,17.9,,
+overlap,8,25,mNF1kg9azQw_07,9.385,,,,,,,,,,,,,,,,,False,,True,backlog 505 frames,,5,,,,,,,957,,17.9,,
+overlap,8,26,wPJ_InXF_I8_02,14.148,,,,,,,,,,,,,,,,,False,,True,backlog 505 frames,,5,,,,,,,957,,17.9,,
+overlap,8,27,J-0KHhPS_m4_03,5.000,,,,,,,,,,,,,,,,,False,,True,backlog 505 frames,,5,,,,,,,978,,17.9,,
+overlap,8,17,iMJ9CjBX7eo_02,4.305,4.27,129,65,49.5,13.8,35.7,,0.04,0.07,3.16,3.28,3.26,10.51,84,82,Thank you for joining us at the Community Forum and I will be hosting it together.,False,,False,,True,5,,,,,271,271,381,False,17.9,1792647549.2271307,1792647598.725
+overlap,8,18,I976oI3s1jQ_05,3.417,3.38,82,41,55.35,10.74,44.61,,0.04,0.16,3.89,4.12,4.08,6.62,51,49,I want to make sure that everyone understands me.,False,,False,,True,6,,,,,271,271,355,False,17.9,1792647554.11684,1792647609.469
+overlap,8,29,5iRIeHAK9b0_02,10.400,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,451,,17.9,,
+overlap,8,30,TXyNxVRRPt8_03,4.505,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,449,,17.9,,
+overlap,8,31,ZgvLTS2zJdo_02,14.724,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,448,,17.9,,
+overlap,8,32,LT0-h4P_xBY_06,8.400,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,446,,17.9,,
+overlap,8,33,uZwKNtHx9FE_01,14.473,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,439,,17.9,,
+overlap,8,34,oP2WdYlaflE_02,9.100,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,438,,17.9,,
+overlap,8,35,rSiciLyYOyI_07,2.878,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,436,,17.9,,
+overlap,8,36,fNT8a6e1gx8_08,3.604,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,434,,17.9,,
+overlap,8,37,wH3lJm0Typ0_03,9.009,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,434,,17.9,,
+overlap,8,38,I976oI3s1jQ_02,13.500,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,521,,17.9,,
+overlap,8,39,k5Gxbifw8s8_05,4.434,,,,,,,,,,,,,,,,,False,,True,backlog 590 frames,,4,,,,,,,519,,17.9,,
+overlap,8,19,sP6B4dlSOoc_05,10.978,10.95,329,165,72.4,29.5,42.9,,0.03,0.06,3.69,3.82,3.79,25.68,97,95,On Wednesday President Trump signed an executive order about trade reform and life kidney care.,False,,False,,True,7,,,,,271,271,531,False,17.9,1792647566.576154,1792647638.976
+overlap,8,22,I976oI3s1jQ_01,7.000,7.29,168,84,78.19,17.6,60.59,,0.04,0.07,3.24,3.37,3.35,14.22,88,86,I feel like it's a chill and I've been very patient with it and I think it's possible.,False,,False,,True,7,,,,,271,271,699,False,17.9,1792647578.3941905,1792647656.583
+overlap,8,23,uZwKNtHx9FE_07,12.471,12.44,299,150,69.88,5.77,64.12,0.58,0.03,0.06,4.96,5.09,5.05,0.1,130,128,"They said the words were added without delay, were immediately introduced into the legislation to make sure that the work began.",False,,False,,False,6,135,18.57,5.79,150,300,271,903,False,17.9,1792647592.47254,1792647662.357
+overlap,8,28,jsOSzFyx8RA_03,12.713,12.68,381,191,57.16,7.61,49.55,0.78,0.03,0.06,6.61,6.74,6.7,0.08,155,153,"Or the show isn't a lot about the experience, but it's about who you are as a person and how you through surveillance through life, the photography, too.",False,,False,,False,5,174,23.23,10.36,191,300,271,450,False,17.9,1792647612.84108,1792647670.0

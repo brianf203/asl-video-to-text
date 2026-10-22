@@ -1,0 +1,41 @@
+condition,pass,order_index,clip_id,duration_s,capture_seconds,raw_frames,retained_frames_after_trim,post_cut_latency_s,worker_s,queue_wait_s,capture_end_to_perception_done_s,shubert_s,byt5_encoder_s,byt5_decode_s,byt5_stage_s,generate_s,other_s,decode_steps,output_bytes,output_text,oom_or_error,error,declined,decline_reason,deferred,queue_depth_at_cut,perception_frames_at_cut,perception_busy_seconds_cpu,embed_busy_seconds,embedded_frames,min_available_mb_during_utterance,min_available_mb_during_run,avail_mb_at_cut,first_after_warmup,warmup_seconds,cut_ts,done_ts
+overlap,14,0,uZwKNtHx9FE_07,12.471,12.43,299,150,11.68,11.68,0.0,2.53,0.23,0.31,8.47,9.06,9.01,0.09,130,128,"They said the words were added without delay, were immediately introduced into the legislation to make sure that the work began.",False,,False,,False,1,137,18.22,4.83,150,1703,1703,2946,True,17.9,1792653397.1865513,1792653408.866
+overlap,14,1,5iRIeHAK9b0_02,10.400,10.65,312,156,9.0,9.0,0.0,3.72,0.07,0.13,4.77,5.0,4.97,0.29,95,93,On Friday two men in California warned of child abuse in court for confession today (Friday).,False,,False,,False,2,144,16.63,11.01,156,1412,1412,1859,False,17.9,1792653409.5116134,1792653418.513
+overlap,14,2,fNT8a6e1gx8_08,3.604,3.57,108,54,7.95,4.14,3.81,1.09,0.03,0.07,2.91,3.02,3.01,0.02,60,58,It's just that we have problems with expressing ourselves.,False,,False,,False,2,44,6.09,5.18,54,1351,1351,1413,False,17.9,1792653414.7450264,1792653422.695
+overlap,14,3,f75G_hZMSHs_04,2.403,2.37,72,36,12.46,8.35,4.1,,0.03,0.06,2.69,2.81,2.79,5.55,52,50,The tourist wedding is scheduled for this weekend.,False,,False,,True,3,,,,,1253,1253,1534,False,17.9,1792653418.629888,1792653431.086
+overlap,14,4,I976oI3s1jQ_01,7.000,6.96,168,84,9.45,5.59,3.86,0.69,0.04,0.12,4.57,4.76,4.73,0.15,86,84,My strategy on the chill was a little bit patient and I thought it would be perfect.,False,,False,,False,3,76,9.89,2.81,84,1391,1253,1752,False,17.9,1792653427.239876,1792653436.691
+overlap,14,5,TXyNxVRRPt8_01,6.273,6.24,188,94,7.04,5.46,1.58,2.03,0.03,0.07,3.27,3.39,3.37,0.04,88,86,We brought them to the Deaf Community Forum to bring their concerns to South Carolina.,False,,False,,False,3,81,10.07,6.56,94,1408,1253,1409,False,17.9,1792653435.1447043,1792653442.187
+overlap,14,6,MJijm9kbdHA_01,14.500,14.46,348,174,27.2,27.2,0.0,,0.03,0.07,4.02,4.15,4.12,23.05,102,100,Biden said Bernie had a vote multiple times against a brady bill that required stricter gun control.,False,,False,,True,3,,,,,754,754,1516,False,17.9,1792653451.122307,1792653478.322
+overlap,14,7,LT0-h4P_xBY_06,8.400,8.38,252,126,20.56,3.39,17.18,0.74,0.03,0.06,2.49,2.59,2.58,0.05,53,51,Do you have a race on the owner of the Ioniar Knox?,False,,False,,False,2,106,16.98,4.41,126,754,754,1311,False,17.9,1792653461.1482925,1792653481.713
+overlap,14,8,k5Gxbifw8s8_05,4.434,4.4,133,67,16.17,1.66,14.51,0.13,0.04,0.07,1.38,1.51,1.49,0.03,37,35,And more young people wear rabbits.,False,,False,,False,3,52,8.43,3.01,67,754,754,796,False,17.9,1792653467.2308986,1792653483.403
+overlap,14,12,z3jAMn3xpoM_02,8.142,,,,,,,,,,,,,,,,,False,,True,backlog 462 frames,,3,,,,,,,942,,17.9,,
+overlap,14,13,TXyNxVRRPt8_03,4.505,,,,,,,,,,,,,,,,,False,,True,backlog 462 frames,,3,,,,,,,1050,,17.9,,
+overlap,14,14,rSiciLyYOyI_07,2.878,,,,,,,,,,,,,,,,,False,,True,backlog 462 frames,,3,,,,,,,1050,,17.9,,
+overlap,14,15,mNF1kg9azQw_07,9.385,,,,,,,,,,,,,,,,,False,,True,backlog 462 frames,,3,,,,,,,1042,,17.9,,
+overlap,14,9,sP6B4dlSOoc_05,10.978,10.95,329,165,32.09,28.33,3.76,,0.03,0.06,3.67,3.8,3.77,24.53,97,95,On Wednesday President Trump signed an executive order about trade reform and life kidney care.,False,,False,,True,4,,,,,592,592,898,False,17.9,1792653479.6906757,1792653511.781
+overlap,14,18,iMJ9CjBX7eo_02,4.305,,,,,,,,,,,,,,,,,False,,True,backlog 476 frames,,4,,,,,,,680,,17.9,,
+overlap,14,19,ZgvLTS2zJdo_01,3.421,,,,,,,,,,,,,,,,,False,,True,backlog 476 frames,,4,,,,,,,672,,17.9,,
+overlap,14,20,sP6B4dlSOoc_04,5.573,,,,,,,,,,,,,,,,,False,,True,backlog 476 frames,,4,,,,,,,783,,17.9,,
+overlap,14,21,I976oI3s1jQ_05,3.417,,,,,,,,,,,,,,,,,False,,True,backlog 476 frames,,4,,,,,,,783,,17.9,,
+overlap,14,22,J-0KHhPS_m4_03,5.000,,,,,,,,,,,,,,,,,False,,True,backlog 476 frames,,4,,,,,,,783,,17.9,,
+overlap,14,10,wH3lJm0Typ0_03,9.009,8.98,270,135,47.22,25.61,21.61,,0.03,0.06,4.95,5.08,5.04,20.54,111,109,"At the end of the game, there were also people who cheered their fans with cheers and critics canceling them.",False,,False,,True,4,,,,,592,592,834,False,17.9,1792653490.1823022,1792653537.407
+overlap,14,11,I976oI3s1jQ_02,13.500,13.46,324,162,37.15,5.03,32.12,0.14,0.03,0.07,4.7,4.82,4.79,0.06,119,117,"She said she was still working for two days, but she had a high fever and chills and decided to stay home recovering.",False,,False,,False,3,159,17.23,5.2,162,672,592,943,False,17.9,1792653505.2889032,1792653542.439
+overlap,14,16,fNT8a6e1gx8_06,2.770,2.74,83,42,28.7,1.96,26.74,0.31,0.03,0.07,1.51,1.63,1.61,0.02,40,38,Tend to ask your students to graduate.,False,,False,,False,3,27,4.91,1.15,42,672,592,863,False,17.9,1792653515.7397287,1792653544.44
+overlap,14,17,mNF1kg9azQw_03,11.387,11.35,273,137,43.03,27.16,15.87,,0.04,0.14,5.31,5.52,5.49,21.64,85,83,"Next we will talk about the next step, the next step, the next step, the next step.",False,,False,,True,4,,,,,419,419,717,False,17.9,1792653528.6004546,1792653571.632
+overlap,14,26,NBpYolVo5WQ_06,3.042,,,,,,,,,,,,,,,,,False,,True,backlog 503 frames,,3,,,,,,,588,,17.9,,
+overlap,14,27,5iRIeHAK9b0_03,4.700,,,,,,,,,,,,,,,,,False,,True,backlog 503 frames,,3,,,,,,,587,,17.9,,
+overlap,14,28,wPJ_InXF_I8_02,14.148,,,,,,,,,,,,,,,,,False,,True,backlog 503 frames,,3,,,,,,,590,,17.9,,
+overlap,14,29,f75G_hZMSHs_02,7.775,,,,,,,,,,,,,,,,,False,,True,backlog 503 frames,,3,,,,,,,586,,17.9,,
+overlap,14,30,D9HR4q0vbwE_05,2.044,,,,,,,,,,,,,,,,,False,,True,backlog 503 frames,,3,,,,,,,586,,17.9,,
+overlap,14,31,YR7BS6l_95E_05,11.600,,,,,,,,,,,,,,,,,False,,True,backlog 503 frames,,3,,,,,,,584,,17.9,,
+overlap,14,32,jsOSzFyx8RA_03,12.713,,,,,,,,,,,,,,,,,False,,True,backlog 503 frames,,3,,,,,,,584,,17.9,,
+overlap,14,33,mNF1kg9azQw_05,10.302,,,,,,,,,,,,,,,,,False,,True,backlog 503 frames,,3,,,,,,,547,,17.9,,
+overlap,14,34,wPJ_InXF_I8_06,4.939,,,,,,,,,,,,,,,,,False,,True,backlog 503 frames,,3,,,,,,,544,,17.9,,
+overlap,14,35,FND2JfzngVY_06,8.008,,,,,,,,,,,,,,,,,False,,True,backlog 503 frames,,3,,,,,,,625,,17.9,,
+overlap,14,36,k5Gxbifw8s8_03,4.700,,,,,,,,,,,,,,,,,False,,True,backlog 503 frames,,3,,,,,,,625,,17.9,,
+overlap,14,23,LT0-h4P_xBY_04,7.767,7.74,233,117,49.95,23.69,26.26,,0.04,0.07,4.17,4.31,4.28,19.38,98,96,"Of course, I want to clearly warn you that I just shared with the people who are self-esteeming.",False,,False,,True,4,,,,,419,419,664,False,17.9,1792653545.3829644,1792653595.335
+overlap,14,24,ZgvLTS2zJdo_02,14.724,14.68,353,177,37.21,3.6,33.61,0.43,0.04,0.07,2.95,3.07,3.05,0.1,58,56,I want to share a little bit of an opportunity with you.,False,,False,,False,3,167,18.49,5.06,177,544,419,951,False,17.9,1792653561.7271526,1792653598.939
+overlap,14,25,oP2WdYlaflE_03,13.934,13.91,418,209,28.54,6.86,21.68,0.45,0.04,0.07,6.15,6.3,6.25,0.12,150,148,And a limited number of Deaf and hard of hearing students can be recommended in primary reports such as the Department of Health and Human Services.,False,,False,,False,4,189,26.21,11.83,209,544,419,599,False,17.9,1792653577.287741,1792653605.832
+overlap,14,37,oP2WdYlaflE_02,9.100,9.07,273,137,29.67,28.26,1.42,,0.09,0.12,6.11,6.36,6.32,21.9,113,111,The expected percentage of a person from the Institute for Health is falling from the University of Washington.,False,,False,,True,3,,,,,508,419,733,False,17.9,1792653604.4524367,1792653634.126
+overlap,14,38,uZwKNtHx9FE_01,14.473,14.43,347,174,19.6,6.04,13.56,0.59,0.05,0.1,5.08,5.29,5.22,0.17,127,125,Most of the outbreaks are that children who do not have a vaccine who live in an ultra-orthodox Jewish community in New York.,False,,False,,False,2,168,21.14,5.87,174,519,419,928,False,17.9,1792653620.5750296,1792653640.176
+overlap,14,39,WMoeSSvCyTU_03,7.908,7.88,237,119,13.96,3.85,10.11,1.42,0.03,0.06,2.28,2.39,2.37,0.04,62,60,The drug hydrogen is still going on and it is controversial.,False,,False,,False,3,101,15.5,15.43,119,584,419,584,False,17.9,1792653630.10941,1792653644.069
