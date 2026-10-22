@@ -41,7 +41,7 @@ for v in BYT5_MAX_LENGTH BYT5_NUM_BEAMS BYT5_DEVICE BYT5_DTYPE BYT5_CKPT FRAME_S
   echo "  env $v = ${!v-<unset>}"; done
 shubert_venv/bin/python3 - <<'PY'
 import os
-os.environ.setdefault("PYTORCH_NO_CUDA_MEMORY_CACHING", "1")
+os.environ.setdefault("PYTORCH_NO_CUDA_MEMORY_CACHING", "0")
 import auto_segment_v5 as v5, streaming_perception as sp, kpe_mediapipe as kpe
 import inference, dinov2_features as dino
 print("  effective MAX_LIVE_STREAMS      =", v5.MAX_LIVE_STREAMS)

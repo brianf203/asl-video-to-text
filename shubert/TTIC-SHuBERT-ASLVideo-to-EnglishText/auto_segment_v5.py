@@ -19,7 +19,14 @@ Measured on my_please.mp4: ~57s cold -> ~41s warm per clip.
 import json
 import os
 import sys
-os.environ.setdefault("PYTORCH_NO_CUDA_MEMORY_CACHING", "1")
+# Caching allocator ON. This was "1" from August to 2026-10-22 as a guard against an
+# intermittent `NVML_SUCCESS == r INTERNAL ASSERT FAILED` on an older torch, at the price of a
+# raw cudaMalloc/cudaFree per tensor: ByT5 decode ran 60-139 ms/step depending on the day
+# against a steady ~40. A matched A/B and a 4h20m soak at "0" (1,240 utterances, 15 model
+# loads, torch 2.11.0) saw no assert and no OOM, byte-identical text, post-cut median
+# 9.5-10.0 -> 5.2 s, and slower memory decay within a process. See latency_runs/flag_ab and
+# latency_runs/soak. If the assert ever comes back, PYTORCH_NO_CUDA_MEMORY_CACHING=1 restores it.
+os.environ.setdefault("PYTORCH_NO_CUDA_MEMORY_CACHING", "0")
 
 import cv2
 import numpy as np
@@ -207,12 +214,9 @@ def _release_cuda_cache():
     for is_initialized() over is_available() -- the latter would initialize CUDA to
     answer, which is the opposite of what a memory-pressure path should do.
 
-    NOTE: this is a NO-OP in the configuration that ships. The top of this file sets
-    PYTORCH_NO_CUDA_MEMORY_CACHING=1 by default, which makes torch return every block to
-    the driver as it is freed -- there is then no cache for empty_cache() to empty, and
-    the fragmentation an OOM leaves behind is the driver's, out of our reach. It is kept
-    because it is correct and near-free for runs that set that var to 0 (the benchmarks
-    do), and so the recovery is already here if that default ever flips.
+    Live since 2026-10-22, when the default flipped to PYTORCH_NO_CUDA_MEMORY_CACHING=0 and
+    there is a cache to empty. Under =1 it is a no-op: torch returns every block to the
+    driver as it is freed, and the fragmentation an OOM leaves behind is the driver's.
     """
     torch = sys.modules.get("torch")
     if torch is None:

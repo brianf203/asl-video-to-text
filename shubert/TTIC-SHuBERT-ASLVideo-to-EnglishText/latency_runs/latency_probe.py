@@ -28,7 +28,7 @@ import sys
 import threading
 import time
 
-os.environ.setdefault("PYTORCH_NO_CUDA_MEMORY_CACHING", "1")
+os.environ.setdefault("PYTORCH_NO_CUDA_MEMORY_CACHING", "0")  # match auto_segment_v5
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

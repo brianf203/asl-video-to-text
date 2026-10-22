@@ -36,7 +36,7 @@ import queue
 import threading
 import time
 
-os.environ.setdefault("PYTORCH_NO_CUDA_MEMORY_CACHING", "1")
+os.environ.setdefault("PYTORCH_NO_CUDA_MEMORY_CACHING", "0")  # match auto_segment_v5
 
 import cv2
 
@@ -52,8 +52,8 @@ def meminfo():
     """MemTotal-MemAvailable is the metric that binds here.
 
     The Jetson has unified memory, so GPU allocations already show up in /proc/meminfo --
-    and torch.cuda.max_memory_allocated() reads 0 anyway because
-    PYTORCH_NO_CUDA_MEMORY_CACHING=1 bypasses the allocator those stats come from.
+    and torch.cuda.max_memory_allocated() reads 0 under the old default
+    PYTORCH_NO_CUDA_MEMORY_CACHING=1, which bypasses the allocator those stats come from.
     """
     vals = {}
     with open("/proc/meminfo") as f:

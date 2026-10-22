@@ -142,16 +142,19 @@ benchmarks. To find them all:
 grep -rn '^MODELS_BASE\|^MODELS_BASE = (' --include='*.py' .
 ```
 
-## 8. Set the CUDA memory flag
+## 8. The CUDA memory flag (fallback only)
 
-PyTorch on this Jetson can hit `NVML_SUCCESS == r INTERNAL ASSERT FAILED`. Export this
-before running anything in `shubert_venv`:
+Nothing to set. PyTorch's caching allocator stays on, which is the default; `auto_segment_v5.py`
+sets `PYTORCH_NO_CUDA_MEMORY_CACHING=0` explicitly.
+
+An older torch on this Jetson could hit `NVML_SUCCESS == r INTERNAL ASSERT FAILED`, and the
+pipeline used to run with the caching allocator disabled to avoid it. On torch 2.11.0 a 4-hour
+soak (1,240 utterances) saw no assert, and turning the allocator back on roughly halved
+post-cut latency. If the assert does come back, disable the allocator again:
 
 ```bash
 export PYTORCH_NO_CUDA_MEMORY_CACHING=1
 ```
-
-`auto_segment_v5.py` sets it for itself if it is unset, but the other entry points do not.
 
 ## 9. Run it
 
@@ -167,8 +170,9 @@ print to **this terminal**, one `Signer: ...` line per clip — the camera windo
 only short status strings. Press `q` to quit (it drains the queue first, which can take a
 couple of minutes; Ctrl-C abandons deliberately).
 
-Models load once at startup (~20s). After that, expect roughly 11s after the cut for a
-~6s clip and ~22s for a ~14s one. Clips are force-cut at 15s.
+Models load once at startup (~20s). After that, expect a translation roughly 5s after the
+cut (median over 2-15s clips; p95 about 8s), longer if you sign the next sentence before
+the previous one is translated. Clips are force-cut at 15s.
 
 Every translation is also appended to `transcripts/session_YYYYMMDD-HHMMSS.txt` as it is
 printed, fsync'd per clip, so a crash or power loss does not take the session's output
@@ -222,6 +226,7 @@ validated.
 | `BYT5_CKPT` | — | override the checkpoint path for every entry point at once |
 | `DINOV2_DTYPE` | `float16` | DINOv2 compute precision; measured quality-neutral. Ignored on CPU |
 | `DINOV2_BATCH_SIZE` | `32` | lower it under memory pressure |
+| `PYTORCH_NO_CUDA_MEMORY_CACHING` | `0` | `1` disables the CUDA caching allocator (about 2x slower decode); only for the NVML assert, see step 8 |
 | `WINDOW_SCALE` | `1.6` | preview window size. Display only — capture stays 640x480 |
 
 Watch the output for `[features] stride 2: N/M frames kept`, `[byt5] device: … dtype: …`
