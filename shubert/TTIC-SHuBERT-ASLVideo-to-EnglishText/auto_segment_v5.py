@@ -19,6 +19,42 @@ Measured on my_please.mp4: ~57s cold -> ~41s warm per clip.
 import json
 import os
 import sys
+
+
+def _cap_malloc_arenas():
+    """Cap glibc's malloc arenas (default 2) before any threads exist.
+
+    The pipeline's resident memory used to climb ~120 MB per clip for the life of the
+    process. That was glibc giving each new thread its own malloc arena (MediaPipe builds
+    fresh landmarkers and threads for every clip) and never handing the pages back -- not
+    CUDA, not weights; torch's own memory is flat across clips. With 2 arenas RSS levels
+    off after ~3 clips. Matched A/B on latency_probe.py, 40 clips x 6 cells: sequential
+    min available +0.9-1.15 GB, overlap +0.4-0.5 GB, post-cut latency / decode / perception
+    fps inside both controls, 0/40 text differences. See latency_runs/mem and
+    latency_runs/arena_ab, PROJECT_CONTEXT.md 2026-10-31.
+
+    Done with mallopt rather than os.environ["MALLOC_ARENA_MAX"]: glibc reads that
+    variable once, at the first malloc, long before this module runs, so setting it here
+    would do nothing. If MALLOC_ARENA_MAX is already in the environment glibc has applied
+    it and it wins. MALLOC_ARENA_CAP=0 skips the cap (glibc default, 8 x cores).
+    """
+    if "MALLOC_ARENA_MAX" in os.environ:
+        return "MALLOC_ARENA_MAX from environment"
+    cap = int(os.environ.get("MALLOC_ARENA_CAP", "2"))
+    if cap <= 0:
+        return "off (glibc default)"
+    try:
+        import ctypes
+        M_ARENA_MAX = -8  # glibc malloc.h
+        if ctypes.CDLL("libc.so.6").mallopt(M_ARENA_MAX, cap) == 1:
+            return str(cap)
+        return "mallopt refused"
+    except OSError as e:  # not glibc
+        return f"unavailable ({e})"
+
+
+MALLOC_ARENA_STATUS = _cap_malloc_arenas()
+
 # Caching allocator ON. This was "1" from August to 2026-10-22 as a guard against an
 # intermittent `NVML_SUCCESS == r INTERNAL ASSERT FAILED` on an older torch, at the price of a
 # raw cudaMalloc/cudaFree per tensor: ByT5 decode ran 60-139 ms/step depending on the day
@@ -198,10 +234,19 @@ def _is_cuda_oom(exc):
     failures this box actually hits come through as a plain RuntimeError reading
     "CUDA error: out of memory" (the OOM notes in PROJECT_CONTEXT.md are all of that
     second kind). Matching on the type alone would miss the common one.
+
+    With the caching allocator on (the default since 2026-10-22) there is a third shape: on
+    Tegra the allocator's out-of-memory path queries NVML, which this board does not have,
+    and the OOM surfaces as `RuntimeError: NVML_SUCCESS == r INTERNAL ASSERT FAILED at
+    .../CUDACachingAllocator.cpp`. Reproduced 2026-10-31: the same failed allocation gives
+    that message at PYTORCH_NO_CUDA_MEMORY_CACHING=0 and "CUDA error: out of memory" at =1.
     """
     if type(exc).__name__ == "OutOfMemoryError":
         return True
-    text = str(exc).lower()
+    text = str(exc)
+    if "NVML_SUCCESS == r" in text and "CUDACachingAllocator" in text:
+        return True
+    text = text.lower()
     return "out of memory" in text and "cuda" in text
 
 
@@ -910,6 +955,7 @@ def write_clip(frames, path, fps=30.0):
 
 
 def main():
+    print(f"[mem] malloc arenas: {MALLOC_ARENA_STATUS}")
     print("Starting persistent translation worker...")
     processor = SHuBERTProcessor(config)
     worker = threading.Thread(target=translation_worker, args=(processor,), daemon=True)

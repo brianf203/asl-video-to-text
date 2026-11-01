@@ -227,6 +227,7 @@ validated.
 | `DINOV2_DTYPE` | `float16` | DINOv2 compute precision; measured quality-neutral. Ignored on CPU |
 | `DINOV2_BATCH_SIZE` | `32` | lower it under memory pressure |
 | `PYTORCH_NO_CUDA_MEMORY_CACHING` | `0` | `1` disables the CUDA caching allocator (about 2x slower decode); only for the NVML assert, see step 8 |
+| `MALLOC_ARENA_CAP` | `2` | glibc malloc arenas, capped at startup via `mallopt`; stops resident memory climbing ~120MB per clip. `0` restores glibc's default. An explicit `MALLOC_ARENA_MAX` in the environment takes precedence |
 | `WINDOW_SCALE` | `1.6` | preview window size. Display only — capture stays 640x480 |
 
 Watch the output for `[features] stride 2: N/M frames kept`, `[byt5] device: … dtype: …`
@@ -239,3 +240,7 @@ and `DINOEmbedder initialized on device: … dtype: …` to confirm these took e
 - GPU memory is 8GB shared with the whole OS and is genuinely tight. Close memory-heavy
   desktop apps (a browser at 1GB+ RSS is enough) before running, or the first DINOv2 load
   can OOM.
+- Model weights are only ~1.36GB of the process. What used to grow during a session was
+  glibc's per-thread malloc arenas (MediaPipe starts new threads for every clip), which is
+  why `auto_segment_v5.py` caps them at 2; that leaves about 1GB more free memory over a
+  40-clip session at no measured latency cost.
