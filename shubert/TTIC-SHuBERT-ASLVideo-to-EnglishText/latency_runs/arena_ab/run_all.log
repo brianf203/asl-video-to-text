@@ -1,0 +1,13 @@
+=== cell 1_sequential_arenadefault start 16:48:27 oc3=1141 ===
+=== cell 1_sequential_arenadefault exit 0 16:58:01 oc3=2293 ===
+=== cell 2_sequential_arena2 start 16:58:21 oc3=2293 ===
+=== cell 2_sequential_arena2 exit 0 17:07:49 oc3=3322 ===
+=== cell 3_sequential_arenadefault start 17:08:09 oc3=3322 ===
+=== cell 3_sequential_arenadefault exit 0 17:17:35 oc3=4433 ===
+=== cell 4_overlap_arenadefault start 17:17:55 oc3=4433 ===
+=== cell 4_overlap_arenadefault exit 0 17:24:24 oc3=6337 ===
+=== cell 5_overlap_arena2 start 17:24:44 oc3=6337 ===
+=== cell 5_overlap_arena2 exit 0 17:31:04 oc3=7706 ===
+=== cell 6_overlap_arenadefault start 17:31:24 oc3=7706 ===
+=== cell 6_overlap_arenadefault exit 0 17:37:34 oc3=9308 ===
+ALL_DONE

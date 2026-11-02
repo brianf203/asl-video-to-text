@@ -1,0 +1,268 @@
+[mem] start (python only)          avail  4438 free  2716 swap     6 | rss    11 anon     5 file    5 nvmap 0 | alloc None rsv None maxalloc None | lfb 89
+[mem] import torch                 avail  4205 free  2438 swap     6 | rss   376 anon   238 file  138 nvmap 0 | alloc None rsv None maxalloc None | lfb 89
+Wav2Vec2Config is imported from: fairseq.models.wav2vec.wav2vec2
+Full path: /home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/fairseq/models/wav2vec/wav2vec2.py
+[mem] import pipeline modules      avail  4028 free  2200 swap     6 | rss   615 anon   413 file  202 nvmap 0 | alloc None rsv None maxalloc None | lfb 89
+[mem] CUDA context                 avail  4005 free  2177 swap     6 | rss   719 anon   503 file  215 nvmap 0 | alloc 0 rsv 2 maxalloc 0 | lfb 89
+[mem] calib before                 avail  4005 free  2177 swap     6 | rss   719 anon   504 file  215 nvmap 0 | alloc 0 rsv 2 maxalloc 0 | lfb 89
+[mem] calib +64MB cuda tensor      avail  4005 free  2177 swap     6 | rss   783 anon   568 file  215 nvmap 0 | alloc 64 rsv 66 maxalloc 64 | lfb 89
+[mem] calibration deltas for +64MB: {'mem_available': 0, 'mem_free': 0, 'rss': 64, 'anon': 64, 'file': 0, 'pss': 0, 'nvmap_mb': 0}
+[mem] camera + preview window      avail  3990 free  2155 swap     6 | rss   734 anon   508 file  224 nvmap 0 | alloc 0 rsv 0 maxalloc 64 | lfb 89
+Using cache found in /home/sllu/.cache/torch/hub/facebookresearch_dinov2_main
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/swiglu_ffn.py:51: UserWarning: xFormers is not available (SwiGLU)
+  warnings.warn("xFormers is not available (SwiGLU)")
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/attention.py:33: UserWarning: xFormers is not available (Attention)
+  warnings.warn("xFormers is not available (Attention)")
+/home/sllu/.cache/torch/hub/facebookresearch_dinov2_main/dinov2/layers/block.py:40: UserWarning: xFormers is not available (Block)
+  warnings.warn("xFormers is not available (Block)")
+2026-10-31 14:36:16 | INFO | dinov2 | using MLP layer as FFN
+DINOEmbedder initialized on device: cuda dtype: torch.float16
+[mem] DINOv2 hands loaded          avail  3924 free  1980 swap     6 | rss   950 anon   713 file  235 nvmap 0 | alloc 43 rsv 164 maxalloc 151 | lfb 77
+Using cache found in /home/sllu/.cache/torch/hub/facebookresearch_dinov2_main
+2026-10-31 14:36:18 | INFO | dinov2 | using MLP layer as FFN
+DINOEmbedder initialized on device: cuda dtype: torch.float16
+[mem] DINOv2 face loaded           avail  3904 free  1852 swap     6 | rss   998 anon   761 file  236 nvmap 0 | alloc 85 rsv 198 maxalloc 193 | lfb 77
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert.py:132: FutureWarning: Positional args are being deprecated, use kwargs instead. Refer to https://pytorch.org/docs/main/generated/torch.nn.Module.html#torch.nn.Module.state_dict for details.
+  state = super().state_dict(destination, prefix, keep_vars)
+[byt5] device: cuda dtype: bfloat16
+[mem] ByT5+SHuBERT loaded          avail  3158 free  1397 swap    39 | rss  2243 anon  2048 file  194 nvmap 0 | alloc 1398 rsv 1446 maxalloc 1398 | lfb 24
+[mem] weights: {"dinov2:dinov2hand.pth:torch.float16": 41.3, "dinov2:dinov2face.pth:torch.float16": 41.3, "byt5_total": 1279.7, "byt5_encoder_incl_adapter": 960.2, "byt5_decoder": 318.4, "byt5_param_dtypes": {"torch.bfloat16": 670950472, "torch.float32": 256}}
+[mem] ready (before clip 1)        avail  3159 free  1398 swap    39 | rss  2243 anon  2048 file  194 nvmap 0 | alloc 1398 rsv 1446 maxalloc 1398 | lfb 24
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+W0000 00:00:1793482597.999673    8187 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+W0000 00:00:1793482598.122103    8194 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/google/protobuf/symbol_database.py:55: UserWarning: SymbolDatabase.GetPrototype() is deprecated. Please use message_factory.GetMessageClass() instead. SymbolDatabase.GetPrototype() will be removed soon.
+  warnings.warn('SymbolDatabase.GetPrototype() is deprecated. Please '
+[mem] clip 0 at cut (174 fr)       avail  2234 free   127 swap    45 | rss  3362 anon  3108 file  253 nvmap 0 | alloc 1417 rsv 1558 maxalloc 1484 | lfb 0
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    6.7s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   20.4s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    6.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    6.7s
+  total               :    6.8s
+[mem] clip 0 done                  avail  1821 free   311 swap    66 | rss  3674 anon  3514 file  157 nvmap 0 | alloc 1410 rsv 1590 maxalloc 1479 | lfb 20
+[mem] clip 0 uZwKNtHx9FE_01: capture peak_rss 3362 torch_peak 1484 | drain torch_peak 1441 | translate torch_peak 1479 peak_rss 3870 min_avail 1598 -> Most of the outbreaks are that children 
+W0000 00:00:1793482621.270265    8917 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1793482621.345050    8924 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+[mem] clip 1 at cut (71 fr)        avail  1587 free   253 swap    69 | rss  3958 anon  3784 file  172 nvmap 0 | alloc 1419 rsv 1590 maxalloc 1495 | lfb 0
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.0s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    8.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.4s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.1s
+  total               :    2.1s
+[mem] clip 1 done                  avail  1642 free   303 swap    69 | rss  3878 anon  3724 file  152 nvmap 0 | alloc 1419 rsv 1590 maxalloc 1440 | lfb 1
+[mem] clip 1 5iRIeHAK9b0_03: capture peak_rss 4042 torch_peak 1495 | drain torch_peak 1495 | translate torch_peak 1440 peak_rss 3938 min_avail 1607 -> Children ranging in age from 3 to 29 yea
+W0000 00:00:1793482630.523879    8974 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1793482630.587077    8981 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+[mem] clip 2 at cut (54 fr)        avail  1356 free   138 swap    69 | rss  4200 anon  4031 file  167 nvmap 0 | alloc 1428 rsv 1590 maxalloc 1495 | lfb 0
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    5.9s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    1.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.5s
+  total               :    2.5s
+[mem] clip 2 done                  avail  1410 free   258 swap    69 | rss  4083 anon  3933 file  148 nvmap 0 | alloc 1419 rsv 1590 maxalloc 1440 | lfb 0
+[mem] clip 2 fNT8a6e1gx8_08: capture peak_rss 4184 torch_peak 1419 | drain torch_peak 1495 | translate torch_peak 1440 peak_rss 4245 min_avail 1273 -> It's just that we have problems with exp
+W0000 00:00:1793482639.089690    9035 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1793482639.150518    9042 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+[mem] clip 3 at cut (165 fr)       avail  1308 free   281 swap    69 | rss  4238 anon  4067 file  169 nvmap 0 | alloc 1419 rsv 1590 maxalloc 1495 | lfb 5
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.2s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    5.6s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.3s
+  total               :    4.3s
+[mem] clip 3 done                  avail  1451 free   416 swap    69 | rss  4093 anon  3944 file  147 nvmap 0 | alloc 1419 rsv 1616 maxalloc 1465 | lfb 1
+[mem] clip 3 sP6B4dlSOoc_05: capture peak_rss 4394 torch_peak 1495 | drain torch_peak 1495 | translate torch_peak 1465 peak_rss 4243 min_avail 1318 -> On Wednesday President Trump signed an e
+W0000 00:00:1793482656.897392    9092 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1793482656.968234    9099 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+[mem] clip 4 at cut (137 fr)       avail  1058 free   213 swap   145 | rss  4440 anon  4274 file  164 nvmap 0 | alloc 1428 rsv 1616 maxalloc 1495 | lfb 0
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.9s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   18.2s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    4.5s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.9s
+  total               :    4.0s
+[mem] clip 4 done                  avail  1275 free   390 swap   145 | rss  4309 anon  4162 file  146 nvmap 0 | alloc 1419 rsv 1616 maxalloc 1459 | lfb 4
+[mem] clip 4 mNF1kg9azQw_03: capture peak_rss 4439 torch_peak 1495 | drain torch_peak 1495 | translate torch_peak 1459 peak_rss 4424 min_avail 1093 -> Jennifer shared her experience with a wo
+W0000 00:00:1793482674.576308    9188 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1793482674.631381    9195 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+[mem] clip 5 at cut (65 fr)        avail  1229 free   343 swap   145 | rss  4370 anon  4205 file  162 nvmap 0 | alloc 1428 rsv 1616 maxalloc 1495 | lfb 1
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.4s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    7.9s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.1s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.4s
+  total               :    3.5s
+[mem] clip 5 done                  avail  1255 free   370 swap   145 | rss  4321 anon  4174 file  146 nvmap 0 | alloc 1419 rsv 1616 maxalloc 1446 | lfb 2
+[mem] clip 5 iMJ9CjBX7eo_02: capture peak_rss 4541 torch_peak 1495 | drain torch_peak 1495 | translate torch_peak 1446 peak_rss 4369 min_avail 1234 -> Thank you for joining us at the Communit
+W0000 00:00:1793482685.742024    9250 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1793482685.801574    9257 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+[mem] clip 6 at cut (67 fr)        avail   979 free   151 swap   145 | rss  4624 anon  4461 file  161 nvmap 0 | alloc 1419 rsv 1616 maxalloc 1495 | lfb 0
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    1.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    7.1s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.2s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    1.6s
+  total               :    1.6s
+[mem] clip 6 done                  avail   972 free   197 swap   145 | rss  4579 anon  4433 file  144 nvmap 0 | alloc 1419 rsv 1616 maxalloc 1437 | lfb 0
+[mem] clip 6 k5Gxbifw8s8_05: capture peak_rss 4623 torch_peak 1495 | drain torch_peak 1495 | translate torch_peak 1437 peak_rss 4640 min_avail 956 -> And more young people wear rabbits.
+W0000 00:00:1793482694.314159    9319 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1793482694.368178    9326 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+[mem] clip 7 at cut (174 fr)       avail  1024 free   331 swap   165 | rss  4561 anon  4395 file  164 nvmap 0 | alloc 1419 rsv 1616 maxalloc 1495 | lfb 2
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    4.5s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   17.5s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    5.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    4.6s
+  total               :    4.6s
+[mem] clip 7 done                  avail  1108 free   414 swap   165 | rss  4462 anon  4316 file  144 nvmap 0 | alloc 1419 rsv 1616 maxalloc 1483 | lfb 3
+[mem] clip 7 MJijm9kbdHA_01: capture peak_rss 4779 torch_peak 1495 | drain torch_peak 1453 | translate torch_peak 1483 peak_rss 4597 min_avail 1005 -> Biden said Bernie had a vote multiple ti
+W0000 00:00:1793482715.172166    9412 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1793482715.228053    9419 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+[mem] clip 8 at cut (74 fr)        avail   902 free   208 swap   164 | rss  4687 anon  4525 file  160 nvmap 0 | alloc 1419 rsv 1616 maxalloc 1495 | lfb 0
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    2.2s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:   10.0s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.3s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    2.2s
+  total               :    2.3s
+[mem] clip 8 done                  avail  1009 free   314 swap   164 | rss  4560 anon  4414 file  144 nvmap 0 | alloc 1419 rsv 1616 maxalloc 1441 | lfb 3
+[mem] clip 8 wPJ_InXF_I8_06: capture peak_rss 4686 torch_peak 1495 | drain torch_peak 1495 | translate torch_peak 1441 peak_rss 4673 min_avail 922 -> the students storytelling comprehension 
+W0000 00:00:1793482725.455639    9468 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+W0000 00:00:1793482725.480194    9475 face_landmarker_graph.cc:174] Sets FaceBlendshapesGraph acceleration to xnnpack by default.
+[mem] clip 9 at cut (84 fr)        avail   815 free   153 swap   164 | rss  4768 anon  4606 file  160 nvmap 0 | alloc 1419 rsv 1616 maxalloc 1495 | lfb 0
+
+--- ByT5 stage breakdown ---
+  checkpoint_load :    0.0s
+  to_device+eval  :    0.0s
+  generate        :    3.6s
+
+--- Stage timing breakdown ---
+  video_read          :    0.0s
+  mediapipe_landmarks :    0.0s
+  mediapipe_overlapped:    9.6s  (overlapped with capture, not on the critical path)
+  hand_crop           :    0.0s
+  dinov2_hands        :    0.0s
+  face_crop           :    0.0s
+  dinov2_face         :    0.0s
+  dinov2_overlapped   :    2.8s  (overlapped with capture, not on the critical path)
+  pose_features       :    0.0s
+  byt5_inference      :    3.6s
+  total               :    3.7s
+[mem] clip 9 done                  avail   830 free   240 swap   165 | rss  4702 anon  4556 file  144 nvmap 0 | alloc 1419 rsv 1616 maxalloc 1450 | lfb 1
+[mem] clip 9 I976oI3s1jQ_01: capture peak_rss 4768 torch_peak 1495 | drain torch_peak 1467 | translate torch_peak 1450 peak_rss 4770 min_avail 794 -> My strategy on the chill was a little bi
+[mem] end                          avail   833 free   240 swap   165 | rss  4702 anon  4557 file  143 nvmap 0 | alloc 1419 rsv 1616 maxalloc 1450 | lfb 1
+[mem] wrote latency_runs/mem/breakdown.json

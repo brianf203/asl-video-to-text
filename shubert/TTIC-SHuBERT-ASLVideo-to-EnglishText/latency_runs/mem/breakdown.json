@@ -1,0 +1,1284 @@
+{
+ "env": {
+  "PYTORCH_NO_CUDA_MEMORY_CACHING": "0"
+ },
+ "others_at_start": [
+  {
+   "pid": 2747,
+   "rss_mb": 390,
+   "comm": "gnome-shell"
+  },
+  {
+   "pid": 4069,
+   "rss_mb": 389,
+   "comm": "claude"
+  },
+  {
+   "pid": 3005,
+   "rss_mb": 180,
+   "comm": "gnome-software"
+  },
+  {
+   "pid": 2600,
+   "rss_mb": 161,
+   "comm": "Xorg"
+  },
+  {
+   "pid": 2367,
+   "rss_mb": 60,
+   "comm": "packagekitd"
+  },
+  {
+   "pid": 2982,
+   "rss_mb": 53,
+   "comm": "evolution-alarm"
+  },
+  {
+   "pid": 2965,
+   "rss_mb": 51,
+   "comm": "xdg-desktop-por"
+  },
+  {
+   "pid": 1394,
+   "rss_mb": 49,
+   "comm": "dockerd"
+  },
+  {
+   "pid": 4004,
+   "rss_mb": 47,
+   "comm": "gnome-terminal-"
+  },
+  {
+   "pid": 3224,
+   "rss_mb": 46,
+   "comm": "gjs"
+  },
+  {
+   "pid": 747,
+   "rss_mb": 41,
+   "comm": "snapd"
+  },
+  {
+   "pid": 2963,
+   "rss_mb": 36,
+   "comm": "python3"
+  },
+  {
+   "pid": 3081,
+   "rss_mb": 34,
+   "comm": "fwupd"
+  },
+  {
+   "pid": 2784,
+   "rss_mb": 29,
+   "comm": "goa-daemon"
+  },
+  {
+   "pid": 3138,
+   "rss_mb": 28,
+   "comm": "tracker-miner-f"
+  }
+ ],
+ "snapshots": [
+  {
+   "tag": "start (python only)",
+   "t": 0.0,
+   "mem_available": 4438,
+   "mem_free": 2716,
+   "cached": 1167,
+   "swap_used": 6,
+   "rss": 11,
+   "anon": 5,
+   "file": 5,
+   "pss": 6,
+   "nvmap_mb": 0,
+   "lfb_4mb": 89,
+   "alloc": null,
+   "reserved": null,
+   "max_alloc": null
+  },
+  {
+   "tag": "import torch",
+   "t": 2.9,
+   "mem_available": 4205,
+   "mem_free": 2438,
+   "cached": 1209,
+   "swap_used": 6,
+   "rss": 376,
+   "anon": 238,
+   "file": 138,
+   "pss": 368,
+   "nvmap_mb": 0,
+   "lfb_4mb": 89,
+   "alloc": null,
+   "reserved": null,
+   "max_alloc": null
+  },
+  {
+   "tag": "import pipeline modules",
+   "t": 9.8,
+   "mem_available": 4028,
+   "mem_free": 2200,
+   "cached": 1269,
+   "swap_used": 6,
+   "rss": 615,
+   "anon": 413,
+   "file": 202,
+   "pss": 601,
+   "nvmap_mb": 0,
+   "lfb_4mb": 89,
+   "alloc": null,
+   "reserved": null,
+   "max_alloc": null
+  },
+  {
+   "tag": "CUDA context",
+   "t": 10.0,
+   "mem_available": 4005,
+   "mem_free": 2177,
+   "cached": 1270,
+   "swap_used": 6,
+   "rss": 719,
+   "anon": 503,
+   "file": 215,
+   "pss": 633,
+   "nvmap_mb": 0,
+   "lfb_4mb": 89,
+   "alloc": 0,
+   "reserved": 2,
+   "max_alloc": 0
+  },
+  {
+   "tag": "camera + preview window",
+   "t": 13.4,
+   "mem_available": 3990,
+   "mem_free": 2155,
+   "cached": 1277,
+   "swap_used": 6,
+   "rss": 734,
+   "anon": 508,
+   "file": 224,
+   "pss": 652,
+   "nvmap_mb": 0,
+   "lfb_4mb": 89,
+   "alloc": 0,
+   "reserved": 0,
+   "max_alloc": 64
+  },
+  {
+   "tag": "DINOv2 hands loaded",
+   "t": 15.4,
+   "mem_available": 3924,
+   "mem_free": 1980,
+   "cached": 1387,
+   "swap_used": 6,
+   "rss": 950,
+   "anon": 713,
+   "file": 235,
+   "pss": 704,
+   "nvmap_mb": 0,
+   "lfb_4mb": 77,
+   "alloc": 43,
+   "reserved": 164,
+   "max_alloc": 151
+  },
+  {
+   "tag": "DINOv2 face loaded",
+   "t": 17.3,
+   "mem_available": 3904,
+   "mem_free": 1852,
+   "cached": 1494,
+   "swap_used": 6,
+   "rss": 998,
+   "anon": 761,
+   "file": 236,
+   "pss": 719,
+   "nvmap_mb": 0,
+   "lfb_4mb": 77,
+   "alloc": 85,
+   "reserved": 198,
+   "max_alloc": 193
+  },
+  {
+   "tag": "ByT5+SHuBERT loaded",
+   "t": 34.4,
+   "mem_available": 3158,
+   "mem_free": 1397,
+   "cached": 1527,
+   "swap_used": 39,
+   "rss": 2243,
+   "anon": 2048,
+   "file": 194,
+   "pss": 715,
+   "nvmap_mb": 0,
+   "lfb_4mb": 24,
+   "alloc": 1398,
+   "reserved": 1446,
+   "max_alloc": 1398
+  },
+  {
+   "tag": "ready (before clip 1)",
+   "t": 34.5,
+   "mem_available": 3159,
+   "mem_free": 1398,
+   "cached": 1527,
+   "swap_used": 39,
+   "rss": 2243,
+   "anon": 2048,
+   "file": 194,
+   "pss": 716,
+   "nvmap_mb": 0,
+   "lfb_4mb": 24,
+   "alloc": 1398,
+   "reserved": 1446,
+   "max_alloc": 1398
+  },
+  {
+   "tag": "end",
+   "t": 175.4,
+   "mem_available": 833,
+   "mem_free": 240,
+   "cached": 657,
+   "swap_used": 165,
+   "rss": 4702,
+   "anon": 4557,
+   "file": 143,
+   "pss": 2973,
+   "nvmap_mb": 0,
+   "lfb_4mb": 1,
+   "alloc": 1419,
+   "reserved": 1616,
+   "max_alloc": 1450
+  }
+ ],
+ "clips": [
+  {
+   "i": 0,
+   "clip_id": "uZwKNtHx9FE_01",
+   "duration_s": 14.473,
+   "kept_frames": 174,
+   "frames_mb_est": 152.9,
+   "capture": {
+    "peak_rss": 3362,
+    "peak_anon": 3108,
+    "min_avail": 2080,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1484
+   },
+   "at_cut": {
+    "tag": "clip 0 at cut (174 fr)",
+    "t": 49.5,
+    "mem_available": 2234,
+    "mem_free": 127,
+    "cached": 1793,
+    "swap_used": 45,
+    "rss": 3362,
+    "anon": 3108,
+    "file": 253,
+    "pss": 1700,
+    "nvmap_mb": 0,
+    "lfb_4mb": 0,
+    "alloc": 1417,
+    "reserved": 1558,
+    "max_alloc": 1484
+   },
+   "drain": {
+    "peak_rss": 3369,
+    "peak_anon": 3115,
+    "min_avail": 2216,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1441
+   },
+   "translate": {
+    "peak_rss": 3870,
+    "peak_anon": 3689,
+    "min_avail": 1598,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1479
+   },
+   "text": "Most of the outbreaks are that children who do not have a vaccine who live in an ultra-orthodox Jewish community in New York.",
+   "after": {
+    "tag": "clip 0 done",
+    "t": 57.9,
+    "mem_available": 1821,
+    "mem_free": 311,
+    "cached": 1376,
+    "swap_used": 66,
+    "rss": 3674,
+    "anon": 3514,
+    "file": 157,
+    "pss": 1980,
+    "nvmap_mb": 0,
+    "lfb_4mb": 20,
+    "alloc": 1410,
+    "reserved": 1590,
+    "max_alloc": 1479
+   }
+  },
+  {
+   "i": 1,
+   "clip_id": "5iRIeHAK9b0_03",
+   "duration_s": 4.7,
+   "kept_frames": 71,
+   "frames_mb_est": 62.4,
+   "capture": {
+    "peak_rss": 4042,
+    "peak_anon": 3869,
+    "min_avail": 1420,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1495
+   },
+   "at_cut": {
+    "tag": "clip 1 at cut (71 fr)",
+    "t": 63.0,
+    "mem_available": 1587,
+    "mem_free": 253,
+    "cached": 1242,
+    "swap_used": 69,
+    "rss": 3958,
+    "anon": 3784,
+    "file": 172,
+    "pss": 2249,
+    "nvmap_mb": 0,
+    "lfb_4mb": 0,
+    "alloc": 1419,
+    "reserved": 1590,
+    "max_alloc": 1495
+   },
+   "drain": {
+    "peak_rss": 3961,
+    "peak_anon": 3787,
+    "min_avail": 1584,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1495
+   },
+   "translate": {
+    "peak_rss": 3938,
+    "peak_anon": 3763,
+    "min_avail": 1607,
+    "min_lfb": 1,
+    "torch_peak_alloc": 1440
+   },
+   "text": "Children ranging in age from 3 to 29 years old.",
+   "after": {
+    "tag": "clip 1 done",
+    "t": 67.2,
+    "mem_available": 1642,
+    "mem_free": 303,
+    "cached": 1247,
+    "swap_used": 69,
+    "rss": 3878,
+    "anon": 3724,
+    "file": 152,
+    "pss": 2174,
+    "nvmap_mb": 0,
+    "lfb_4mb": 1,
+    "alloc": 1419,
+    "reserved": 1590,
+    "max_alloc": 1440
+   }
+  },
+  {
+   "i": 2,
+   "clip_id": "fNT8a6e1gx8_08",
+   "duration_s": 3.604,
+   "kept_frames": 54,
+   "frames_mb_est": 47.5,
+   "capture": {
+    "peak_rss": 4184,
+    "peak_anon": 4015,
+    "min_avail": 1355,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1419
+   },
+   "at_cut": {
+    "tag": "clip 2 at cut (54 fr)",
+    "t": 71.1,
+    "mem_available": 1356,
+    "mem_free": 138,
+    "cached": 1137,
+    "swap_used": 69,
+    "rss": 4200,
+    "anon": 4031,
+    "file": 167,
+    "pss": 2494,
+    "nvmap_mb": 0,
+    "lfb_4mb": 0,
+    "alloc": 1428,
+    "reserved": 1590,
+    "max_alloc": 1495
+   },
+   "drain": {
+    "peak_rss": 4227,
+    "peak_anon": 4056,
+    "min_avail": 1317,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1495
+   },
+   "translate": {
+    "peak_rss": 4245,
+    "peak_anon": 4075,
+    "min_avail": 1273,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1440
+   },
+   "text": "It's just that we have problems with expressing ourselves.",
+   "after": {
+    "tag": "clip 2 done",
+    "t": 75.7,
+    "mem_available": 1410,
+    "mem_free": 258,
+    "cached": 1091,
+    "swap_used": 69,
+    "rss": 4083,
+    "anon": 3933,
+    "file": 148,
+    "pss": 2379,
+    "nvmap_mb": 0,
+    "lfb_4mb": 0,
+    "alloc": 1419,
+    "reserved": 1590,
+    "max_alloc": 1440
+   }
+  },
+  {
+   "i": 3,
+   "clip_id": "sP6B4dlSOoc_05",
+   "duration_s": 10.978,
+   "kept_frames": 165,
+   "frames_mb_est": 145.0,
+   "capture": {
+    "peak_rss": 4394,
+    "peak_anon": 4225,
+    "min_avail": 1148,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1495
+   },
+   "at_cut": {
+    "tag": "clip 3 at cut (165 fr)",
+    "t": 87.1,
+    "mem_available": 1308,
+    "mem_free": 281,
+    "cached": 984,
+    "swap_used": 69,
+    "rss": 4238,
+    "anon": 4067,
+    "file": 169,
+    "pss": 2530,
+    "nvmap_mb": 0,
+    "lfb_4mb": 5,
+    "alloc": 1419,
+    "reserved": 1590,
+    "max_alloc": 1495
+   },
+   "drain": {
+    "peak_rss": 4239,
+    "peak_anon": 4068,
+    "min_avail": 1307,
+    "min_lfb": 5,
+    "torch_peak_alloc": 1495
+   },
+   "translate": {
+    "peak_rss": 4243,
+    "peak_anon": 4074,
+    "min_avail": 1318,
+    "min_lfb": 1,
+    "torch_peak_alloc": 1465
+   },
+   "text": "On Wednesday President Trump signed an executive order about trade reform and high kidney care.",
+   "after": {
+    "tag": "clip 3 done",
+    "t": 93.5,
+    "mem_available": 1451,
+    "mem_free": 416,
+    "cached": 991,
+    "swap_used": 69,
+    "rss": 4093,
+    "anon": 3944,
+    "file": 147,
+    "pss": 2363,
+    "nvmap_mb": 0,
+    "lfb_4mb": 1,
+    "alloc": 1419,
+    "reserved": 1616,
+    "max_alloc": 1465
+   }
+  },
+  {
+   "i": 4,
+   "clip_id": "mNF1kg9azQw_03",
+   "duration_s": 11.387,
+   "kept_frames": 137,
+   "frames_mb_est": 120.4,
+   "capture": {
+    "peak_rss": 4439,
+    "peak_anon": 4273,
+    "min_avail": 1002,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1495
+   },
+   "at_cut": {
+    "tag": "clip 4 at cut (137 fr)",
+    "t": 105.3,
+    "mem_available": 1058,
+    "mem_free": 213,
+    "cached": 967,
+    "swap_used": 145,
+    "rss": 4440,
+    "anon": 4274,
+    "file": 164,
+    "pss": 2708,
+    "nvmap_mb": 0,
+    "lfb_4mb": 0,
+    "alloc": 1428,
+    "reserved": 1616,
+    "max_alloc": 1495
+   },
+   "drain": {
+    "peak_rss": 4444,
+    "peak_anon": 4276,
+    "min_avail": 1056,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1495
+   },
+   "translate": {
+    "peak_rss": 4424,
+    "peak_anon": 4256,
+    "min_avail": 1093,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1459
+   },
+   "text": "Jennifer shared her experience with a woman who was currently in the photography of Floyd.",
+   "after": {
+    "tag": "clip 4 done",
+    "t": 111.2,
+    "mem_available": 1275,
+    "mem_free": 390,
+    "cached": 904,
+    "swap_used": 145,
+    "rss": 4309,
+    "anon": 4162,
+    "file": 146,
+    "pss": 2580,
+    "nvmap_mb": 0,
+    "lfb_4mb": 4,
+    "alloc": 1419,
+    "reserved": 1616,
+    "max_alloc": 1459
+   }
+  },
+  {
+   "i": 5,
+   "clip_id": "iMJ9CjBX7eo_02",
+   "duration_s": 4.305,
+   "kept_frames": 65,
+   "frames_mb_est": 57.1,
+   "capture": {
+    "peak_rss": 4541,
+    "peak_anon": 4380,
+    "min_avail": 1068,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1495
+   },
+   "at_cut": {
+    "tag": "clip 5 at cut (65 fr)",
+    "t": 115.9,
+    "mem_available": 1229,
+    "mem_free": 343,
+    "cached": 904,
+    "swap_used": 145,
+    "rss": 4370,
+    "anon": 4205,
+    "file": 162,
+    "pss": 2641,
+    "nvmap_mb": 0,
+    "lfb_4mb": 1,
+    "alloc": 1428,
+    "reserved": 1616,
+    "max_alloc": 1495
+   },
+   "drain": {
+    "peak_rss": 4390,
+    "peak_anon": 4221,
+    "min_avail": 1213,
+    "min_lfb": 1,
+    "torch_peak_alloc": 1495
+   },
+   "translate": {
+    "peak_rss": 4369,
+    "peak_anon": 4200,
+    "min_avail": 1234,
+    "min_lfb": 2,
+    "torch_peak_alloc": 1446
+   },
+   "text": "Thank you for joining us at the Community Forum and we will host it together.",
+   "after": {
+    "tag": "clip 5 done",
+    "t": 122.4,
+    "mem_available": 1255,
+    "mem_free": 370,
+    "cached": 904,
+    "swap_used": 145,
+    "rss": 4321,
+    "anon": 4174,
+    "file": 146,
+    "pss": 2592,
+    "nvmap_mb": 0,
+    "lfb_4mb": 2,
+    "alloc": 1419,
+    "reserved": 1616,
+    "max_alloc": 1446
+   }
+  },
+  {
+   "i": 6,
+   "clip_id": "k5Gxbifw8s8_05",
+   "duration_s": 4.434,
+   "kept_frames": 67,
+   "frames_mb_est": 58.9,
+   "capture": {
+    "peak_rss": 4623,
+    "peak_anon": 4460,
+    "min_avail": 941,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1495
+   },
+   "at_cut": {
+    "tag": "clip 6 at cut (67 fr)",
+    "t": 127.2,
+    "mem_available": 979,
+    "mem_free": 151,
+    "cached": 843,
+    "swap_used": 145,
+    "rss": 4624,
+    "anon": 4461,
+    "file": 161,
+    "pss": 2894,
+    "nvmap_mb": 0,
+    "lfb_4mb": 0,
+    "alloc": 1419,
+    "reserved": 1616,
+    "max_alloc": 1495
+   },
+   "drain": {
+    "peak_rss": 4628,
+    "peak_anon": 4462,
+    "min_avail": 978,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1495
+   },
+   "translate": {
+    "peak_rss": 4640,
+    "peak_anon": 4474,
+    "min_avail": 956,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1437
+   },
+   "text": "And more young people wear rabbits.",
+   "after": {
+    "tag": "clip 6 done",
+    "t": 130.9,
+    "mem_available": 972,
+    "mem_free": 197,
+    "cached": 826,
+    "swap_used": 145,
+    "rss": 4579,
+    "anon": 4433,
+    "file": 144,
+    "pss": 2850,
+    "nvmap_mb": 0,
+    "lfb_4mb": 0,
+    "alloc": 1419,
+    "reserved": 1616,
+    "max_alloc": 1437
+   }
+  },
+  {
+   "i": 7,
+   "clip_id": "MJijm9kbdHA_01",
+   "duration_s": 14.5,
+   "kept_frames": 174,
+   "frames_mb_est": 152.9,
+   "capture": {
+    "peak_rss": 4779,
+    "peak_anon": 4618,
+    "min_avail": 779,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1495
+   },
+   "at_cut": {
+    "tag": "clip 7 at cut (174 fr)",
+    "t": 145.8,
+    "mem_available": 1024,
+    "mem_free": 331,
+    "cached": 721,
+    "swap_used": 165,
+    "rss": 4561,
+    "anon": 4395,
+    "file": 164,
+    "pss": 2828,
+    "nvmap_mb": 0,
+    "lfb_4mb": 2,
+    "alloc": 1419,
+    "reserved": 1616,
+    "max_alloc": 1495
+   },
+   "drain": {
+    "peak_rss": 4569,
+    "peak_anon": 4401,
+    "min_avail": 1016,
+    "min_lfb": 2,
+    "torch_peak_alloc": 1453
+   },
+   "translate": {
+    "peak_rss": 4597,
+    "peak_anon": 4429,
+    "min_avail": 1005,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1483
+   },
+   "text": "Biden said Bernie had a vote multiple times against a brady bill that required stricter gun control.",
+   "after": {
+    "tag": "clip 7 done",
+    "t": 151.8,
+    "mem_available": 1108,
+    "mem_free": 414,
+    "cached": 721,
+    "swap_used": 165,
+    "rss": 4462,
+    "anon": 4316,
+    "file": 144,
+    "pss": 2734,
+    "nvmap_mb": 0,
+    "lfb_4mb": 3,
+    "alloc": 1419,
+    "reserved": 1616,
+    "max_alloc": 1483
+   }
+  },
+  {
+   "i": 8,
+   "clip_id": "wPJ_InXF_I8_06",
+   "duration_s": 4.939,
+   "kept_frames": 74,
+   "frames_mb_est": 65.0,
+   "capture": {
+    "peak_rss": 4686,
+    "peak_anon": 4524,
+    "min_avail": 902,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1495
+   },
+   "at_cut": {
+    "tag": "clip 8 at cut (74 fr)",
+    "t": 157.1,
+    "mem_available": 902,
+    "mem_free": 208,
+    "cached": 722,
+    "swap_used": 164,
+    "rss": 4687,
+    "anon": 4525,
+    "file": 160,
+    "pss": 2957,
+    "nvmap_mb": 0,
+    "lfb_4mb": 0,
+    "alloc": 1419,
+    "reserved": 1616,
+    "max_alloc": 1495
+   },
+   "drain": {
+    "peak_rss": 4696,
+    "peak_anon": 4532,
+    "min_avail": 895,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1495
+   },
+   "translate": {
+    "peak_rss": 4673,
+    "peak_anon": 4509,
+    "min_avail": 922,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1441
+   },
+   "text": "the students storytelling comprehension abilities.",
+   "after": {
+    "tag": "clip 8 done",
+    "t": 162.1,
+    "mem_available": 1009,
+    "mem_free": 314,
+    "cached": 722,
+    "swap_used": 164,
+    "rss": 4560,
+    "anon": 4414,
+    "file": 144,
+    "pss": 2831,
+    "nvmap_mb": 0,
+    "lfb_4mb": 3,
+    "alloc": 1419,
+    "reserved": 1616,
+    "max_alloc": 1441
+   }
+  },
+  {
+   "i": 9,
+   "clip_id": "I976oI3s1jQ_01",
+   "duration_s": 7.0,
+   "kept_frames": 84,
+   "frames_mb_est": 73.8,
+   "capture": {
+    "peak_rss": 4768,
+    "peak_anon": 4606,
+    "min_avail": 821,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1495
+   },
+   "at_cut": {
+    "tag": "clip 9 at cut (84 fr)",
+    "t": 169.5,
+    "mem_available": 815,
+    "mem_free": 153,
+    "cached": 693,
+    "swap_used": 164,
+    "rss": 4768,
+    "anon": 4606,
+    "file": 160,
+    "pss": 3037,
+    "nvmap_mb": 0,
+    "lfb_4mb": 0,
+    "alloc": 1419,
+    "reserved": 1616,
+    "max_alloc": 1495
+   },
+   "drain": {
+    "peak_rss": 4788,
+    "peak_anon": 4622,
+    "min_avail": 795,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1467
+   },
+   "translate": {
+    "peak_rss": 4770,
+    "peak_anon": 4604,
+    "min_avail": 794,
+    "min_lfb": 0,
+    "torch_peak_alloc": 1450
+   },
+   "text": "My strategy on the chill was a little bit patient and I thought it would be perfect.",
+   "after": {
+    "tag": "clip 9 done",
+    "t": 175.0,
+    "mem_available": 830,
+    "mem_free": 240,
+    "cached": 653,
+    "swap_used": 165,
+    "rss": 4702,
+    "anon": 4556,
+    "file": 144,
+    "pss": 2973,
+    "nvmap_mb": 0,
+    "lfb_4mb": 1,
+    "alloc": 1419,
+    "reserved": 1616,
+    "max_alloc": 1450
+   }
+  }
+ ],
+ "calibration_64mb": {
+  "mem_available": 0,
+  "mem_free": 0,
+  "rss": 64,
+  "anon": 64,
+  "file": 0,
+  "pss": 0,
+  "nvmap_mb": 0
+ },
+ "weights_mb": {
+  "dinov2:dinov2hand.pth:torch.float16": 41.3,
+  "dinov2:dinov2face.pth:torch.float16": 41.3,
+  "byt5_total": 1279.7,
+  "byt5_encoder_incl_adapter": 960.2,
+  "byt5_decoder": 318.4,
+  "byt5_param_dtypes": {
+   "torch.bfloat16": 670950472,
+   "torch.float32": 256
+  }
+ },
+ "smaps_ready": [
+  {
+   "mapping": "anon 1-32MB",
+   "rss_mb": 161
+  },
+  {
+   "mapping": "[heap]",
+   "rss_mb": 158
+  },
+  {
+   "mapping": "anon 32-64MB",
+   "rss_mb": 102
+  },
+  {
+   "mapping": "anon >64MB",
+   "rss_mb": 90
+  },
+  {
+   "mapping": "lib:libcublasLt",
+   "rss_mb": 46
+  },
+  {
+   "mapping": "lib:libtorch_cpu",
+   "rss_mb": 33
+  },
+  {
+   "mapping": "lib:libtorch_cuda",
+   "rss_mb": 25
+  },
+  {
+   "mapping": "lib:libtorch_python",
+   "rss_mb": 9
+  },
+  {
+   "mapping": "file:dmabuf:",
+   "rss_mb": 8
+  },
+  {
+   "mapping": "lib:cv2.abi3",
+   "rss_mb": 6
+  },
+  {
+   "mapping": "lib:libcufft",
+   "rss_mb": 6
+  },
+  {
+   "mapping": "anon <1MB",
+   "rss_mb": 4
+  },
+  {
+   "mapping": "file:python3.10",
+   "rss_mb": 4
+  },
+  {
+   "mapping": "lib:libcuda",
+   "rss_mb": 4
+  },
+  {
+   "mapping": "lib:libnvJitLink",
+   "rss_mb": 4
+  },
+  {
+   "mapping": "lib:_framework_bindings.cpython-310-aarch64-linux-gnu",
+   "rss_mb": 3
+  },
+  {
+   "mapping": "lib:libcrypto",
+   "rss_mb": 3
+  },
+  {
+   "mapping": "/dev/video0",
+   "rss_mb": 2
+  },
+  {
+   "mapping": "lib:libarrow",
+   "rss_mb": 2
+  },
+  {
+   "mapping": "lib:libQt5Core-104e39d9",
+   "rss_mb": 2
+  },
+  {
+   "mapping": "lib:libQt5Gui-4373c2bb",
+   "rss_mb": 2
+  },
+  {
+   "mapping": "lib:libQt5Widgets-42fd29df",
+   "rss_mb": 2
+  },
+  {
+   "mapping": "file:memfd:xorg",
+   "rss_mb": 1
+  },
+  {
+   "mapping": "lib:libarrow_compute",
+   "rss_mb": 1
+  },
+  {
+   "mapping": "lib:tokenizers.cpython-310-aarch64-linux-gnu",
+   "rss_mb": 1
+  }
+ ],
+ "smaps_at_first_cut": [
+  {
+   "mapping": "anon 1-32MB",
+   "rss_mb": 521
+  },
+  {
+   "mapping": "anon 32-64MB",
+   "rss_mb": 448
+  },
+  {
+   "mapping": "[heap]",
+   "rss_mb": 297
+  },
+  {
+   "mapping": "anon >64MB",
+   "rss_mb": 185
+  },
+  {
+   "mapping": "lib:libcublasLt",
+   "rss_mb": 55
+  },
+  {
+   "mapping": "lib:libtorch_cpu",
+   "rss_mb": 35
+  },
+  {
+   "mapping": "lib:libtorch_cuda",
+   "rss_mb": 28
+  },
+  {
+   "mapping": "lib:libcudnn_engines_precompiled",
+   "rss_mb": 22
+  },
+  {
+   "mapping": "file:dmabuf:",
+   "rss_mb": 15
+  },
+  {
+   "mapping": "file:fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1",
+   "rss_mb": 14
+  },
+  {
+   "mapping": "lib:_framework_bindings.cpython-310-aarch64-linux-gnu",
+   "rss_mb": 9
+  },
+  {
+   "mapping": "lib:libtorch_python",
+   "rss_mb": 9
+  },
+  {
+   "mapping": "file:8e0044e474913045fff3ace464ab14db1646f5f49b42f7c38cacc5f85a5bb8e9",
+   "rss_mb": 7
+  },
+  {
+   "mapping": "lib:libcufft",
+   "rss_mb": 6
+  },
+  {
+   "mapping": "lib:libcuda",
+   "rss_mb": 5
+  },
+  {
+   "mapping": "anon <1MB",
+   "rss_mb": 4
+  },
+  {
+   "mapping": "file:python3.10",
+   "rss_mb": 4
+  },
+  {
+   "mapping": "lib:libavcodec-2e98a126",
+   "rss_mb": 3
+  },
+  {
+   "mapping": "lib:cv2.abi3",
+   "rss_mb": 3
+  },
+  {
+   "mapping": "lib:libcudnn_engines_runtime_compiled",
+   "rss_mb": 2
+  },
+  {
+   "mapping": "lib:libcudnn_heuristic",
+   "rss_mb": 2
+  },
+  {
+   "mapping": "lib:libcudnn_graph",
+   "rss_mb": 2
+  },
+  {
+   "mapping": "/dev/video0",
+   "rss_mb": 2
+  },
+  {
+   "mapping": "lib:libcrypto",
+   "rss_mb": 2
+  },
+  {
+   "mapping": "file:memfd:xorg",
+   "rss_mb": 1
+  }
+ ],
+ "smaps_end": [
+  {
+   "mapping": "anon 32-64MB",
+   "rss_mb": 1510
+  },
+  {
+   "mapping": "[heap]",
+   "rss_mb": 828
+  },
+  {
+   "mapping": "anon 1-32MB",
+   "rss_mb": 253
+  },
+  {
+   "mapping": "anon >64MB",
+   "rss_mb": 235
+  },
+  {
+   "mapping": "file:dmabuf:",
+   "rss_mb": 25
+  },
+  {
+   "mapping": "lib:libcublasLt",
+   "rss_mb": 25
+  },
+  {
+   "mapping": "lib:libcudnn_engines_precompiled",
+   "rss_mb": 18
+  },
+  {
+   "mapping": "lib:libtorch_cuda",
+   "rss_mb": 16
+  },
+  {
+   "mapping": "lib:libtorch_cpu",
+   "rss_mb": 14
+  },
+  {
+   "mapping": "lib:_framework_bindings.cpython-310-aarch64-linux-gnu",
+   "rss_mb": 8
+  },
+  {
+   "mapping": "anon <1MB",
+   "rss_mb": 4
+  },
+  {
+   "mapping": "file:python3.10",
+   "rss_mb": 3
+  },
+  {
+   "mapping": "lib:libtorch_python",
+   "rss_mb": 3
+  },
+  {
+   "mapping": "lib:libcuda",
+   "rss_mb": 2
+  },
+  {
+   "mapping": "lib:libQt5Gui-4373c2bb",
+   "rss_mb": 2
+  },
+  {
+   "mapping": "lib:cv2.abi3",
+   "rss_mb": 2
+  },
+  {
+   "mapping": "lib:libcrypto",
+   "rss_mb": 2
+  },
+  {
+   "mapping": "lib:libcudnn_engines_runtime_compiled",
+   "rss_mb": 1
+  },
+  {
+   "mapping": "lib:libcudnn_heuristic",
+   "rss_mb": 1
+  },
+  {
+   "mapping": "lib:libcudnn_graph",
+   "rss_mb": 1
+  },
+  {
+   "mapping": "file:memfd:xorg",
+   "rss_mb": 1
+  },
+  {
+   "mapping": "lib:libQt5XcbQpa-e326a422",
+   "rss_mb": 1
+  },
+  {
+   "mapping": "lib:libarrow",
+   "rss_mb": 1
+  },
+  {
+   "mapping": "lib:libQt5Core-104e39d9",
+   "rss_mb": 1
+  },
+  {
+   "mapping": "lib:libQt5Widgets-42fd29df",
+   "rss_mb": 1
+  }
+ ],
+ "others_at_end": [
+  {
+   "pid": 2747,
+   "rss_mb": 342,
+   "comm": "gnome-shell"
+  },
+  {
+   "pid": 4069,
+   "rss_mb": 305,
+   "comm": "claude"
+  },
+  {
+   "pid": 2600,
+   "rss_mb": 186,
+   "comm": "Xorg"
+  },
+  {
+   "pid": 3005,
+   "rss_mb": 173,
+   "comm": "gnome-software"
+  },
+  {
+   "pid": 2367,
+   "rss_mb": 59,
+   "comm": "packagekitd"
+  },
+  {
+   "pid": 2965,
+   "rss_mb": 42,
+   "comm": "xdg-desktop-por"
+  },
+  {
+   "pid": 747,
+   "rss_mb": 39,
+   "comm": "snapd"
+  },
+  {
+   "pid": 2982,
+   "rss_mb": 37,
+   "comm": "evolution-alarm"
+  },
+  {
+   "pid": 4004,
+   "rss_mb": 36,
+   "comm": "gnome-terminal-"
+  },
+  {
+   "pid": 1394,
+   "rss_mb": 33,
+   "comm": "dockerd"
+  },
+  {
+   "pid": 2963,
+   "rss_mb": 32,
+   "comm": "python3"
+  },
+  {
+   "pid": 3081,
+   "rss_mb": 32,
+   "comm": "fwupd"
+  },
+  {
+   "pid": 3224,
+   "rss_mb": 26,
+   "comm": "gjs"
+  },
+  {
+   "pid": 3138,
+   "rss_mb": 25,
+   "comm": "tracker-miner-f"
+  }
+ ]
+}

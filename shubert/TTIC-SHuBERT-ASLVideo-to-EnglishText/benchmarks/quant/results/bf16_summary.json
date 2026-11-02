@@ -1,0 +1,15 @@
+{
+  "variant": "bf16",
+  "baseline": "results_quant_capture_20261101-130616.json",
+  "n": 200,
+  "differ_vs_bf16": 0,
+  "bleu": 20.34,
+  "chrf": 44.08,
+  "bleu_bf16_same_clips": 20.34,
+  "chrf_bf16_same_clips": 44.08,
+  "generate_s_median": 2.793,
+  "generate_s_mean": 3.627,
+  "generate_s_total": 725.4,
+  "peak_cuda_alloc_mb": 1490.1,
+  "peak_note": "restored from the 2026-11-01 15:22 first full run; the resume rerun did not load the model"
+}

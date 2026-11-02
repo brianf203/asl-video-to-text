@@ -41,3 +41,7 @@ POSE_SWAP_SCOPING.md
 # like PROJECT_CONTEXT.md, and the paper draft is unverified: 7 citations unchecked and
 # the LaTeX has never been compiled. Rooted so an upstream docs/ elsewhere is unaffected.
 /docs/
+
+# quant gate feature dumps: 95 MB, regenerate with benchmarks/quant/capture_features.py
+shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/benchmarks/quant/features/
+shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/benchmarks/quant/features_bad0/

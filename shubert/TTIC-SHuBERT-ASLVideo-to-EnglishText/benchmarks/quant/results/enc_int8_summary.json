@@ -1,0 +1,24 @@
+{
+  "variant": "enc_int8",
+  "baseline": "results_quant_capture_20261101-130616.json",
+  "slow_mha_modules": 12,
+  "param_mb_before": 1279.7,
+  "cuda_alloc_mb_before": 1313.5,
+  "linears": {
+    "dec": 66,
+    "enc": 208
+  },
+  "quantize_s": 0.8,
+  "param_mb_after": 802.5,
+  "cuda_alloc_mb_after": 838.9,
+  "n": 200,
+  "differ_vs_bf16": 77,
+  "bleu": 20.09,
+  "chrf": 43.93,
+  "bleu_bf16_same_clips": 20.34,
+  "chrf_bf16_same_clips": 44.08,
+  "generate_s_median": 2.901,
+  "generate_s_mean": 3.723,
+  "generate_s_total": 744.6,
+  "peak_cuda_alloc_mb": 1328.5
+}
