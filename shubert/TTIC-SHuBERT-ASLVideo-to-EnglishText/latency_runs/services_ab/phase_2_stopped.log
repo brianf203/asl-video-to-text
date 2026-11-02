@@ -1,0 +1,6 @@
+Mem:            7619        1361        5918           5         340        6046
+=== cell 2_stopped_sequential start 23:26:55 oc3=1626 ===
+=== cell 2_stopped_sequential exit 0 23:36:21 oc3=2421 ===
+=== cell 2_stopped_overlap start 23:36:41 oc3=2421 ===
+=== cell 2_stopped_overlap exit 0 23:41:47 oc3=3109 ===
+PHASE_DONE 2_stopped

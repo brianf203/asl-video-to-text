@@ -1,0 +1,6 @@
+Mem:            7619        1787        5264           6         567        5619
+=== cell 1_ctrl_sequential start 22:59:51 oc3=0 ===
+=== cell 1_ctrl_sequential exit 0 23:09:23 oc3=905 ===
+=== cell 1_ctrl_overlap start 23:09:43 oc3=905 ===
+=== cell 1_ctrl_overlap exit 0 23:15:17 oc3=1626 ===
+PHASE_DONE 1_ctrl

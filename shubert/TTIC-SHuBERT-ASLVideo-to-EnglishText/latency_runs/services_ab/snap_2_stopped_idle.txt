@@ -1,0 +1,35 @@
+# 2_stopped_idle 23:26:55
+               total        used        free      shared  buff/cache   available
+Mem:            7619        1361        5918           5         340        6046
+Swap:           5857           3        5854
+Node 0, zone   Normal  29429  28343  18107  10424   5113   2272   1007    502    210    228     85     39     42 
+MemFree:         6060212 kB
+MemAvailable:    6191520 kB
+Cached:           284256 kB
+SwapCached:           16 kB
+SwapFree:        5994884 kB
+  RSS USER   COMMAND
+408596 sllu  gnome-shell
+316500 sllu  claude
+179560 root  Xorg
+57868 sllu   xdg-desktop-por
+54976 sllu   gnome-terminal-
+54808 sllu   gjs
+28364 sllu   ibus-extension-
+27252 sllu   gsd-power
+26784 sllu   gsd-xsettings
+26444 sllu   gsd-media-keys
+25984 sllu   gsd-color
+24988 sllu   gjs
+24316 sllu   gjs
+22764 sllu   xdg-desktop-por
+22532 sllu   gsd-wacom
+22328 sllu   ibus-x11
+22152 sllu   gsd-keyboard
+20292 sllu   wireplumber
+20268 root   jtop
+19512 sllu   gnome-shell-cal
+19332 root   networkd-dispat
+17900 root   NetworkManager
+17660 sllu   gnome-session-b
+16264 root   jtop

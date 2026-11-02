@@ -1,0 +1,35 @@
+# 1_ctrl_idle 22:59:51
+               total        used        free      shared  buff/cache   available
+Mem:            7619        1787        5264           6         567        5619
+Swap:           5857           0        5857
+Node 0, zone   Normal  28062  21415  12226   6945   3328   1766    732    346    191    107     69     38     58 
+MemFree:         5390484 kB
+MemAvailable:    5754308 kB
+Cached:           514056 kB
+SwapCached:            0 kB
+SwapFree:        5998468 kB
+  RSS USER   COMMAND
+431428 sllu  gnome-shell
+379228 sllu  claude
+182076 root  Xorg
+88760 root   dockerd
+85700 sllu   tracker-miner-f
+84964 sllu   gnome-software
+68452 root   packagekitd
+66820 sllu   evolution-alarm
+62756 sllu   xdg-desktop-por
+60288 sllu   gnome-terminal-
+59600 sllu   gjs
+51136 root   snapd
+49756 root   containerd
+46220 sllu   update-notifier
+43964 sllu   python3
+38152 sllu   goa-daemon
+32308 sllu   evolution-calen
+29740 sllu   ibus-extension-
+29056 root   fwupd
+28776 sllu   evolution-addre
+28660 sllu   gsd-power
+28128 sllu   gsd-xsettings
+28068 sllu   gsd-media-keys
+27612 sllu   gsd-color
