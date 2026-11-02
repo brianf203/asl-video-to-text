@@ -1,0 +1,53 @@
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert.py:132: FutureWarning: Positional args are being deprecated, use kwargs instead. Refer to https://pytorch.org/docs/main/generated/torch.nn.Module.html#torch.nn.Module.state_dict for details.
+  state = super().state_dict(destination, prefix, keep_vars)
+2026-11-02 13:07:08 | WARNING | torchao.kernel.intmm | Warning: Detected no triton, on systems without Triton certain kernels will not work
+Wav2Vec2Config is imported from: fairseq.models.wav2vec.wav2vec2
+Full path: /home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/fairseq/models/wav2vec/wav2vec2.py
+[byt5] device: cuda dtype: bfloat16
+[byt5] encoder Linears quantized to int8 (BYT5_ENC_INT8=0 to disable)
+40 clips, beams 4, max_length 768, dtype torch.bfloat16
+  0 2_PWeBb41qM_01     steps 207 eager  37.76 graph  14.95 ms/step  same(static/graph) False/False
+  1 2_PWeBb41qM_02     steps  76 eager  46.84 graph  17.37 ms/step  same(static/graph) True/True
+  2 2_PWeBb41qM_03     steps 162 eager  39.04 graph  15.17 ms/step  same(static/graph) True/True
+  3 2_PWeBb41qM_04     steps  51 eager  45.92 graph  16.74 ms/step  same(static/graph) True/True
+  4 2_PWeBb41qM_05     steps  34 eager  39.15 graph  15.97 ms/step  same(static/graph) True/True
+  5 5iRIeHAK9b0_01     steps  17 eager  34.14 graph  11.48 ms/step  same(static/graph) True/True
+  6 5iRIeHAK9b0_02     steps 117 eager  36.96 graph  13.87 ms/step  same(static/graph) True/True
+  7 5iRIeHAK9b0_03     steps  48 eager  35.70 graph  13.21 ms/step  same(static/graph) True/True
+  8 5iRIeHAK9b0_04     steps  88 eager  36.69 graph  14.02 ms/step  same(static/graph) False/False
+  9 5iRIeHAK9b0_05     steps  11 eager  53.47 graph  18.80 ms/step  same(static/graph) True/True
+ 10 D9HR4q0vbwE_01     steps 113 eager  38.61 graph  15.01 ms/step  same(static/graph) True/True
+ 11 D9HR4q0vbwE_02     steps  25 eager  35.18 graph  12.85 ms/step  same(static/graph) True/True
+ 12 D9HR4q0vbwE_03     steps  91 eager  35.84 graph  13.32 ms/step  same(static/graph) True/True
+ 13 D9HR4q0vbwE_05     steps  19 eager  38.88 graph  15.80 ms/step  same(static/graph) False/False
+ 14 D9HR4q0vbwE_06     steps  68 eager  35.54 graph  12.88 ms/step  same(static/graph) True/True
+ 15 D9HR4q0vbwE_07     steps  93 eager  36.12 graph  14.03 ms/step  same(static/graph) True/True
+ 16 FND2JfzngVY_01     steps  23 eager  37.02 graph  14.12 ms/step  same(static/graph) True/True
+ 17 FND2JfzngVY_02     steps  52 eager  40.29 graph  14.51 ms/step  same(static/graph) True/True
+ 18 FND2JfzngVY_03     steps  54 eager  35.46 graph  12.92 ms/step  same(static/graph) True/True
+ 19 FND2JfzngVY_04     steps 115 eager  37.06 graph  13.70 ms/step  same(static/graph) True/True
+ 20 FND2JfzngVY_05     steps  32 eager  51.06 graph  18.74 ms/step  same(static/graph) True/True
+ 21 FND2JfzngVY_06     steps  54 eager  43.35 graph  15.73 ms/step  same(static/graph) True/True
+ 22 I976oI3s1jQ_01     steps  93 eager  36.87 graph  13.74 ms/step  same(static/graph) True/True
+ 23 I976oI3s1jQ_02     steps 118 eager  37.67 graph  14.13 ms/step  same(static/graph) True/True
+ 24 I976oI3s1jQ_03     steps  85 eager  37.75 graph  14.06 ms/step  same(static/graph) True/True
+ 25 I976oI3s1jQ_04     steps  14 eager  55.14 graph  22.29 ms/step  same(static/graph) True/True
+ 26 I976oI3s1jQ_05     steps  51 eager  41.53 graph  15.41 ms/step  same(static/graph) True/True
+ 27 I976oI3s1jQ_06     steps  81 eager  36.70 graph  13.31 ms/step  same(static/graph) True/True
+ 28 I976oI3s1jQ_07     steps 222 eager  43.48 graph  16.36 ms/step  same(static/graph) True/True
+ 29 J-0KHhPS_m4_01     steps  75 eager  42.45 graph  15.71 ms/step  same(static/graph) True/True
+ 30 J-0KHhPS_m4_02     steps  65 eager  40.45 graph  15.91 ms/step  same(static/graph) True/True
+ 31 J-0KHhPS_m4_03     steps  25 eager  65.17 graph  23.70 ms/step  same(static/graph) True/True
+ 32 J-0KHhPS_m4_04     steps 111 eager  38.88 graph  14.47 ms/step  same(static/graph) True/True
+ 33 J-0KHhPS_m4_05     steps  23 eager  36.70 graph  14.16 ms/step  same(static/graph) True/True
+ 34 JtPw-DVL4Rk_01     steps 110 eager  49.33 graph  16.59 ms/step  same(static/graph) True/True
+ 35 L68SkmewDnI_01     steps  34 eager  37.42 graph  14.34 ms/step  same(static/graph) True/True
+ 36 L68SkmewDnI_02     steps 155 eager  39.41 graph  15.02 ms/step  same(static/graph) True/True
+ 37 L68SkmewDnI_03     steps 130 eager  37.96 graph  14.34 ms/step  same(static/graph) True/True
+ 38 L68SkmewDnI_04     steps 148 eager  37.83 graph  14.44 ms/step  same(static/graph) True/True
+ 39 L68SkmewDnI_05     steps  40 eager  37.56 graph  13.75 ms/step  same(static/graph) True/True
+
+median ms/step eager 37.89  graph 14.46; generate s eager 131.5 graph 54.1; ids identical 37/40 (static-no-graph 37/40)
+extra CUDA alloc after graphs: 336.2 MB, graphs captured: 25 (buckets [(64, 64), (64, 128), (64, 256), (64, 512), (64, 768), (128, 64), (128, 128), (128, 256), (128, 512), (128, 768), (192, 64), (192, 128), (192, 256), (192, 512), (192, 768), (256, 64), (256, 128), (256, 256), (256, 512), (256, 768), (320, 64), (320, 128), (320, 256), (320, 512), (320, 768)])
