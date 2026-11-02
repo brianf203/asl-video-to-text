@@ -1,0 +1,13 @@
+=== cell 1_sequential_cudagraph_0 start 14:13:30 oc3=8328 ===
+=== cell 1_sequential_cudagraph_0 exit 0 14:22:56 oc3=9343 ===
+=== cell 2_sequential_cudagraph_1 start 14:23:16 oc3=9343 ===
+=== cell 2_sequential_cudagraph_1 exit 0 14:31:36 oc3=10337 ===
+=== cell 3_sequential_cudagraph_0 start 14:31:56 oc3=10337 ===
+=== cell 3_sequential_cudagraph_0 exit 0 14:41:24 oc3=11255 ===
+=== cell 4_overlap_cudagraph_0 start 14:41:44 oc3=11255 ===
+=== cell 4_overlap_cudagraph_0 exit 0 14:48:28 oc3=13000 ===
+=== cell 5_overlap_cudagraph_1 start 14:48:48 oc3=13000 ===
+=== cell 5_overlap_cudagraph_1 exit 0 14:55:51 oc3=14052 ===
+=== cell 6_overlap_cudagraph_0 start 14:56:11 oc3=14052 ===
+=== cell 6_overlap_cudagraph_0 exit 0 15:02:52 oc3=15818 ===
+ALL_DONE

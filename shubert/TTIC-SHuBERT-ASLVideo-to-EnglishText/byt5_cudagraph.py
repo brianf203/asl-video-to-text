@@ -1,9 +1,10 @@
-"""CUDA-graph ByT5 decode step for transformers 4.30's T5Stack. Opt-in: BYT5_CUDAGRAPH=1.
+"""CUDA-graph ByT5 decode step for transformers 4.30's T5Stack. Default ON; BYT5_CUDAGRAPH=0 disables.
 
 Measured (benchmarks/cudagraph/, 200-clip OpenASL replay, 2026-11-02): decode 39.2 -> 14.7 ms/step,
 generate() 2.47x faster, BLEU 20.09 -> 20.60 (paired bootstrap +0.52, CI [-0.10, +1.24]: no loss),
 182/200 texts identical; the 18 that change do so from bf16 reduction order (they change the same way
-with the static math run WITHOUT a graph). ~110 MB extra CUDA memory.
+with the static math run WITHOUT a graph). ~110 MB extra CUDA memory. Live A/B
+(latency_runs/cudagraph_ab/): sequential post-cut 5.25 -> 3.41 s; overlap 0 refusals (was 7/40), 22 -> 3.7 s.
 
 Why eager 4.30 cannot be graphed: the self-attention KV cache grows by torch.cat every step
 (new shapes) and the relative position bias is rebuilt from Python ints. This module re-implements
@@ -20,7 +21,7 @@ ONE decoder step over preallocated buffers, reusing the model's own weights/modu
 
 HF 4.30's generate()/beam scorer is left untouched: install(model) swaps only forward(),
 _reorder_cache() and the past sentinel, so the search itself is identical to eager.
-Wired in by inference._get_cached_model() when BYT5_CUDAGRAPH=1; all graphs are captured at load
+Wired in by inference._get_cached_model() unless BYT5_CUDAGRAPH=0; all graphs are captured at load
 (warm_all), so no clip pays a capture.
 """
 import torch

@@ -26,6 +26,10 @@ sys.path.insert(0, ROOT)
 sys.path.insert(0, HERE)
 os.chdir(ROOT)
 
+# The model must load EAGER here (this script installs the graph decoder itself, to compare both);
+# BYT5_CUDAGRAPH has been default-on in inference.py since 2026-11-02.
+os.environ["BYT5_CUDAGRAPH"] = "0"
+
 import numpy as np  # noqa: E402
 import torch  # noqa: E402
 

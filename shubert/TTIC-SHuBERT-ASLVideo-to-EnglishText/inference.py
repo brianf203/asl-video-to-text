@@ -752,10 +752,11 @@ def _get_cached_model(model_checkpoint: str, tokenizer_checkpoint: str, output_d
     print(f"[byt5] device: {device} dtype: {_dtype_name}")
     if os.environ.get("BYT5_ENC_INT8", "1") == "1" and device.type == "cuda":
         _quantize_encoder_int8(model)
-    # CUDA-graph decode (opt-in until the live A/B decides): see byt5_cudagraph.py for the
-    # measurements. Beams / max_length are read from the same env vars test() uses; a clip that
-    # does not fit the static buffers falls back to the eager path on its own.
-    if os.environ.get("BYT5_CUDAGRAPH", "0") == "1" and device.type == "cuda":
+    # CUDA-graph decode, DEFAULT ON since 2026-11-02 (live A/B, latency_runs/cudagraph_ab/: sequential
+    # post-cut 5.25 -> 3.41 s; at live pace 0 refusals instead of 7, median 22 -> 3.7 s; 200-clip BLEU
+    # 20.09 -> 20.60, no loss). See byt5_cudagraph.py. Beams / max_length are read from the same env
+    # vars test() uses; a clip that does not fit the static buffers falls back to eager on its own.
+    if os.environ.get("BYT5_CUDAGRAPH", "1") == "1" and device.type == "cuda":
         import time as _t
         import byt5_cudagraph
         _t0 = _t.time()

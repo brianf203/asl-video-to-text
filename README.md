@@ -224,6 +224,8 @@ validated.
 | `BYT5_DEVICE` | `cuda` | `cpu` reverts the decoder to CPU |
 | `BYT5_DTYPE` | `bfloat16` | decoder precision (T5 overflows in fp16) |
 | `BYT5_CKPT` | — | override the checkpoint path for every entry point at once |
+| `BYT5_ENC_INT8` | `1` | encoder Linears at int8 weight-only (torchao): ~480MB less GPU memory, quality and speed unchanged. `0` restores bf16 |
+| `BYT5_CUDAGRAPH` | `1` | decode ByT5 through CUDA graphs (`byt5_cudagraph.py`): ~2.5x faster decode, post-cut ~5.3s -> ~3.4s, and at live pace no clips refused; ~110MB more GPU memory, ~5s more at startup. `0` restores eager decode |
 | `DINOV2_DTYPE` | `float16` | DINOv2 compute precision; measured quality-neutral. Ignored on CPU |
 | `DINOV2_BATCH_SIZE` | `32` | lower it under memory pressure |
 | `PYTORCH_NO_CUDA_MEMORY_CACHING` | `0` | `1` disables the CUDA caching allocator (about 2x slower decode); only for the NVML assert, see step 8 |
@@ -244,3 +246,7 @@ and `DINOEmbedder initialized on device: … dtype: …` to confirm these took e
   glibc's per-thread malloc arenas (MediaPipe starts new threads for every clip), which is
   why `auto_segment_v5.py` caps them at 2; that leaves about 1GB more free memory over a
   40-clip session at no measured latency cost.
+- ByT5 decode is dispatch-bound (one CPU core issuing GPU kernels), not compute-bound, so it is
+  captured as CUDA graphs (`BYT5_CUDAGRAPH`). Measured live, 40 clips: sequential post-cut median
+  5.25s -> 3.41s, and at live pace (signer not waiting) 0 clips refused instead of 7, median 22s ->
+  3.7s. 200-clip BLEU 20.09 -> 20.60 (paired bootstrap: no loss).
