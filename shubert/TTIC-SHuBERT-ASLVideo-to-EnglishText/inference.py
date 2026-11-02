@@ -725,9 +725,53 @@ def _get_cached_model(model_checkpoint: str, tokenizer_checkpoint: str, output_d
     model.to(device)
     model.eval()
     print(f"[byt5] device: {device} dtype: {_dtype_name}")
+    if os.environ.get("BYT5_ENC_INT8", "1") == "1" and device.type == "cuda":
+        _quantize_encoder_int8(model)
 
     _model_cache[key] = (model, tokenizer, device)
     return _model_cache[key]
+
+
+def _quantize_encoder_int8(model):
+    """int8 weight-only quantization of every encoder-side nn.Linear (SHuBERT + adapter + T5
+    encoder; the decoder and the tied lm_head stay bf16). On by default since 2026-11-01;
+    BYT5_ENC_INT8=0 turns it off (plain bf16). Falls back to bf16 if torchao is not installed.
+
+    Live A/B 2026-11-01 (latency_runs/enc_int8_ab, ctrl/int8/ctrl x sequential+overlap, 40 utts
+    each): sequential post-cut median 5.36 s vs 5.26/5.49 control, decode ms/step flat, min
+    MemAvailable +300-400 MB; overlap too noisy for latency, min MemAvailable again higher.
+
+    Gated 2026-11-01 on 200 OpenASL clips replayed from saved features
+    (benchmarks/quant/quant_gate.py): CUDA inference peak 1523 -> 1039 MB (-485 MB), generate()
+    speed flat, paired-bootstrap BLEU -0.26 [-1.14, +0.57] vs bf16 (no detectable loss), but the
+    text changes on 77/200 clips. Decoder int4 was rejected there: +36% decode time, since decode is
+    dispatch-bound (2026-08-24).
+
+    fairseq's MultiheadAttention fast path hands q/k/v_proj.weight straight to
+    F.multi_head_attention_forward, which runs aten.t on them, and torchao's Int8Tensor does not
+    implement that. skip_embed_dim_check=True (otherwise it only skips an assert) routes attention
+    through the q/k/v_proj Linears instead. That path ALONE changes 32/200 texts (BLEU -0.11
+    [-0.42, +0.20]); it is part of this switch, not a separate one.
+    """
+    try:
+        from torchao.quantization import Int8WeightOnlyConfig, quantize_
+    except ImportError:
+        print("[byt5] torchao not installed; encoder stays bf16 (pip install torchao==0.18.0)")
+        return
+    from fairseq.modules.multihead_attention import MultiheadAttention
+
+    for m in model.modules():
+        if isinstance(m, MultiheadAttention):
+            m.skip_embed_dim_check = True
+
+    def _enc_linear(m, fqn):
+        return (isinstance(m, torch.nn.Linear) and not fqn.startswith("decoder.")
+                and fqn != "lm_head")
+
+    quantize_(model, Int8WeightOnlyConfig(), filter_fn=_enc_linear)
+    torch.cuda.synchronize()
+    torch.cuda.empty_cache()
+    print("[byt5] encoder Linears quantized to int8 (BYT5_ENC_INT8=0 to disable)")
 
 
 def preload_model(model_checkpoint: str, tokenizer_checkpoint: str, output_dir: str) -> None:

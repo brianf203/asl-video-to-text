@@ -20,3 +20,4 @@ mediapipe==0.10.13
 tokenizers==0.13.3
 tensorboardX
 cffi
+torchao==0.18.0
