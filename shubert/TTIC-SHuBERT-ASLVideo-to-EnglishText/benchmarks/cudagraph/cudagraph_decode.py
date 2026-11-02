@@ -31,7 +31,7 @@ import torch  # noqa: E402
 
 import inference  # noqa: E402
 import run_eval  # noqa: E402
-import static_decoder  # noqa: E402
+import byt5_cudagraph as static_decoder  # noqa: E402
 
 FEATS = os.path.join(ROOT, "benchmarks", "quant", "features")
 

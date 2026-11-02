@@ -1,0 +1,213 @@
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/torch/nn/utils/weight_norm.py:144: FutureWarning: `torch.nn.utils.weight_norm` is deprecated in favor of `torch.nn.utils.parametrizations.weight_norm`.
+  WeightNorm.apply(module, name, dim)
+/home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert.py:132: FutureWarning: Positional args are being deprecated, use kwargs instead. Refer to https://pytorch.org/docs/main/generated/torch.nn.Module.html#torch.nn.Module.state_dict for details.
+  state = super().state_dict(destination, prefix, keep_vars)
+2026-11-02 13:19:45 | WARNING | torchao.kernel.intmm | Warning: Detected no triton, on systems without Triton certain kernels will not work
+Wav2Vec2Config is imported from: fairseq.models.wav2vec.wav2vec2
+Full path: /home/sllu/asl-video-to-text/shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/shubert_venv/lib/python3.10/site-packages/fairseq/models/wav2vec/wav2vec2.py
+[byt5] device: cuda dtype: bfloat16
+[byt5] encoder Linears quantized to int8 (BYT5_ENC_INT8=0 to disable)
+200 clips, beams 4, max_length 768, dtype torch.bfloat16
+  0 2_PWeBb41qM_01     steps 207 eager  38.50 graph  15.22 ms/step  same(static/graph) None/False
+  1 2_PWeBb41qM_02     steps  76 eager  47.60 graph  17.75 ms/step  same(static/graph) None/True
+  2 2_PWeBb41qM_03     steps 162 eager  39.83 graph  15.50 ms/step  same(static/graph) None/True
+  3 2_PWeBb41qM_04     steps  51 eager  46.88 graph  17.35 ms/step  same(static/graph) None/True
+  4 2_PWeBb41qM_05     steps  34 eager  40.14 graph  16.85 ms/step  same(static/graph) None/True
+  5 5iRIeHAK9b0_01     steps  17 eager  34.89 graph  11.86 ms/step  same(static/graph) None/True
+  6 5iRIeHAK9b0_02     steps 117 eager  37.69 graph  14.08 ms/step  same(static/graph) None/True
+  7 5iRIeHAK9b0_03     steps  48 eager  36.41 graph  13.35 ms/step  same(static/graph) None/True
+  8 5iRIeHAK9b0_04     steps  88 eager  37.43 graph  14.22 ms/step  same(static/graph) None/False
+  9 5iRIeHAK9b0_05     steps  11 eager  55.30 graph  19.31 ms/step  same(static/graph) None/True
+ 10 D9HR4q0vbwE_01     steps 113 eager  39.46 graph  15.03 ms/step  same(static/graph) None/True
+ 11 D9HR4q0vbwE_02     steps  25 eager  36.18 graph  13.71 ms/step  same(static/graph) None/True
+ 12 D9HR4q0vbwE_03     steps  91 eager  36.72 graph  13.95 ms/step  same(static/graph) None/True
+ 13 D9HR4q0vbwE_05     steps  19 eager  39.83 graph  16.17 ms/step  same(static/graph) None/False
+ 14 D9HR4q0vbwE_06     steps  68 eager  36.39 graph  12.97 ms/step  same(static/graph) None/True
+ 15 D9HR4q0vbwE_07     steps  93 eager  36.56 graph  14.71 ms/step  same(static/graph) None/True
+ 16 FND2JfzngVY_01     steps  23 eager  37.53 graph  14.63 ms/step  same(static/graph) None/True
+ 17 FND2JfzngVY_02     steps  52 eager  41.05 graph  15.16 ms/step  same(static/graph) None/True
+ 18 FND2JfzngVY_03     steps  54 eager  36.26 graph  13.75 ms/step  same(static/graph) None/True
+ 19 FND2JfzngVY_04     steps 115 eager  38.27 graph  13.90 ms/step  same(static/graph) None/True
+ 20 FND2JfzngVY_05     steps  32 eager  52.10 graph  20.07 ms/step  same(static/graph) None/True
+ 21 FND2JfzngVY_06     steps  54 eager  44.26 graph  15.86 ms/step  same(static/graph) None/True
+ 22 I976oI3s1jQ_01     steps  93 eager  37.55 graph  13.85 ms/step  same(static/graph) None/True
+ 23 I976oI3s1jQ_02     steps 118 eager  38.26 graph  14.25 ms/step  same(static/graph) None/True
+ 24 I976oI3s1jQ_03     steps  85 eager  38.71 graph  14.16 ms/step  same(static/graph) None/True
+ 25 I976oI3s1jQ_04     steps  14 eager  56.45 graph  21.12 ms/step  same(static/graph) None/True
+ 26 I976oI3s1jQ_05     steps  51 eager  42.55 graph  16.03 ms/step  same(static/graph) None/True
+ 27 I976oI3s1jQ_06     steps  81 eager  37.39 graph  13.54 ms/step  same(static/graph) None/True
+ 28 I976oI3s1jQ_07     steps 222 eager  44.88 graph  16.48 ms/step  same(static/graph) None/True
+ 29 J-0KHhPS_m4_01     steps  75 eager  43.32 graph  15.75 ms/step  same(static/graph) None/True
+ 30 J-0KHhPS_m4_02     steps  65 eager  41.47 graph  16.12 ms/step  same(static/graph) None/True
+ 31 J-0KHhPS_m4_03     steps  25 eager  66.77 graph  24.41 ms/step  same(static/graph) None/True
+ 32 J-0KHhPS_m4_04     steps 111 eager  39.69 graph  14.77 ms/step  same(static/graph) None/True
+ 33 J-0KHhPS_m4_05     steps  23 eager  37.53 graph  13.51 ms/step  same(static/graph) None/True
+ 34 JtPw-DVL4Rk_01     steps 110 eager  50.36 graph  16.94 ms/step  same(static/graph) None/True
+ 35 L68SkmewDnI_01     steps  34 eager  38.26 graph  15.13 ms/step  same(static/graph) None/True
+ 36 L68SkmewDnI_02     steps 155 eager  40.03 graph  15.23 ms/step  same(static/graph) None/True
+ 37 L68SkmewDnI_03     steps 130 eager  39.14 graph  14.55 ms/step  same(static/graph) None/True
+ 38 L68SkmewDnI_04     steps 148 eager  39.37 graph  14.60 ms/step  same(static/graph) None/True
+ 39 L68SkmewDnI_05     steps  40 eager  38.45 graph  14.01 ms/step  same(static/graph) None/True
+ 40 L68SkmewDnI_06     steps  93 eager  40.44 graph  14.75 ms/step  same(static/graph) None/True
+ 41 LT0-h4P_xBY_01     steps  21 eager  44.84 graph  16.88 ms/step  same(static/graph) None/True
+ 42 LT0-h4P_xBY_02     steps 114 eager  38.31 graph  14.37 ms/step  same(static/graph) None/True
+ 43 LT0-h4P_xBY_03     steps 186 eager  38.41 graph  12.60 ms/step  same(static/graph) None/False
+ 44 LT0-h4P_xBY_04     steps 106 eager  37.39 graph  13.82 ms/step  same(static/graph) None/True
+ 45 LT0-h4P_xBY_05     steps 122 eager  37.21 graph  13.81 ms/step  same(static/graph) None/True
+ 46 LT0-h4P_xBY_06     steps  74 eager  38.10 graph  13.77 ms/step  same(static/graph) None/True
+ 47 MJijm9kbdHA_01     steps 101 eager  39.50 graph  14.65 ms/step  same(static/graph) None/True
+ 48 MJijm9kbdHA_02     steps  54 eager  37.06 graph  13.98 ms/step  same(static/graph) None/True
+ 49 MJijm9kbdHA_03     steps  86 eager  37.51 graph  13.73 ms/step  same(static/graph) None/True
+ 50 MJijm9kbdHA_04     steps  74 eager  37.32 graph  11.04 ms/step  same(static/graph) None/False
+ 51 MJijm9kbdHA_05     steps  11 eager  34.79 graph  11.78 ms/step  same(static/graph) None/True
+ 52 NBpYolVo5WQ_01     steps  87 eager  40.66 graph  14.82 ms/step  same(static/graph) None/True
+ 53 NBpYolVo5WQ_02     steps 163 eager  38.28 graph  14.43 ms/step  same(static/graph) None/False
+ 54 NBpYolVo5WQ_03     steps 148 eager  39.25 graph  14.45 ms/step  same(static/graph) None/True
+ 55 NBpYolVo5WQ_04     steps  77 eager  37.39 graph  13.67 ms/step  same(static/graph) None/True
+ 56 NBpYolVo5WQ_05     steps  68 eager  38.31 graph  13.91 ms/step  same(static/graph) None/True
+ 57 NBpYolVo5WQ_06     steps  42 eager  37.11 graph  14.05 ms/step  same(static/graph) None/True
+ 58 PYbUwpYMx0A_01     steps  37 eager  37.05 graph  13.94 ms/step  same(static/graph) None/True
+ 59 PYbUwpYMx0A_02     steps  87 eager  40.85 graph  15.10 ms/step  same(static/graph) None/True
+ 60 PYbUwpYMx0A_03     steps  33 eager  46.05 graph  16.64 ms/step  same(static/graph) None/True
+ 61 PYbUwpYMx0A_04     steps  76 eager  37.57 graph  13.71 ms/step  same(static/graph) None/True
+ 62 PYbUwpYMx0A_05     steps  19 eager  45.23 graph  15.89 ms/step  same(static/graph) None/True
+ 63 TUH4q-QBV7k_01     steps  30 eager  39.33 graph  14.85 ms/step  same(static/graph) None/True
+ 64 TUH4q-QBV7k_02     steps 129 eager  45.24 graph  16.07 ms/step  same(static/graph) None/False
+ 65 TUH4q-QBV7k_03     steps  75 eager  51.91 graph  19.36 ms/step  same(static/graph) None/True
+ 66 TUH4q-QBV7k_04     steps  11 eager  52.08 graph  17.70 ms/step  same(static/graph) None/True
+ 67 TUH4q-QBV7k_05     steps  19 eager  37.48 graph  13.83 ms/step  same(static/graph) None/True
+ 68 TXyNxVRRPt8_01     steps  63 eager  46.55 graph  16.97 ms/step  same(static/graph) None/True
+ 69 TXyNxVRRPt8_03     steps  33 eager  47.27 graph  17.01 ms/step  same(static/graph) None/True
+ 70 TXyNxVRRPt8_04     steps  47 eager  47.26 graph  16.97 ms/step  same(static/graph) None/True
+ 71 TXyNxVRRPt8_05     steps  35 eager  36.05 graph  13.92 ms/step  same(static/graph) None/True
+ 72 WMoeSSvCyTU_01     steps  25 eager  41.41 graph  15.43 ms/step  same(static/graph) None/True
+ 73 WMoeSSvCyTU_02     steps  38 eager  39.80 graph  14.83 ms/step  same(static/graph) None/True
+ 74 WMoeSSvCyTU_03     steps  53 eager  36.50 graph  13.12 ms/step  same(static/graph) None/True
+ 75 WMoeSSvCyTU_04     steps 195 eager  43.31 graph  16.76 ms/step  same(static/graph) None/True
+ 76 WMoeSSvCyTU_05     steps 147 eager  40.53 graph  15.57 ms/step  same(static/graph) None/False
+ 77 WMoeSSvCyTU_06     steps  94 eager  42.53 graph  15.77 ms/step  same(static/graph) None/True
+ 78 YR7BS6l_95E_01     steps  34 eager  54.53 graph  20.52 ms/step  same(static/graph) None/True
+ 79 YR7BS6l_95E_02     steps  82 eager  38.84 graph  14.28 ms/step  same(static/graph) None/True
+ 80 YR7BS6l_95E_03     steps  47 eager  42.43 graph  15.99 ms/step  same(static/graph) None/True
+ 81 YR7BS6l_95E_04     steps  97 eager  41.94 graph  15.24 ms/step  same(static/graph) None/True
+ 82 YR7BS6l_95E_05     steps 121 eager  38.25 graph  12.97 ms/step  same(static/graph) None/False
+ 83 YR7BS6l_95E_06     steps 116 eager  38.53 graph  14.24 ms/step  same(static/graph) None/True
+ 84 ZgvLTS2zJdo_01     steps  66 eager  50.38 graph  19.30 ms/step  same(static/graph) None/True
+ 85 ZgvLTS2zJdo_02     steps  56 eager  54.65 graph  17.67 ms/step  same(static/graph) None/True
+ 86 ZgvLTS2zJdo_03     steps 151 eager  36.89 graph  14.41 ms/step  same(static/graph) None/True
+ 87 ZgvLTS2zJdo_04     steps 121 eager  36.71 graph  13.99 ms/step  same(static/graph) None/True
+ 88 ZgvLTS2zJdo_05     steps  91 eager  36.75 graph  13.84 ms/step  same(static/graph) None/True
+ 89 ZgvLTS2zJdo_06     steps 186 eager  39.17 graph  15.16 ms/step  same(static/graph) None/True
+ 90 f75G_hZMSHs_01     steps  78 eager  37.00 graph  13.55 ms/step  same(static/graph) None/True
+ 91 f75G_hZMSHs_02     steps 116 eager  39.79 graph  14.79 ms/step  same(static/graph) None/True
+ 92 f75G_hZMSHs_03     steps  39 eager  37.36 graph  13.50 ms/step  same(static/graph) None/True
+ 93 f75G_hZMSHs_04     steps  51 eager  42.56 graph  15.89 ms/step  same(static/graph) None/True
+ 94 f75G_hZMSHs_05     steps  84 eager  40.12 graph  14.62 ms/step  same(static/graph) None/True
+ 95 fNT8a6e1gx8_02     steps  20 eager  37.76 graph  14.53 ms/step  same(static/graph) None/True
+ 96 fNT8a6e1gx8_03     steps  43 eager  35.75 graph  13.64 ms/step  same(static/graph) None/True
+ 97 fNT8a6e1gx8_05     steps  53 eager  35.93 graph  13.87 ms/step  same(static/graph) None/True
+ 98 fNT8a6e1gx8_06     steps  39 eager  36.91 graph  13.92 ms/step  same(static/graph) None/True
+ 99 fNT8a6e1gx8_07     steps  20 eager  49.97 graph  19.17 ms/step  same(static/graph) None/True
+100 fNT8a6e1gx8_08     steps  60 eager  36.78 graph  12.80 ms/step  same(static/graph) None/False
+101 iMJ9CjBX7eo_01     steps  32 eager  38.47 graph  14.78 ms/step  same(static/graph) None/True
+102 iMJ9CjBX7eo_02     steps  61 eager  39.89 graph  14.71 ms/step  same(static/graph) None/True
+103 iMJ9CjBX7eo_03     steps 103 eager  40.43 graph  14.99 ms/step  same(static/graph) None/True
+104 iMJ9CjBX7eo_04     steps  96 eager  37.09 graph  13.87 ms/step  same(static/graph) None/True
+105 iMJ9CjBX7eo_05     steps  68 eager  42.66 graph  15.53 ms/step  same(static/graph) None/True
+106 j2iRHiIYtTg_01     steps  51 eager  36.25 graph  13.70 ms/step  same(static/graph) None/True
+107 j2iRHiIYtTg_02     steps  46 eager  48.83 graph  18.23 ms/step  same(static/graph) None/True
+108 j2iRHiIYtTg_03     steps  51 eager  36.23 graph  13.69 ms/step  same(static/graph) None/True
+109 j2iRHiIYtTg_04     steps  47 eager  36.07 graph  13.79 ms/step  same(static/graph) None/True
+110 j2iRHiIYtTg_05     steps  19 eager  52.70 graph  20.02 ms/step  same(static/graph) None/True
+111 j2iRHiIYtTg_06     steps 135 eager  40.52 graph  15.06 ms/step  same(static/graph) None/True
+112 j2iRHiIYtTg_07     steps  58 eager  42.22 graph  15.35 ms/step  same(static/graph) None/True
+113 j2iRHiIYtTg_08     steps  96 eager  41.25 graph  15.38 ms/step  same(static/graph) None/True
+114 j2iRHiIYtTg_09     steps  94 eager  42.26 graph  17.96 ms/step  same(static/graph) None/False
+115 j2iRHiIYtTg_10     steps  28 eager  36.25 graph  13.13 ms/step  same(static/graph) None/True
+116 jsOSzFyx8RA_01     steps  64 eager  41.16 graph  14.86 ms/step  same(static/graph) None/True
+117 jsOSzFyx8RA_02     steps 153 eager  37.77 graph  14.57 ms/step  same(static/graph) None/True
+118 jsOSzFyx8RA_03     steps 158 eager  41.69 graph  16.80 ms/step  same(static/graph) None/True
+119 jsOSzFyx8RA_04     steps  71 eager  36.57 graph  13.32 ms/step  same(static/graph) None/True
+120 jsOSzFyx8RA_05     steps  77 eager  38.81 graph  14.15 ms/step  same(static/graph) None/True
+121 jsOSzFyx8RA_06     steps  58 eager  38.50 graph  14.29 ms/step  same(static/graph) None/True
+122 jsOSzFyx8RA_07     steps  94 eager  38.54 graph  14.21 ms/step  same(static/graph) None/True
+123 jsOSzFyx8RA_08     steps  22 eager  36.26 graph  14.43 ms/step  same(static/graph) None/True
+124 k5Gxbifw8s8_01     steps  19 eager  37.35 graph  14.12 ms/step  same(static/graph) None/True
+125 k5Gxbifw8s8_02     steps 185 eager  38.66 graph  15.18 ms/step  same(static/graph) None/True
+126 k5Gxbifw8s8_03     steps  49 eager  41.24 graph  15.03 ms/step  same(static/graph) None/True
+127 k5Gxbifw8s8_04     steps 180 eager  39.74 graph  15.39 ms/step  same(static/graph) None/True
+128 k5Gxbifw8s8_05     steps  36 eager  37.64 graph  13.56 ms/step  same(static/graph) None/True
+129 k5Gxbifw8s8_06     steps  39 eager  46.70 graph  18.83 ms/step  same(static/graph) None/True
+130 mNF1kg9azQw_01     steps 160 eager  38.52 graph  14.78 ms/step  same(static/graph) None/True
+131 mNF1kg9azQw_02     steps  66 eager  39.70 graph  14.04 ms/step  same(static/graph) None/True
+132 mNF1kg9azQw_03     steps 104 eager  37.58 graph  14.00 ms/step  same(static/graph) None/True
+133 mNF1kg9azQw_04     steps  37 eager  39.68 graph  14.31 ms/step  same(static/graph) None/True
+134 mNF1kg9azQw_05     steps  38 eager  55.52 graph  19.86 ms/step  same(static/graph) None/True
+135 mNF1kg9azQw_06     steps  20 eager  50.53 graph  19.77 ms/step  same(static/graph) None/True
+136 mNF1kg9azQw_07     steps 121 eager  37.64 graph  13.92 ms/step  same(static/graph) None/True
+137 oP2WdYlaflE_01     steps  37 eager  37.45 graph  13.50 ms/step  same(static/graph) None/True
+138 oP2WdYlaflE_02     steps 116 eager  39.23 graph  14.68 ms/step  same(static/graph) None/True
+139 oP2WdYlaflE_03     steps 147 eager  39.17 graph  14.78 ms/step  same(static/graph) None/True
+140 oP2WdYlaflE_04     steps 249 eager  40.85 graph  16.47 ms/step  same(static/graph) None/True
+141 oP2WdYlaflE_05     steps  33 eager  39.77 graph  15.19 ms/step  same(static/graph) None/True
+142 rSiciLyYOyI_01     steps  96 eager  43.99 graph  16.22 ms/step  same(static/graph) None/True
+143 rSiciLyYOyI_02     steps  46 eager  47.83 graph  17.22 ms/step  same(static/graph) None/True
+144 rSiciLyYOyI_03     steps  35 eager  50.91 graph  19.38 ms/step  same(static/graph) None/True
+145 rSiciLyYOyI_04     steps  36 eager  36.08 graph  15.20 ms/step  same(static/graph) None/True
+146 rSiciLyYOyI_05     steps  57 eager  38.75 graph  14.04 ms/step  same(static/graph) None/True
+147 rSiciLyYOyI_06     steps  34 eager  36.18 graph  14.67 ms/step  same(static/graph) None/True
+148 rSiciLyYOyI_07     steps  18 eager  37.48 graph  12.67 ms/step  same(static/graph) None/True
+149 sP6B4dlSOoc_01     steps 103 eager  39.66 graph  14.54 ms/step  same(static/graph) None/False
+150 sP6B4dlSOoc_02     steps  69 eager  37.48 graph  13.55 ms/step  same(static/graph) None/True
+151 sP6B4dlSOoc_03     steps  40 eager  37.24 graph  14.33 ms/step  same(static/graph) None/True
+152 sP6B4dlSOoc_04     steps  45 eager  47.01 graph  16.91 ms/step  same(static/graph) None/True
+153 sP6B4dlSOoc_05     steps  99 eager  39.58 graph  14.51 ms/step  same(static/graph) None/True
+154 u919vf-yghQ_01     steps 282 eager  41.84 graph  15.80 ms/step  same(static/graph) None/False
+155 u919vf-yghQ_02     steps 493 eager  53.52 graph  22.65 ms/step  same(static/graph) None/False
+156 u919vf-yghQ_03     steps 146 eager  39.03 graph  15.16 ms/step  same(static/graph) None/True
+157 u919vf-yghQ_04     steps  59 eager  37.03 graph  14.07 ms/step  same(static/graph) None/True
+158 u919vf-yghQ_05     steps  26 eager  35.80 graph  13.36 ms/step  same(static/graph) None/True
+159 u919vf-yghQ_06     steps  60 eager  36.36 graph  13.49 ms/step  same(static/graph) None/True
+160 u919vf-yghQ_07     steps  62 eager  41.33 graph  15.00 ms/step  same(static/graph) None/True
+161 uZwKNtHx9FE_01     steps 126 eager  40.32 graph  15.19 ms/step  same(static/graph) None/True
+162 uZwKNtHx9FE_02     steps 210 eager  39.77 graph  15.62 ms/step  same(static/graph) None/True
+163 uZwKNtHx9FE_03     steps  47 eager  37.22 graph  13.92 ms/step  same(static/graph) None/True
+164 uZwKNtHx9FE_04     steps 212 eager  39.81 graph  15.72 ms/step  same(static/graph) None/True
+165 uZwKNtHx9FE_05     steps  19 eager  38.57 graph  12.26 ms/step  same(static/graph) None/False
+166 uZwKNtHx9FE_06     steps 120 eager  37.53 graph  14.06 ms/step  same(static/graph) None/True
+167 uZwKNtHx9FE_07     steps 119 eager  39.86 graph  14.80 ms/step  same(static/graph) None/True
+168 uZwKNtHx9FE_08     steps 231 eager  44.87 graph  17.57 ms/step  same(static/graph) None/True
+169 uZwKNtHx9FE_09     steps  40 eager  46.89 graph  16.77 ms/step  same(static/graph) None/True
+170 uZwKNtHx9FE_10     steps   7 eager  60.31 graph  19.47 ms/step  same(static/graph) None/True
+171 wH3lJm0Typ0_01     steps 118 eager  43.50 graph  16.01 ms/step  same(static/graph) None/True
+172 wH3lJm0Typ0_02     steps  28 eager  81.41 graph  29.31 ms/step  same(static/graph) None/True
+173 wH3lJm0Typ0_03     steps  95 eager  38.39 graph  14.30 ms/step  same(static/graph) None/True
+174 wH3lJm0Typ0_04     steps  44 eager  37.38 graph  14.10 ms/step  same(static/graph) None/True
+175 wH3lJm0Typ0_05     steps  52 eager  43.56 graph  15.50 ms/step  same(static/graph) None/True
+176 wH3lJm0Typ0_06     steps 215 eager  39.13 graph  15.52 ms/step  same(static/graph) None/True
+177 wH3lJm0Typ0_07     steps  44 eager  43.85 graph  16.83 ms/step  same(static/graph) None/True
+178 wH3lJm0Typ0_08     steps  23 eager  38.69 graph  13.86 ms/step  same(static/graph) None/True
+179 wH3lJm0Typ0_09     steps  96 eager  40.99 graph  15.26 ms/step  same(static/graph) None/True
+180 wPJ_InXF_I8_01     steps  20 eager  43.28 graph  16.73 ms/step  same(static/graph) None/True
+181 wPJ_InXF_I8_02     steps 105 eager  39.44 graph  14.33 ms/step  same(static/graph) None/True
+182 wPJ_InXF_I8_03     steps  66 eager  37.72 graph  14.71 ms/step  same(static/graph) None/False
+183 wPJ_InXF_I8_04     steps  25 eager  66.61 graph  25.55 ms/step  same(static/graph) None/True
+184 wPJ_InXF_I8_05     steps 127 eager  42.42 graph  16.02 ms/step  same(static/graph) None/True
+185 wPJ_InXF_I8_06     steps  51 eager  36.66 graph  13.30 ms/step  same(static/graph) None/True
+186 wPJ_InXF_I8_07     steps 108 eager  36.75 graph  13.83 ms/step  same(static/graph) None/True
+187 wdmj6E_faOo_01     steps  54 eager  46.21 graph  16.74 ms/step  same(static/graph) None/True
+188 wdmj6E_faOo_02     steps  20 eager  54.02 graph  19.22 ms/step  same(static/graph) None/True
+189 wdmj6E_faOo_03     steps  71 eager  36.85 graph  13.29 ms/step  same(static/graph) None/True
+190 wdmj6E_faOo_04     steps  70 eager  41.11 graph  13.48 ms/step  same(static/graph) None/False
+191 wdmj6E_faOo_05     steps  14 eager  35.78 graph  12.32 ms/step  same(static/graph) None/True
+192 wdmj6E_faOo_06     steps  35 eager  35.94 graph  13.70 ms/step  same(static/graph) None/True
+193 z3jAMn3xpoM_01     steps 136 eager  40.06 graph  14.83 ms/step  same(static/graph) None/True
+194 z3jAMn3xpoM_02     steps  77 eager  39.02 graph  14.23 ms/step  same(static/graph) None/True
+195 z3jAMn3xpoM_03     steps 124 eager  38.96 graph  14.38 ms/step  same(static/graph) None/True
+196 z3jAMn3xpoM_04     steps  49 eager  55.17 graph  20.84 ms/step  same(static/graph) None/True
+197 z3jAMn3xpoM_05     steps  47 eager  36.21 graph  13.68 ms/step  same(static/graph) None/True
+198 z3jAMn3xpoM_06     steps 268 eager  40.53 graph   4.75 ms/step  same(static/graph) None/False
+199 z3jAMn3xpoM_07     steps  23 eager  36.22 graph  14.24 ms/step  same(static/graph) None/True
+
+median ms/step eager 39.24  graph 14.71; generate s eager 699.7 graph 283.8; ids identical 182/200
+extra CUDA alloc after graphs: 169.5 MB, graphs captured: 30 (buckets [(64, 64), (64, 128), (64, 256), (64, 512), (64, 768), (128, 64), (128, 128), (128, 256), (128, 512), (128, 768), (192, 64), (192, 128), (192, 256), (192, 512), (192, 768), (256, 64), (256, 128), (256, 256), (256, 512), (256, 768), (320, 64), (320, 128), (320, 256), (320, 512), (320, 768), (384, 64), (384, 128), (384, 256), (384, 512), (384, 768)])

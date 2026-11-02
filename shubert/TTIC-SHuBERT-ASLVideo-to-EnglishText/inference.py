@@ -752,6 +752,20 @@ def _get_cached_model(model_checkpoint: str, tokenizer_checkpoint: str, output_d
     print(f"[byt5] device: {device} dtype: {_dtype_name}")
     if os.environ.get("BYT5_ENC_INT8", "1") == "1" and device.type == "cuda":
         _quantize_encoder_int8(model)
+    # CUDA-graph decode (opt-in until the live A/B decides): see byt5_cudagraph.py for the
+    # measurements. Beams / max_length are read from the same env vars test() uses; a clip that
+    # does not fit the static buffers falls back to the eager path on its own.
+    if os.environ.get("BYT5_CUDAGRAPH", "0") == "1" and device.type == "cuda":
+        import time as _t
+        import byt5_cudagraph
+        _t0 = _t.time()
+        _beams = max(1, int(os.environ.get("BYT5_NUM_BEAMS", "4")))
+        _maxlen = max(64, int(os.environ.get("BYT5_MAX_LENGTH", "768")))
+        _sd, _ = byt5_cudagraph.install(model, beams=_beams, max_len=_maxlen)
+        _n = byt5_cudagraph.warm_all(_sd)
+        torch.cuda.synchronize()
+        print(f"[byt5] CUDA-graph decode on: {_n} graphs captured in {_t.time() - _t0:.1f}s "
+              f"(BYT5_CUDAGRAPH=0 to disable)")
 
     _model_cache[key] = (model, tokenizer, device)
     return _model_cache[key]

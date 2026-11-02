@@ -1,0 +1,1008 @@
+{
+ "condition": "graph",
+ "bleu": 20.602663965039923,
+ "chrf": 43.97770694452877,
+ "mean_seconds_per_clip": 1.4188859999999999,
+ "outputs": [
+  {
+   "id": "2_PWeBb41qM_01",
+   "reference": "They are the first interpreting team in the country to be embedded in the state's emergency management operation center alongside other critical personnel.",
+   "hypothesis": "The school has interpreters for the disability skills because they are the first interpreting group to determine who is the state's emergency running group to become the state's emergency running group."
+  },
+  {
+   "id": "2_PWeBb41qM_02",
+   "reference": "As of Tuesday morning, more than 3-thousand people have died of coronavirus in the US.",
+   "hypothesis": "As of Saturday morning, the U.S. has the number of coronavirus cases today."
+  },
+  {
+   "id": "2_PWeBb41qM_03",
+   "reference": "On Monday a popular Florida pastor was arrested for holding large church services despite social distancing orders.",
+   "hypothesis": "On Saturday, in Florida, people are being bullied because they are hosting any gatherings at churches and waiting for pageants to socialize and ignore audiences."
+  },
+  {
+   "id": "2_PWeBb41qM_04",
+   "reference": "Amazon fired them Monday after he appeared at the protest.",
+   "hypothesis": "She showed up at the protest because she was born."
+  },
+  {
+   "id": "2_PWeBb41qM_05",
+   "reference": "Thank you for watching Sign1News live.",
+   "hypothesis": "Thank you for watching Sign1News."
+  },
+  {
+   "id": "5iRIeHAK9b0_01",
+   "reference": "It was really cool!",
+   "hypothesis": "It s phenomenal."
+  },
+  {
+   "id": "5iRIeHAK9b0_02",
+   "reference": "Two parents accused of horrific child abuse pleaded guilty in a California court, Friday.",
+   "hypothesis": "A California court in California warned two men that child abuse pleaded guilty Friday in confession to child abuse."
+  },
+  {
+   "id": "5iRIeHAK9b0_03",
+   "reference": "The children range in age from 2 to 29 years old.",
+   "hypothesis": "Children ranging in age from 3 to 29 years old."
+  },
+  {
+   "id": "5iRIeHAK9b0_04",
+   "reference": "The deal will keep the children from being called to testify.",
+   "hypothesis": "The deal would include facilitating children who do not show up to face children."
+  },
+  {
+   "id": "5iRIeHAK9b0_05",
+   "reference": "Sign1News.",
+   "hypothesis": "Sign1News."
+  },
+  {
+   "id": "D9HR4q0vbwE_01",
+   "reference": "The Presidential Scholars Program is a scholarship program, that does not recognize any specific programs.",
+   "hypothesis": "The Presidential Scholars Program is a program that provides Secretary of Schools without a witness recognition."
+  },
+  {
+   "id": "D9HR4q0vbwE_02",
+   "reference": "An official letter, right.",
+   "hypothesis": "Thank you for your time."
+  },
+  {
+   "id": "D9HR4q0vbwE_03",
+   "reference": "Mom said she couldn't believe it.",
+   "hypothesis": "I would think what can I do to direct, how can I improve as an artist. How would I direct?"
+  },
+  {
+   "id": "D9HR4q0vbwE_05",
+   "reference": "You're meeting them, how do you feel about that?",
+   "hypothesis": "That's a good question."
+  },
+  {
+   "id": "D9HR4q0vbwE_06",
+   "reference": "I already know this person so I know their signing style.",
+   "hypothesis": "I'm going to show you how to do it and no matter what you say, yes."
+  },
+  {
+   "id": "D9HR4q0vbwE_07",
+   "reference": "And none of them take sign skills.",
+   "hypothesis": "This is the first one of the most important information you have to share with your friends."
+  },
+  {
+   "id": "FND2JfzngVY_01",
+   "reference": "I'm Crystal Cousineau.",
+   "hypothesis": "I'm Crystal Cousineau."
+  },
+  {
+   "id": "FND2JfzngVY_02",
+   "reference": "That's the NFL stadium for the Detroit Lions.",
+   "hypothesis": "The Philadelphia Lions NFL stadium will take place."
+  },
+  {
+   "id": "FND2JfzngVY_03",
+   "reference": "The cost is $20 for adults, $15 for students.",
+   "hypothesis": "The school needs $20 for adults and $15 for students."
+  },
+  {
+   "id": "FND2JfzngVY_04",
+   "reference": "Beanie Babies, the Hamburglar and Power Rangers are some of the retro toys that will be making a comeback.",
+   "hypothesis": "The returning toys include Benie Babies, The Hamburgolar and Power Rangers, which have been renrolled in the past."
+  },
+  {
+   "id": "FND2JfzngVY_05",
+   "reference": "If you want one, you better act fast.",
+   "hypothesis": "If you want to go, be prepared."
+  },
+  {
+   "id": "FND2JfzngVY_06",
+   "reference": "Daylight saving time will return at 2 am on March 8.",
+   "hypothesis": "The daylight savings will be back on March 8 at 2 AM."
+  },
+  {
+   "id": "I976oI3s1jQ_01",
+   "reference": "It felt like a chill, but I thought nothing of it and I thought I could overcome it.",
+   "hypothesis": "I feel like it's a strategic chill, but I have to be patient with it and think it's perfect."
+  },
+  {
+   "id": "I976oI3s1jQ_02",
+   "reference": "He said he still went to work for two days, but after struggling with high fevers and chills, he decided to stay home to recover.",
+   "hypothesis": "She said she was still working for two days, but she had a high fever and chills and decided to stay home recovering."
+  },
+  {
+   "id": "I976oI3s1jQ_03",
+   "reference": "The nurse wrote notes for me, but I had to type down text messages and show them to the nurse.",
+   "hypothesis": "You know hearing people who wrote early calls and realized I needed to use my texts."
+  },
+  {
+   "id": "I976oI3s1jQ_04",
+   "reference": "I do fully understand.",
+   "hypothesis": "I understand."
+  },
+  {
+   "id": "I976oI3s1jQ_05",
+   "reference": "Try to make sure that everyone understands that this is not a joke.",
+   "hypothesis": "I wanted to make sure that everyone understood me."
+  },
+  {
+   "id": "I976oI3s1jQ_06",
+   "reference": "She said the swab was really invasive and  went deep into the back of her nasal cavity, causing her to cough.",
+   "hypothesis": "His nose was very small and that he resisted very deeply in the air and coughed."
+  },
+  {
+   "id": "I976oI3s1jQ_07",
+   "reference": "They said they encourage deaf people out there, if you think you might have the virus, to be sure to talk with healthcare workers who will take the time to sit down and have patience with your communication needs and delays.",
+   "hypothesis": "He encouraged deaf people if you think you might have the virus and be sure to work with healthcare providers to make sure they are willing to sit down and be patient with your communication needs and delay communication."
+  },
+  {
+   "id": "J-0KHhPS_m4_01",
+   "reference": "In addition some other retired players participated in the scheme for kickbacks and bribes.",
+   "hypothesis": "And some are also raising money for other customers involved in the scams."
+  },
+  {
+   "id": "J-0KHhPS_m4_02",
+   "reference": "And speaking of health, Google is out with the top ten health questions users in the US asked in 2019.",
+   "hypothesis": "Google showed 2019 is the tenth most healthy one in the country."
+  },
+  {
+   "id": "J-0KHhPS_m4_03",
+   "reference": "The third question is how to get rid of hiccups.",
+   "hypothesis": "Here's a quick question."
+  },
+  {
+   "id": "J-0KHhPS_m4_04",
+   "reference": "So instead of being scared of Friday the 13th, try incorporating some positive changes in your life and see what happens today.",
+   "hypothesis": "Here's a quick recap of this Monday: Don't be afraid to try to participate in a positive method for your life."
+  },
+  {
+   "id": "J-0KHhPS_m4_05",
+   "reference": "Thank you for watching Sign1News live.",
+   "hypothesis": "I'm Crystal Cousineau."
+  },
+  {
+   "id": "JtPw-DVL4Rk_01",
+   "reference": "Funerals were held today in Pittsburgh to mourn the deaths of three of the 11 victims of Saturday's synagogue shooting.",
+   "hypothesis": "Today in Pittsburgh, three funerals killed 11 people in the deadly shooting deadly synagogue killed Saturday."
+  },
+  {
+   "id": "L68SkmewDnI_01",
+   "reference": "Here are today's top news briefs.",
+   "hypothesis": "Here are today s top news briefs."
+  },
+  {
+   "id": "L68SkmewDnI_02",
+   "reference": "The Johns Hopkins dashboard says there are 99,800 deaths as of this afternoon, and it is likely to be past 100,000 by the time this video is posted tonight.",
+   "hypothesis": "Johns Hopkins counted a sign that said 99,800 people died this afternoon, but it was likely that it would pass 100,000 by the time you watched this video."
+  },
+  {
+   "id": "L68SkmewDnI_03",
+   "reference": "Dr. Fauci did not say if he thinks the drug should be banned, but said that the data is clear that it may cause heart issues.",
+   "hypothesis": "Dr. Fauci did not say that he should ban the drug in the U.S. but said data was clear that this tablet could cause heart  issues."
+  },
+  {
+   "id": "L68SkmewDnI_04",
+   "reference": "The tweets by Trump claimed that mail-in ballots would be a massive fraud with mailboxes being robbed.",
+   "hypothesis": "Trump tweeted that mail-in ballots would be seriously fraudulent and weak and that he was concerned that mail-in ballots would be quickly withheld."
+  },
+  {
+   "id": "L68SkmewDnI_05",
+   "reference": "The FBI is investigating Floyd's death.",
+   "hypothesis": "The FBI is investigating Floyd's death."
+  },
+  {
+   "id": "L68SkmewDnI_06",
+   "reference": "He and three other officers involved in with Floyd's arrest and eventual death have been fired.",
+   "hypothesis": "She and three other officers were involved in Floyd s arrest and death, and four were fired."
+  },
+  {
+   "id": "LT0-h4P_xBY_01",
+   "reference": "I'm Jethro Wooddall.",
+   "hypothesis": "I'm Jethro Wooddall."
+  },
+  {
+   "id": "LT0-h4P_xBY_02",
+   "reference": "The virus attack rate has lowered as has the demand for supplies, such as hospital beds.",
+   "hypothesis": "When you answer decreased questions, you will also require supplies of things like blood pressure or loss checks."
+  },
+  {
+   "id": "LT0-h4P_xBY_03",
+   "reference": "Although it may take several months for your lungs to clear out all the gunk from smoking, it is a change you'll be glad you made.",
+   "hypothesis": "However, if you have been watering for several months and working on cleaning your body a little bit, that would make you a happy decision to quit your body."
+  },
+  {
+   "id": "LT0-h4P_xBY_04",
+   "reference": "Of course the coronavirus pandemic is the reason of the spike in unemployment.",
+   "hypothesis": "Of course, I want to make sure that the policy is shared with the people and the people of our community."
+  },
+  {
+   "id": "LT0-h4P_xBY_05",
+   "reference": "It was the second largest number of initial unemployment claims in history.",
+   "hypothesis": "Has you been the third biggest person in your classroom and the best person in your classroom ever been a police officer?"
+  },
+  {
+   "id": "LT0-h4P_xBY_06",
+   "reference": "As business dried up, owner Jennifer Knox was sitting in her empty bar and looked around.",
+   "hypothesis": "Have you been riding in a mother's business on the Piennial Knox all day?"
+  },
+  {
+   "id": "MJijm9kbdHA_01",
+   "reference": "Biden said Bernie voted multiple times against the Brady Bill, which required stricter gun controls.",
+   "hypothesis": "Biden said Bernie had a vote multiple times against a brady bill that required stricter gun control."
+  },
+  {
+   "id": "MJijm9kbdHA_02",
+   "reference": "So, that's a recap of the South Carolina debate.",
+   "hypothesis": "So, that is an acronym for the South Carolina debate."
+  },
+  {
+   "id": "MJijm9kbdHA_03",
+   "reference": "Johnson is credited with making the mathematical calculations that helped to put men on the moon in 1969.",
+   "hypothesis": "Johnson was a measurement of mathematics that helped a man reach on the moon in 1969."
+  },
+  {
+   "id": "MJijm9kbdHA_04",
+   "reference": "I signed an agreement to keep it confidential.",
+   "hypothesis": "Then they check in and then they will keep it tight."
+  },
+  {
+   "id": "MJijm9kbdHA_05",
+   "reference": "I really love you!",
+   "hypothesis": "I am back."
+  },
+  {
+   "id": "NBpYolVo5WQ_01",
+   "reference": "It includes persistent fever, abdominal symptoms, rash, and sometimes serious cardiovascular symptoms.",
+   "hypothesis": "This may include persistent fever, abdominal symptoms, rash, and serious heart issues."
+  },
+  {
+   "id": "NBpYolVo5WQ_02",
+   "reference": "They received a citation, a cease and desist letter, and a restraining order, but still kept the business open.",
+   "hypothesis": "They did get guilty of paying a citing a citizenship, cease and desist mail seriously stopping, and resting over, but they continued to open their business."
+  },
+  {
+   "id": "NBpYolVo5WQ_03",
+   "reference": "Now some countries are re-testing samples of patients who had respiratory symptoms in December and January to better understand how the virus spread.",
+   "hypothesis": "She is now testing samples from a patient who was sick with respiratory illness in December and January to try and understand how the virus spread."
+  },
+  {
+   "id": "NBpYolVo5WQ_04",
+   "reference": "Gregory used to be a police officer and once worked for a local prosecutor.",
+   "hypothesis": "Gregory used to be a police officer and used to work for a local prosecutor."
+  },
+  {
+   "id": "NBpYolVo5WQ_05",
+   "reference": "A third man, who is a neighbor, joined in the chase.",
+   "hypothesis": "There was a third man at a neighborhood who joined the 13-year-old."
+  },
+  {
+   "id": "NBpYolVo5WQ_06",
+   "reference": "See you tomorrow and stay with the light!",
+   "hypothesis": "See you tomorrow and stay with the light!"
+  },
+  {
+   "id": "PYbUwpYMx0A_01",
+   "reference": "Here are your top stories for today.",
+   "hypothesis": "Here are your top stories for today."
+  },
+  {
+   "id": "PYbUwpYMx0A_02",
+   "reference": "Thousands of people gather at the US Capitol to pay their respects to George H.W. Bush.",
+   "hypothesis": "Thousands of people from around the world attended the US capital to honor George H.W."
+  },
+  {
+   "id": "PYbUwpYMx0A_03",
+   "reference": "She was forced into an SUV.",
+   "hypothesis": "They forced the girl into a SUV."
+  },
+  {
+   "id": "PYbUwpYMx0A_04",
+   "reference": "Most importantly my mentor and friend.",
+   "hypothesis": "And one of the most important things that I want to mentor with my friends."
+  },
+  {
+   "id": "PYbUwpYMx0A_05",
+   "reference": "Remember to like us on Facebook and follow us on Twitter.",
+   "hypothesis": "I'm Candace Jones."
+  },
+  {
+   "id": "TUH4q-QBV7k_01",
+   "reference": "Today is the first day of winter.",
+   "hypothesis": "It s the first day of winter."
+  },
+  {
+   "id": "TUH4q-QBV7k_02",
+   "reference": "That's more than a third of the country and the highest figure on record in the 17 years since tracking holiday travel.",
+   "hypothesis": "More than two-thirds of the country's travelers according to the marked holiday schedule have recorded the highest travelers in 17 years."
+  },
+  {
+   "id": "TUH4q-QBV7k_03",
+   "reference": "It's not 1 million lights but it's still spectacular.",
+   "hypothesis": "I know there aren't millions of lights in the area but it still beautiful."
+  },
+  {
+   "id": "TUH4q-QBV7k_04",
+   "reference": "Now it's your turn.",
+   "hypothesis": "Your turn!"
+  },
+  {
+   "id": "TUH4q-QBV7k_05",
+   "reference": "I'm Candace Jones.",
+   "hypothesis": "I'm Candace Jones."
+  },
+  {
+   "id": "TXyNxVRRPt8_01",
+   "reference": "We met with the people there and did a community forum just like the one we did in South Carolina.",
+   "hypothesis": "We brought them to the Deaf Community Forum as South Carolina."
+  },
+  {
+   "id": "TXyNxVRRPt8_03",
+   "reference": "Most people do not realize that is a NAD program.",
+   "hypothesis": "Most people don't know about it."
+  },
+  {
+   "id": "TXyNxVRRPt8_04",
+   "reference": "We are looking forward to Region III monthly meeting.",
+   "hypothesis": "I love being involved in the monthly meetings."
+  },
+  {
+   "id": "TXyNxVRRPt8_05",
+   "reference": "Thank you.",
+   "hypothesis": "&gt;&gt; CHRISTOPHER JOHNSON: Yes."
+  },
+  {
+   "id": "WMoeSSvCyTU_01",
+   "reference": "They hit the accelerator and did it on purpose.",
+   "hypothesis": "It's usually on purpose."
+  },
+  {
+   "id": "WMoeSSvCyTU_02",
+   "reference": "They hit the accelerator and went fast, really fast.",
+   "hypothesis": "&gt;&gt; I'm shocked to see you soon."
+  },
+  {
+   "id": "WMoeSSvCyTU_03",
+   "reference": "The drug hydroxychde continues to be controversial.",
+   "hypothesis": "The drug hydroxychloroquine is still in controversy."
+  },
+  {
+   "id": "WMoeSSvCyTU_04",
+   "reference": "Fox News did an interview with a Yale professor who advocated for the drug by pointing to a study in Detroit that said the drug helped patients who were hospitalized less likely to die.",
+   "hypothesis": "In Fox News, she did an interview with a Yale University professor who supports the drug and said there was a study in Detroit that helped patients who were hospitalized with less likely to die."
+  },
+  {
+   "id": "WMoeSSvCyTU_05",
+   "reference": "The pastor said the church services were shut down last week because leaders found out that one of the members tested positive for Covid-19.",
+   "hypothesis": "The pastor said the church services stopped closing last week after leaders found out that they and one of the members tested positive for the coronavirus."
+  },
+  {
+   "id": "WMoeSSvCyTU_06",
+   "reference": "The pastor admitted that he knew what they were getting into when they gathered, that he knew the possibilities.",
+   "hypothesis": "The pastor admitted that he was able to gather and know what was possible, but what happened."
+  },
+  {
+   "id": "YR7BS6l_95E_01",
+   "reference": "A warm welcome to you all. So friendly and sociable.",
+   "hypothesis": "Who crowns the glory of humanity."
+  },
+  {
+   "id": "YR7BS6l_95E_02",
+   "reference": "I met so many diverse people with so much talent.",
+   "hypothesis": "I've met so many different people, but I can't feel it's a lot of people filming."
+  },
+  {
+   "id": "YR7BS6l_95E_03",
+   "reference": "I feel so blessed and grateful for the Atlanta community.",
+   "hypothesis": "I feel so blessed that it feels so much to me."
+  },
+  {
+   "id": "YR7BS6l_95E_04",
+   "reference": "Speculation that she might be pregnant started last week when royal watchers noticed she was wearing a loose fitting outfit at the wedding of Princess Eugenie.",
+   "hypothesis": "A royal viewer noticed her dress last week during a wedding in Eugenie was dressed up last week."
+  },
+  {
+   "id": "YR7BS6l_95E_05",
+   "reference": "They got an aerial tour over the devastated areas, then landed and stopped by a shelter to help hand out supplies to people.",
+   "hypothesis": "The helicopter drives up to the side of the car and travels to a shelter to help supplies share their supplies."
+  },
+  {
+   "id": "YR7BS6l_95E_06",
+   "reference": "The company's new ad campaign depicts burly men picking grapes, driving trucks and guzzling down grape juice.",
+   "hypothesis": "The new trailer features a male-field belly guttering company, including chocolate, trump management and tall boil."
+  },
+  {
+   "id": "ZgvLTS2zJdo_01",
+   "reference": "When you opened the door, what did you notice?",
+   "hypothesis": "There are many different resources to open and provide resources."
+  },
+  {
+   "id": "ZgvLTS2zJdo_02",
+   "reference": "He said he knew both from prior experiences where Grant and Mavrick went on the property to do varying work for Mr. McCawol.",
+   "hypothesis": "I want to share a little bit of an experience with you."
+  },
+  {
+   "id": "ZgvLTS2zJdo_03",
+   "reference": "According to the doctor, what were the physical findings?",
+   "hypothesis": "AND THEN I'M GOING TO SHOW YOU A LITTLE BIT MORE ABOUT HOW TO SIGN THE STYLE, AND I'M GOING TO SHOW YOU A LITTLE BIT MORE ABOUT HOW TO SIGN THE STYLE."
+  },
+  {
+   "id": "ZgvLTS2zJdo_04",
+   "reference": "Then struck them two more times.",
+   "hypothesis": "I'M GOING TO TALK TO YOU ABOUT THE SAME THING ON THE OTHER SIDE, AND THEN I'M GOING TO TALK TO YOU ABOUT THE SAME THING."
+  },
+  {
+   "id": "ZgvLTS2zJdo_05",
+   "reference": "Did Mavrick tell you that the altercation became physical in any way?",
+   "hypothesis": "This is the first time you have the most important concern about the coronavirus pandemic."
+  },
+  {
+   "id": "ZgvLTS2zJdo_06",
+   "reference": "The judge said that the third count of taking a valuable object from a dead body would not be included because it was not clear based on the evidence that Mavrick intended to use the car for his personal use and benefit.",
+   "hypothesis": "The third person allegedly took the valuable object from a dead body, but it would not include the movement because it was unclear if Mavrick was intentionally taking a car for his car."
+  },
+  {
+   "id": "f75G_hZMSHs_01",
+   "reference": "They also said their wife suffered from depression and anxiety for many years and was seeking help.",
+   "hypothesis": "He says his wife has been struggling with depression and anxiety for decades."
+  },
+  {
+   "id": "f75G_hZMSHs_02",
+   "reference": "They started talking and discovered one of them had worked as an officer in their hometown.",
+   "hypothesis": "The similar conversation between the police officers and his hometown includes the former officer and his hometown."
+  },
+  {
+   "id": "f75G_hZMSHs_03",
+   "reference": "Patterson then shook hands and said \"My name is Michael Patterson, sir.\"",
+   "hypothesis": "He said \"My name is Michael Patterson."
+  },
+  {
+   "id": "f75G_hZMSHs_04",
+   "reference": "The wedding is this weekend.",
+   "hypothesis": "The tourist wedding is scheduled for this weekend."
+  },
+  {
+   "id": "f75G_hZMSHs_05",
+   "reference": "Today we're giving you a sneak peek at a couple of big movies set to hit theaters soon.",
+   "hypothesis": "Today we are telling you about the holiday movie that will be released in theaters."
+  },
+  {
+   "id": "fNT8a6e1gx8_02",
+   "reference": "Hello, what\u2019s your name?",
+   "hypothesis": "Where are you from?"
+  },
+  {
+   "id": "fNT8a6e1gx8_03",
+   "reference": "Learn from your mistakes.",
+   "hypothesis": "We learned from mistakes to make mistakes."
+  },
+  {
+   "id": "fNT8a6e1gx8_05",
+   "reference": "It's close to my home.",
+   "hypothesis": "It's one of the most important things to know about."
+  },
+  {
+   "id": "fNT8a6e1gx8_06",
+   "reference": "If a student is oppressed, what would your advice be?",
+   "hypothesis": "Tend to ask your students to graduate."
+  },
+  {
+   "id": "fNT8a6e1gx8_07",
+   "reference": "Marvin Miller.",
+   "hypothesis": "My name is Marinda."
+  },
+  {
+   "id": "fNT8a6e1gx8_08",
+   "reference": "After Deafhood, I realized we all need to unpack.",
+   "hypothesis": "It's just that we have problems with expressing ourselves."
+  },
+  {
+   "id": "iMJ9CjBX7eo_01",
+   "reference": "Phoenix, Arizona.",
+   "hypothesis": "This is my arm at the age of 8."
+  },
+  {
+   "id": "iMJ9CjBX7eo_02",
+   "reference": "Join us at the Community Forum, where I will be hosting.",
+   "hypothesis": "Join us at the Community Forum and we will host it together."
+  },
+  {
+   "id": "iMJ9CjBX7eo_03",
+   "reference": "Our goal is to unify the community together, deaf and hearing people in one room for the evening.",
+   "hypothesis": "The goal of this event is to have Deaf classes and interpreting classes split into night-time classes."
+  },
+  {
+   "id": "iMJ9CjBX7eo_04",
+   "reference": "It's an initiative that recognizes women, men, LGBT, and so on I'm thrilled to be involved.",
+   "hypothesis": "I am thrilled to be involved with men and women in LGBTQ diversity and I am the host as the OC."
+  },
+  {
+   "id": "iMJ9CjBX7eo_05",
+   "reference": "We look forward to seeing you there with your cash, credit card, or check!",
+   "hypothesis": "We want to see you bringing your weekends, credit cards, or checks!"
+  },
+  {
+   "id": "j2iRHiIYtTg_01",
+   "reference": "What are your thoughts on that, these actions?",
+   "hypothesis": "What are your thoughts on and on their activities?"
+  },
+  {
+   "id": "j2iRHiIYtTg_02",
+   "reference": "So this is bigger than just a student list.",
+   "hypothesis": "We need to be able to interview the students."
+  },
+  {
+   "id": "j2iRHiIYtTg_03",
+   "reference": "When will that statement get through their head?",
+   "hypothesis": "What is the great day to prevent that interpreter?"
+  },
+  {
+   "id": "j2iRHiIYtTg_04",
+   "reference": "President Bobbi confirmed it with the five-year contract.",
+   "hypothesis": "RID has confirmed with that five-year purpose."
+  },
+  {
+   "id": "j2iRHiIYtTg_05",
+   "reference": "Was that all they learned as president?",
+   "hypothesis": "You need to learn."
+  },
+  {
+   "id": "j2iRHiIYtTg_06",
+   "reference": "First things first, I\u2019m taking my own risk to speak on behalf of students of color, BIPOC, and other persons of color at Gallaudet.",
+   "hypothesis": "The first thing I know is taking when I risk speaking for our resources of color, BIPOC, and Black Deaf Color at Gallaudet University."
+  },
+  {
+   "id": "j2iRHiIYtTg_07",
+   "reference": "There\u2019s been a lot of dialogue and frustration around everything going on.",
+   "hypothesis": "When you have questions, you don t have to be frustrated."
+  },
+  {
+   "id": "j2iRHiIYtTg_08",
+   "reference": "Much has been said about this, and President Bobbi, you have failed us and you have failed our community for four years now.",
+   "hypothesis": "I've spoken about this and Gallaudet University has failed us and our community for five years."
+  },
+  {
+   "id": "j2iRHiIYtTg_09",
+   "reference": "We have called you out to stop racism.",
+   "hypothesis": "DeafBlind people have struggled to express their struggles with expressing their concerns and talking to them."
+  },
+  {
+   "id": "j2iRHiIYtTg_10",
+   "reference": "Second is Dr. Glenn Anderson.",
+   "hypothesis": "Second, Dr. Glenn Anderson."
+  },
+  {
+   "id": "jsOSzFyx8RA_01",
+   "reference": "Many of us including myself watched all 8 episodes.",
+   "hypothesis": "Many of us, including ourselves, range from all eight episodes."
+  },
+  {
+   "id": "jsOSzFyx8RA_02",
+   "reference": "I feel like this was a really good way to show the mainstream that Deaf people are really just normal.",
+   "hypothesis": "I feel that this is a really good way to show the broader audience of an aid to maintenance that Deaf people are really, really, really, just as normal."
+  },
+  {
+   "id": "jsOSzFyx8RA_03",
+   "reference": "The show doesn't focus much on audism but rather who you are as a person and how you navigate through life as a person who is Deaf.",
+   "hypothesis": "Or the show isn't a lot about the experience, but it's about who you are as a person and how you through savingstories throughout life, the photography, too."
+  },
+  {
+   "id": "jsOSzFyx8RA_04",
+   "reference": "We were truly authentic.",
+   "hypothesis": "Honestly, we have a lot of honesty and authenticity and our remaining."
+  },
+  {
+   "id": "jsOSzFyx8RA_05",
+   "reference": "And then looking at myself, I'm an alumni student athlete for the same team and they don't help me know.",
+   "hypothesis": "When I was 10 years old, student athletes for the same team were helping me."
+  },
+  {
+   "id": "jsOSzFyx8RA_06",
+   "reference": "It showed that these things are a part of the human experience, period.",
+   "hypothesis": "I'm going to show that this human experience is possible."
+  },
+  {
+   "id": "jsOSzFyx8RA_07",
+   "reference": "Some might or might not have enjoyed it but I'm still thankful to have watched it.",
+   "hypothesis": "I might suggest some that you don't enjoy it, some would enjoy it, but I'm thankful for that."
+  },
+  {
+   "id": "jsOSzFyx8RA_08",
+   "reference": "I've not really seen any negativity.",
+   "hypothesis": "It's a funny setting."
+  },
+  {
+   "id": "k5Gxbifw8s8_01",
+   "reference": "Me cl:L-flick-side-of-chin.",
+   "hypothesis": "I'm Candace Jones."
+  },
+  {
+   "id": "k5Gxbifw8s8_02",
+   "reference": "I let my students decide the topic they feel will be most beneficial for them, I narrow the list down to the top three and then I bring in leaders from the Deaf community in those fields to present to the class.",
+   "hypothesis": "We rejected the top three students who decided to decide what was the most important information I wanted to document and present to the Deaf community and professionals in their area."
+  },
+  {
+   "id": "k5Gxbifw8s8_03",
+   "reference": "There are more and more opportunities for Deaf people to become CDIs.",
+   "hypothesis": "This job opportunity for Deaf people is growing."
+  },
+  {
+   "id": "k5Gxbifw8s8_04",
+   "reference": "The Trump Administration has claimed the House is not conducting a valid impeachment inquiry since there's been no formal vote to authorize it.",
+   "hypothesis": "The Trump administration has argued that the House's conduct of impeachment inquiry is not valid because Congress has not officially voted to proceed with the impeachment inquiry."
+  },
+  {
+   "id": "k5Gxbifw8s8_05",
+   "reference": "Why the increase of young people vaping? Eesh.",
+   "hypothesis": "Also, more young people use rabbit."
+  },
+  {
+   "id": "k5Gxbifw8s8_06",
+   "reference": "Snickers is giving away candy anyway.",
+   "hypothesis": "And Snyders still provides free candy."
+  },
+  {
+   "id": "mNF1kg9azQw_01",
+   "reference": "Lauricella said they saw an incident of Silvay being on top of Ramirez and a small bruise the next day on her lip.",
+   "hypothesis": "Lauricella responded by saying that you have previously seen something happen on the top of Ramirez and that the next day you saw a small bruise on her tongue."
+  },
+  {
+   "id": "mNF1kg9azQw_02",
+   "reference": "He said there is a lot more to it and that he is not a bad person.",
+   "hypothesis": "They said there is a lot more to it and that he is not a bad one."
+  },
+  {
+   "id": "mNF1kg9azQw_03",
+   "reference": "There was a viral story by a woman, Hazel, who described her experiences of being in a violent relationship.",
+   "hypothesis": "There was a woman who was currently in Hayton who was immediately explaining her experience of culture."
+  },
+  {
+   "id": "mNF1kg9azQw_04",
+   "reference": "She mentioned that there were bystanders, individuals who saw things but did not intervene.",
+   "hypothesis": "Last year, I was involved with YATA."
+  },
+  {
+   "id": "mNF1kg9azQw_05",
+   "reference": "How would you recommend people to respond to others who create a vlog that reveals previous experiences?",
+   "hypothesis": "How would you do this to anyone else?"
+  },
+  {
+   "id": "mNF1kg9azQw_06",
+   "reference": "There could be rain, cold, hot, then cold again.",
+   "hypothesis": "It's raining there."
+  },
+  {
+   "id": "mNF1kg9azQw_07",
+   "reference": "If you are interested, an article by MTV lists out all the various ways of how you can support the Native Hawaiians.",
+   "hypothesis": "If you are interested in food or money, there is an article by MTV that lists different ways you can support your needs."
+  },
+  {
+   "id": "oP2WdYlaflE_01",
+   "reference": "Here are your top stories for today.",
+   "hypothesis": "Here are your top stories for today."
+  },
+  {
+   "id": "oP2WdYlaflE_02",
+   "reference": "The forecast is from the Institute of Health Metrics and Evaluation at the University of Washington.",
+   "hypothesis": "The expected percentage of a person from the Institute for Health is experimenting at the University of Washington."
+  },
+  {
+   "id": "oP2WdYlaflE_03",
+   "reference": "It also limits the number of witnesses that primary response agencies, like the Department of Health and Human Services, can provide.",
+   "hypothesis": "And a limited number of Deaf and hard of hearing people can be recommended in primary reports such as the Department of Health and Human Services."
+  },
+  {
+   "id": "oP2WdYlaflE_04",
+   "reference": "They said members of Congress who are deciding what to do with trillions of dollars in coronavirus response money are entitled to know more about the situation so they can make the best decisions.",
+   "hypothesis": "They say that congressional members are responsible for determining the trillions of dollars and writing to help the coronavirus pandemic have the right to understand everything throughout the project and will help determine the services they need."
+  },
+  {
+   "id": "oP2WdYlaflE_05",
+   "reference": "Thank you for watching Sign1News live.",
+   "hypothesis": "Thank you for watching my video."
+  },
+  {
+   "id": "rSiciLyYOyI_01",
+   "reference": "One of the beekeepers said it was heartbreaking to see this loss.",
+   "hypothesis": "One of the people who treat bees says they are heartbroken to see the loss of all these groups."
+  },
+  {
+   "id": "rSiciLyYOyI_02",
+   "reference": "First this was tested with human cells outside of the body, it was a success.",
+   "hypothesis": "First, the child was tested with human cells."
+  },
+  {
+   "id": "rSiciLyYOyI_03",
+   "reference": "Could you describe that?",
+   "hypothesis": "&gt;&gt; CHRISTOPHER JOHNSON: Yes."
+  },
+  {
+   "id": "rSiciLyYOyI_04",
+   "reference": "We kept on chatting.",
+   "hypothesis": "There are a variety of differences."
+  },
+  {
+   "id": "rSiciLyYOyI_05",
+   "reference": "It was interesting because after we chatted, it started to feel strange because it became so quiet.",
+   "hypothesis": "We chatted and started to feel so solitary and chatting."
+  },
+  {
+   "id": "rSiciLyYOyI_06",
+   "reference": "They came and sat next to me.",
+   "hypothesis": "When it comes to communication..."
+  },
+  {
+   "id": "rSiciLyYOyI_07",
+   "reference": "Wow, I've never experienced that.",
+   "hypothesis": "That was amazing."
+  },
+  {
+   "id": "sP6B4dlSOoc_01",
+   "reference": "Conspiracy theories included everyone from mobsters to international terrorists and the highest levels of the Vatican being involved.",
+   "hypothesis": "Consumeracy theories include all mabatories ranging from international terminals and higher to valuable."
+  },
+  {
+   "id": "sP6B4dlSOoc_02",
+   "reference": "Those activities can pose a threat to your dog if you're taking them along.",
+   "hypothesis": "But all of these activities can hurt your dog if you leave together."
+  },
+  {
+   "id": "sP6B4dlSOoc_03",
+   "reference": "It's important to do the same for your dog space.",
+   "hypothesis": "It's just as important as your dog can."
+  },
+  {
+   "id": "sP6B4dlSOoc_04",
+   "reference": "Something as simple as walking along the sidewalk can be potentially dangerous.",
+   "hypothesis": "Sometimes simple sidewalks can be dangerous."
+  },
+  {
+   "id": "sP6B4dlSOoc_05",
+   "reference": "On Wednesday President Trump signed an executive order aimed at transforming kidney care.",
+   "hypothesis": "On Wednesday President Trump signed an executive order about trade reform and late Kinesian abuse."
+  },
+  {
+   "id": "u919vf-yghQ_01",
+   "reference": "President Trump tweeted responding to the article saying this is \"great news for the Republican Party\" and that Amash \"knew he wouldn't get the nomination to run again\" in Michigan because he's \"already being challenged for his seat as House Representative.\"",
+   "hypothesis": "Trump himself has tweeted a response to that article and told me that this is great news for the Democratic Party and told Amash that he knows that he won't get the rights again in Michigan because he wants to be a man or a challenger for his role as a House Representative."
+  },
+  {
+   "id": "u919vf-yghQ_02",
+   "reference": "Amash said he was a lifelong Republican, but in recent years, Amash says he's become disappointed and frightened by the \"party politics\", that most Americans are not \"rigidly partisan\" and that Americans can do better than a two-party system.",
+   "hypothesis": "Amash said growing up always been a Republican, but he has noticed that in the past few years, he has been more disappointed and he became more disappointed by being a party or a politician and a Democrat, he said that most Americans were not a professional, and also mentioned that they were not a professional American, but also mentioned that most Americans were not a professional, and that they always mentioned that Americans were not a professional, and that they were walking in the party that was not a party system."
+  },
+  {
+   "id": "u919vf-yghQ_03",
+   "reference": "This is an update on the White House's push on adding the citizenship question to the 2020 census.",
+   "hypothesis": "Right now, Curpitte is on its own White House and is promoting that we want to add a citizenship question to the 2020 Census Medical Application."
+  },
+  {
+   "id": "u919vf-yghQ_04",
+   "reference": "China has a flawed justice system.",
+   "hypothesis": "It is afraid that China's justice system violates the flu."
+  },
+  {
+   "id": "u919vf-yghQ_05",
+   "reference": "It was a chilling to watch.",
+   "hypothesis": "We all need to stay here."
+  },
+  {
+   "id": "u919vf-yghQ_06",
+   "reference": "How will it impact Deaf people's lives if the bill passes?",
+   "hypothesis": "How will this bill impact deaf people's lives if it passes?"
+  },
+  {
+   "id": "u919vf-yghQ_07",
+   "reference": "Because there would be economic implications in Asia and Hong Kong plays an important part.",
+   "hypothesis": "And that's why we need evidence to connect here to Hong Kong."
+  },
+  {
+   "id": "uZwKNtHx9FE_01",
+   "reference": "Most of the outbreaks were among children who were not vaccinated in ultra-Orthodox Jewish communities in New York.",
+   "hypothesis": "Most of the outbreaks are that children who do not have a vaccine who live in an ultra-orthodox Jewish community in New York."
+  },
+  {
+   "id": "uZwKNtHx9FE_02",
+   "reference": "The comment was referring to Mueller's public appearance yesterday in which he said he couldn't bring indictments against Trump concerning obstruction, that he couldn't do this because it was the Department of Justice's policy to not indict a sitting president.",
+   "hypothesis": "He said about Mueller yesterday that he couldn t indict Trump with obstruction and couldn t do anything about the indictment because the Department of Justice s policies do not impeach a seat of the president."
+  },
+  {
+   "id": "uZwKNtHx9FE_03",
+   "reference": "He reached the summit, but died on his way down.",
+   "hypothesis": "He has reached the highest rate and gone down."
+  },
+  {
+   "id": "uZwKNtHx9FE_04",
+   "reference": "There have been a lot of news coverage about overcrowding on the mountain that may have caused the spike in deaths, because people are forced to wait for longer periods of time in very high altitudes, which can damage and exhaust the human body.",
+   "hypothesis": "There are many news reports about traffic on mountains that could cause increased deaths since people have had to build longer extensions in higher altitudes that could potentially damage and wear down the body."
+  },
+  {
+   "id": "uZwKNtHx9FE_05",
+   "reference": "Next is what?",
+   "hypothesis": "Don't be afraid!"
+  },
+  {
+   "id": "uZwKNtHx9FE_06",
+   "reference": "For Deaf Canadian activists, this is a huge achievement and something that they have fought for many months.",
+   "hypothesis": "For Deaf Canadian activists, this is a huge achievement that has been something you have been fighting for a long time."
+  },
+  {
+   "id": "uZwKNtHx9FE_07",
+   "reference": "They said the words, \"without delay,\" was added to the legislation to make sure the work begins immediately.",
+   "hypothesis": "They said the words were added without delay, were immediately added into the legislation to make sure the work began."
+  },
+  {
+   "id": "uZwKNtHx9FE_08",
+   "reference": "Charlton LaChase, a DeafBlind man from Florida who was imprisoned for a year and three months after pleading guilty to sending threatening texts towards his sister in which he said he would carry out deadly ISIS-inspired attacks, was released from prison on Friday, but was placed in custody again just a few hours later.",
+   "hypothesis": "Charlton LaChase, a DeafBlind man from Florida, was jailed for a year and three months for pleading guilty of threatening texts to his age, said he would do ISIS inspirational attacks, but was released a few hours later in prison."
+  },
+  {
+   "id": "uZwKNtHx9FE_09",
+   "reference": "Mother said it was because of the same situation with the sister.",
+   "hypothesis": "She said because of the same situation."
+  },
+  {
+   "id": "uZwKNtHx9FE_10",
+   "reference": "That is all for today.",
+   "hypothesis": "Hello."
+  },
+  {
+   "id": "wH3lJm0Typ0_01",
+   "reference": "His friend and teammate, Corey, from Washburn University, who was with him, Dwane Simmons, was killed in the shooting.",
+   "hypothesis": "His two friends and a teammate at Washburn University, Dwane Simons, was with Corei and was killed from the shooting."
+  },
+  {
+   "id": "wH3lJm0Typ0_02",
+   "reference": "Which country had the highest gross from the debut?",
+   "hypothesis": "Which country has the most?"
+  },
+  {
+   "id": "wH3lJm0Typ0_03",
+   "reference": "The Endgame movie also received praise from not only fans, but critics as well.",
+   "hypothesis": "Endgame videos also have fans cheering their endgame and criticizing them for their criticism."
+  },
+  {
+   "id": "wH3lJm0Typ0_04",
+   "reference": "Will this movie beat any of the top 3 movies?",
+   "hypothesis": "Will this clip beat any of the four movies?"
+  },
+  {
+   "id": "wH3lJm0Typ0_05",
+   "reference": "Saudi Arabia usually executes people with beheading.",
+   "hypothesis": "Saudi Arabia usually executes people with diseases."
+  },
+  {
+   "id": "wH3lJm0Typ0_06",
+   "reference": "The person also said that Hicks was in a \"boyfriend/girlfriend\" relationship with the former superintendent of ISD, Marybeth Lauderdale, who is currently the Director of the Western Pennsylvania School for the Deaf.",
+   "hypothesis": "The person also told me that Hicks was in a boyfriend and girlfriend s relationship with the former President of ISD, Marybeth Lauderdale, and is currently the Director of the West Pennsylvania School for the Deaf."
+  },
+  {
+   "id": "wH3lJm0Typ0_07",
+   "reference": "What does this moment mean to you?",
+   "hypothesis": "&gt;&gt; What does this moment mean to you?"
+  },
+  {
+   "id": "wH3lJm0Typ0_08",
+   "reference": "He saw that I had this potential to succeed.",
+   "hypothesis": "I'm Crystal Cousineau."
+  },
+  {
+   "id": "wH3lJm0Typ0_09",
+   "reference": "She brought two young students who were Black to my dissertation defense.",
+   "hypothesis": "The president has been sentencing the president's death to two years ago and three years later."
+  },
+  {
+   "id": "wPJ_InXF_I8_01",
+   "reference": "Ready for news?",
+   "hypothesis": "Ready for the news?"
+  },
+  {
+   "id": "wPJ_InXF_I8_02",
+   "reference": "AP also said Barack Obama has declined to endorse him, but Biden said he asked Obama not to endorse him.",
+   "hypothesis": "AP also said Barack Obama has declared to endorse him, but Biden said he asked Obama to not endorse him."
+  },
+  {
+   "id": "wPJ_InXF_I8_03",
+   "reference": "They are in jail now but we do not know for how long.",
+   "hypothesis": "The filter is currently on but it is not known how long it will take."
+  },
+  {
+   "id": "wPJ_InXF_I8_04",
+   "reference": "WHY DO I SUPPORT P. B.?",
+   "hypothesis": "Hello, I m my supporter."
+  },
+  {
+   "id": "wPJ_InXF_I8_05",
+   "reference": "I\u2019ll show you an interview with Marlee Matlin about Mark Medoff, who wrote the play \u201cChildren of a Lesser God.\u201d He passed away at 79.",
+   "hypothesis": "Here is an interview with Marlee Matlin about Marlee Medocff who wrote on the show \"Children of a Lower God\" at the age of 79."
+  },
+  {
+   "id": "wPJ_InXF_I8_06",
+   "reference": "They could bring in money and help the movie achieve success.",
+   "hypothesis": "the students storytelling comprehension abilities."
+  },
+  {
+   "id": "wPJ_InXF_I8_07",
+   "reference": "He did continue his work almost up until his death.",
+   "hypothesis": "I want to share a little bit of information with you about the interpreter being involved in the community."
+  },
+  {
+   "id": "wdmj6E_faOo_01",
+   "reference": "Whew, it was crazy, but I kept getting up to write, write, and write.",
+   "hypothesis": "You will also need to make sure you register to vote."
+  },
+  {
+   "id": "wdmj6E_faOo_02",
+   "reference": "I was alone in the world and would write in the quiet.",
+   "hypothesis": "The world is quiet."
+  },
+  {
+   "id": "wdmj6E_faOo_03",
+   "reference": "Ah, many of those countries didn't have their own history.",
+   "hypothesis": "It is close to me and I understand what is happening in the community."
+  },
+  {
+   "id": "wdmj6E_faOo_04",
+   "reference": "I felt that they should write their history themselves, not me.",
+   "hypothesis": "It will also be available in the community for the first time."
+  },
+  {
+   "id": "wdmj6E_faOo_05",
+   "reference": "I needed to write a book.",
+   "hypothesis": "I am so happy"
+  },
+  {
+   "id": "wdmj6E_faOo_06",
+   "reference": "I said yes, do you mind if I borrow it.",
+   "hypothesis": "This is my first time meeting her."
+  },
+  {
+   "id": "z3jAMn3xpoM_01",
+   "reference": "The second news - an author, E. Jean Carroll, accused Donald Trump of raping her in a dressing room in New York City in the 1990's.",
+   "hypothesis": "The second news - an author, E. Jean Carroll, accused Donald Trump of raping him in a breathing room in the New York City in the 1990s."
+  },
+  {
+   "id": "z3jAMn3xpoM_02",
+   "reference": "One of them filmed a Facebook Live video that showed the officer lying on the floor, bleeding.",
+   "hypothesis": "One of them filmed on Facebook and saw officers lying on the floor on blood."
+  },
+  {
+   "id": "z3jAMn3xpoM_03",
+   "reference": "When it came to music, it never felt that important to me and it's reserved for the hearing world, but then the \"Black Drum\" was produced.",
+   "hypothesis": "I never felt it was really important for music to be in the hearing world, but until the black problem was really evolving."
+  },
+  {
+   "id": "z3jAMn3xpoM_04",
+   "reference": "Growing up, I adopted the thinking that it was a hearing thing and couldn't be a Deaf thing.",
+   "hypothesis": "Growing up, I was able to admit that I was deaf."
+  },
+  {
+   "id": "z3jAMn3xpoM_05",
+   "reference": "Thank you, Otalora, for sending in the video.",
+   "hypothesis": "Thank you, Otalora, for sending in this video."
+  },
+  {
+   "id": "z3jAMn3xpoM_06",
+   "reference": "My wife asked me if I could get pink.",
+   "hypothesis": "THE NATIVE AMERICAN WITH DISABILITIES AND THE DEAF COMMUNITY IN THE FUTURE."
+  },
+  {
+   "id": "z3jAMn3xpoM_07",
+   "reference": "Hmm.",
+   "hypothesis": "English: Your gesture."
+  }
+ ]
+}

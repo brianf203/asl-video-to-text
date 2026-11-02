@@ -1,4 +1,9 @@
-"""CUDA-graph ByT5 decode step for transformers 4.30's T5Stack (phase 0 prototype).
+"""CUDA-graph ByT5 decode step for transformers 4.30's T5Stack. Opt-in: BYT5_CUDAGRAPH=1.
+
+Measured (benchmarks/cudagraph/, 200-clip OpenASL replay, 2026-11-02): decode 39.2 -> 14.7 ms/step,
+generate() 2.47x faster, BLEU 20.09 -> 20.60 (paired bootstrap +0.52, CI [-0.10, +1.24]: no loss),
+182/200 texts identical; the 18 that change do so from bf16 reduction order (they change the same way
+with the static math run WITHOUT a graph). ~110 MB extra CUDA memory.
 
 Why eager 4.30 cannot be graphed: the self-attention KV cache grows by torch.cat every step
 (new shapes) and the relative position bias is rebuilt from Python ints. This module re-implements
@@ -15,7 +20,8 @@ ONE decoder step over preallocated buffers, reusing the model's own weights/modu
 
 HF 4.30's generate()/beam scorer is left untouched: install(model) swaps only forward(),
 _reorder_cache() and the past sentinel, so the search itself is identical to eager.
-Opt-in only. Measurement code; nothing in the pipeline imports this yet.
+Wired in by inference._get_cached_model() when BYT5_CUDAGRAPH=1; all graphs are captured at load
+(warm_all), so no clip pays a capture.
 """
 import torch
 from torch import nn
@@ -27,6 +33,10 @@ ENC_BUCKET = 64
 # for a ~70-step clip; bucketing keeps that proportional to the real length. All buckets are
 # VIEWS of one max_len buffer, so crossing a bucket copies nothing.
 DEC_BUCKETS = (64, 128, 256, 512, 768)
+# Cross-attn K/V capacity (encoder frames). All encoder buckets are VIEWS of one buffer of this
+# size (separate buffers per bucket cost ~99 MB over 6 buckets). A clip whose encoder output is
+# longer than this decodes on the normal eager path (install() falls back per clip).
+ENC_CAP = 512
 
 
 class _StaticPast(tuple):
@@ -54,7 +64,10 @@ class StaticDecoder:
         self.beam_idx = self.ident.clone()
         self.pos = torch.arange(max_len, device=self.dev)
         self.dec_buckets = sorted({min(b, max_len) for b in DEC_BUCKETS} | {max_len})
-        self.cross = {}           # enc bucket -> ((ck, cv), cmask)
+        self.enc_cap = ENC_CAP
+        self.ck = [z(beams, self.H, self.enc_cap, self.dk) for _ in range(self.L)]
+        self.cv = [z(beams, self.H, self.enc_cap, self.dk) for _ in range(self.L)]
+        self.cross = {}           # enc bucket -> ((ck views, cv views), cmask)
         self.graphs = {}          # (enc bucket, dec bucket) -> (graph, logits out)
         self.pool = None
         self.cur = None
@@ -64,9 +77,8 @@ class StaticDecoder:
     def _bufs(self, lp):
         if lp in self.cross:
             return self.cross[lp]
-        ck = [torch.zeros(self.beams, self.H, lp, self.dk, device=self.dev, dtype=self.dt)
-              for _ in range(self.L)]
-        cv = [torch.zeros_like(ck[0]) for _ in range(self.L)]
+        ck = [x[:, :, :lp] for x in self.ck]
+        cv = [x[:, :, :lp] for x in self.cv]
         cmask = torch.zeros(1, 1, 1, lp, device=self.dev, dtype=self.dt)
         self.cross[lp] = ((ck, cv), cmask)
         return self.cross[lp]
@@ -77,6 +89,8 @@ class StaticDecoder:
         enc = enc_hidden[:1]
         le = enc.shape[1]
         lp = ((le + ENC_BUCKET - 1) // ENC_BUCKET) * ENC_BUCKET
+        if lp > self.enc_cap:
+            raise ValueError(f"encoder length {le} exceeds ENC_CAP {self.enc_cap}")
         (ck, cv), cmask = self._bufs(lp)
         for i, blk in enumerate(self.m.decoder.block):
             att = blk.layer[1].EncDecAttention
@@ -151,7 +165,11 @@ class StaticDecoder:
     @torch.no_grad()
     def _capture(self, lp, ld):
         cross, cmask = self.cross[lp]
-        s = torch.cuda.Stream()
+        # ONE warmup stream for all captures: PyTorch keeps a cuBLAS workspace (~8 MB) alive per
+        # stream it has seen, so a fresh stream per capture leaked 8 MB per graph (25 graphs = 200 MB).
+        if getattr(self, "_side", None) is None:
+            self._side = torch.cuda.Stream()
+        s = self._side
         s.wait_stream(torch.cuda.current_stream())
         saved = [x.clone() for x in self.k + self.v]
         self.t.fill_(0)           # warmup must index inside [0, ld); replay sets the real t
@@ -206,13 +224,19 @@ def install(model, beams=4, max_len=768, use_graph=True, sd=None):
     Pass an existing `sd` to reuse its buffers and captured graphs across calls."""
     sd = sd or StaticDecoder(model, beams=beams, max_len=max_len)
     orig_forward, orig_reorder = model.forward, model._reorder_cache
-    state = {"enc": None}
+    state = {"eager": False, "fallbacks": 0}
 
     def forward(decoder_input_ids=None, encoder_outputs=None, past_key_values=None, **kw):
         enc = encoder_outputs[0]
         if past_key_values is None:
-            if decoder_input_ids.shape[0] != beams:
-                raise ValueError(f"static decoder built for {beams} beams, got {decoder_input_ids.shape[0]}")
+            # per-clip choice: too long for the static buffers, or a beam count the buffers were
+            # not built for -> the whole clip runs on the normal eager path
+            state["eager"] = (enc.shape[1] > sd.enc_cap or decoder_input_ids.shape[0] != beams)
+            state["fallbacks"] += state["eager"]
+        if state["eager"]:
+            return orig_forward(decoder_input_ids=decoder_input_ids, encoder_outputs=encoder_outputs,
+                                past_key_values=past_key_values, **kw)
+        if past_key_values is None:
             sd.prepare(enc)
             t = 0
         else:
@@ -224,9 +248,12 @@ def install(model, beams=4, max_len=768, use_graph=True, sd=None):
         return Seq2SeqLMOutput(logits=logits, past_key_values=_StaticPast((t,)))
 
     def reorder(past, beam_idx):
+        if state["eager"]:
+            return orig_reorder(past, beam_idx)
         sd.beam_idx.copy_(beam_idx)
         return past
 
+    sd.state = state
     model.forward = forward
     model._reorder_cache = reorder
 
@@ -234,3 +261,13 @@ def install(model, beams=4, max_len=768, use_graph=True, sd=None):
         model.forward = orig_forward
         model._reorder_cache = orig_reorder
     return sd, uninstall
+
+
+@torch.no_grad()
+def warm_all(sd):
+    """Capture every (encoder bucket, decoder bucket) graph up front. Returns the count."""
+    for lp in range(ENC_BUCKET, sd.enc_cap + 1, ENC_BUCKET):
+        sd.prepare(torch.zeros(1, lp, sd.D, device=sd.dev, dtype=sd.dt))
+        sd.capture_all(lp)
+    sd.cur = None
+    return len(sd.graphs)
