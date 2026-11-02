@@ -671,6 +671,30 @@ class TranslationFeatures(torch.utils.data.Dataset):
 _model_cache = {}
 
 
+def _drop_page_cache(path: str) -> None:
+    """Evict a just-loaded checkpoint (file or directory) from the kernel page cache.
+
+    On this Jetson NvMap (the CUDA allocator underneath torch) does not reclaim page cache:
+    on 2026-11-01 model.to("cuda") failed with NvMapMemAllocInternalTagged error 12 while
+    MemAvailable read 5.6 GB, because ~2.6 GB of it was cache, much of it this checkpoint's
+    1.34 GB of file data that from_pretrained had just read. A 256 MB-chunk probe got 2560 MB;
+    evicting the cache raised it to 3840 MB and the load succeeded. The bytes are in the model
+    now, so the cached copy is pure waste. posix_fadvise needs no root. Best-effort.
+    """
+    paths = [path]
+    if os.path.isdir(path):
+        paths = [os.path.join(d, f) for d, _, fs in os.walk(path) for f in fs]
+    for p in paths:
+        try:
+            fd = os.open(p, os.O_RDONLY)
+            try:
+                os.posix_fadvise(fd, 0, 0, os.POSIX_FADV_DONTNEED)
+            finally:
+                os.close(fd)
+        except OSError:
+            pass
+
+
 def _get_cached_model(model_checkpoint: str, tokenizer_checkpoint: str, output_dir: str):
     """Load (or reuse) the ByT5 model + tokenizer. Returns (model, tokenizer, device)."""
     key = (model_checkpoint, tokenizer_checkpoint)
@@ -702,6 +726,7 @@ def _get_cached_model(model_checkpoint: str, tokenizer_checkpoint: str, output_d
         torch_dtype=_dtype,
     )
     tokenizer = ByT5Tokenizer.from_pretrained(tokenizer_checkpoint)
+    _drop_page_cache(model_checkpoint)
 
     # ByT5 used to default to CPU because running it on GPU alongside DINOv2 once OOM'd
     # the Jetson's 8GB shared pool. That finding dated from a different configuration —
