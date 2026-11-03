@@ -45,3 +45,8 @@ POSE_SWAP_SCOPING.md
 # quant gate feature dumps: 95 MB, regenerate with benchmarks/quant/capture_features.py
 shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/benchmarks/quant/features/
 shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/benchmarks/quant/features_bad0/
+
+# Working notes / write-ups (documentation only, like PROJECT_CONTEXT.md) -- local, not public docs.
+/MEMORY_QUANT_UPDATE.md
+shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/latency_runs/REPORT.md
+shubert/TTIC-SHuBERT-ASLVideo-to-EnglishText/latency_runs/SESSION_*.md
